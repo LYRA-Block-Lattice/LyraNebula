@@ -51,7 +51,7 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
-		protected async Task HandleRestore(WebWalletRestoreAction action, IDispatcher dispatcher)
+		public async Task HandleRestore(WebWalletRestoreAction action, IDispatcher dispatcher)
 		{
 			var store = new AccountInMemoryStorage();
 			var name = Guid.NewGuid().ToString();
@@ -67,7 +67,7 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
-		protected async Task HandleRefresh(WebWalletRefreshBalanceAction action, IDispatcher dispatcher)
+		public async Task HandleRefresh(WebWalletRefreshBalanceAction action, IDispatcher dispatcher)
 		{
 			var result = await action.wallet.Sync(null);
 			if (result == Lyra.Core.Blocks.APIResultCodes.Success)
@@ -78,7 +78,7 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
-		protected async Task HandleTransactions(WebWalletTransactionsAction action, IDispatcher dispatcher)
+		public async Task HandleTransactions(WebWalletTransactionsAction action, IDispatcher dispatcher)
 		{
 			var result = await action.wallet.Sync(null);
 			List<string> txs = new List<string>();
@@ -136,7 +136,7 @@ namespace Nebula.Store.WebWalletUseCase
         }
 
 		[EffectMethod]
-		protected async Task HandleFreeToken(WebWalletFreeTokenAction action, IDispatcher dispatcher)
+		public async Task HandleFreeToken(WebWalletFreeTokenAction action, IDispatcher dispatcher)
 		{
 			var store = new AccountInMemoryStorage();
 			var name = Guid.NewGuid().ToString();
@@ -148,7 +148,7 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
-		protected async Task HandleFreeTokenSend(WebWalletSendMeFreeTokenAction action, IDispatcher dispatcher)
+		public async Task HandleFreeTokenSend(WebWalletSendMeFreeTokenAction action, IDispatcher dispatcher)
 		{
 			var store = new AccountInMemoryStorage();
 			var name = Guid.NewGuid().ToString();
