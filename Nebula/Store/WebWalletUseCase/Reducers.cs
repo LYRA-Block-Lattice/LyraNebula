@@ -9,6 +9,9 @@ namespace Nebula.Store.WebWalletUseCase
 {
 	public static class Reducers
 	{
+		[ReducerMethod]
+		public static WebWalletState RefreshBalanceActionHandler(WebWalletState state, WebWalletRefreshBalanceAction action) => state.With(new { IsLoading = true });
+
         [ReducerMethod]
 		public static WebWalletState CloseAction(WebWalletState state, WebWalletCloseAction action) => new WebWalletState();
 
@@ -16,10 +19,13 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState SendAction(WebWalletState state, WebWalletSendAction action) => state.With(new { stage = UIStage.Send });
 
 		[ReducerMethod]
+		public static WebWalletState SendTokenActionHandler(WebWalletState state, WebWalletSendTokenAction action) => state.With(new { IsLoading = true });
+
+		[ReducerMethod]
 		public static WebWalletState CancelSendAction(WebWalletState state, WebWalletCancelSendAction action) => state.With(new { stage = UIStage.Main });
 
 		[ReducerMethod]
-		public static WebWalletState ReduceFetchDataResultAction(WebWalletState state, WebWalletResultAction action)
+		public static WebWalletState RefreshBalanceAction(WebWalletState state, WebWalletResultAction action)
         {
 			var bs = "<empty>";
 			var bst = action.wallet.GetDisplayBalancesAsync().ContinueWith(a => bs = a.Result);
@@ -27,6 +33,7 @@ namespace Nebula.Store.WebWalletUseCase
 
 			return state.With(new
 			{
+				IsLoading = false,
 				stage = action.stage,
 				IsOpening = action.IsOpening,
 				wallet = action.wallet,
@@ -52,8 +59,12 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState ReduceCancelSaveSettingsAction(WebWalletState state, WebWalletCancelSaveSettingsAction action) => state.With(new { stage = UIStage.Main });
 
 		[ReducerMethod]
+		public static WebWalletState GetTransactionActionHandler(WebWalletState state, WebWalletTransactionsAction action) => state.With(new { IsLoading = true });
+
+		[ReducerMethod]
 		public static WebWalletState ReduceTransactionsAction(WebWalletState state, WebWalletTransactionsResultAction action) =>
 			state.With(new {
+				IsLoading = false,
 				stage = UIStage.Transactions,
 				txs = action.transactions
 			});

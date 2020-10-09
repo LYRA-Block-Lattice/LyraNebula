@@ -20,14 +20,17 @@ namespace Nebula.Store.StatsUseCase
 			this.transStats = transStats;
 		}
 
+		private IEnumerable<TransStats> AllSend => transStats.Where(a => a.trans == BlockTypes.SendTransfer);
+		private IEnumerable<TransStats> AllRecv => transStats.Where(a => a.trans == BlockTypes.ReceiveTransfer);
+
 		public TransStats Fastest => transStats.OrderBy(a => a.ms).FirstOrDefault();
 		public TransStats Slowest => transStats.OrderBy(a => a.ms).LastOrDefault();
-		public TransStats FastestSend => transStats.Where(a => a.trans == BlockTypes.SendTransfer).OrderBy(b => b.ms).FirstOrDefault();
-		public TransStats SlowestSend => transStats.Where(a => a.trans == BlockTypes.SendTransfer).OrderBy(b => b.ms).LastOrDefault();
-		public TransStats FastestReceive => transStats.Where(a => a.trans == BlockTypes.ReceiveTransfer).OrderBy(b => b.ms).FirstOrDefault();
-		public TransStats SlowestReceive => transStats.Where(a => a.trans == BlockTypes.ReceiveTransfer).OrderBy(b => b.ms).LastOrDefault();
+		public TransStats FastestSend => AllSend.OrderBy(b => b.ms).FirstOrDefault();
+		public TransStats SlowestSend => AllSend.OrderBy(b => b.ms).LastOrDefault();
+		public TransStats FastestReceive => AllRecv.OrderBy(b => b.ms).FirstOrDefault();
+		public TransStats SlowestReceive => AllRecv.OrderBy(b => b.ms).LastOrDefault();
 		public double AvgTime => Math.Round(transStats.Average(a => a.ms), 2);
-		public double AvgSendTime => Math.Round(transStats.Where(a => a.trans == BlockTypes.SendTransfer).Average(b => b.ms), 2);
-		public double AvgRecvTime => Math.Round(transStats.Where(a => a.trans == BlockTypes.ReceiveTransfer).Average(b => b.ms), 2);
+		public double AvgSendTime => Math.Round(AllSend.Any() ? AllSend.Average(b => b.ms) : 0, 2);
+		public double AvgRecvTime => Math.Round(AllRecv.Any() ? AllRecv.Average(b => b.ms) : 0, 2);
 	}
 }
