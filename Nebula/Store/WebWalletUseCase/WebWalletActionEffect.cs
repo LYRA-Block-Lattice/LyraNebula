@@ -53,17 +53,24 @@ namespace Nebula.Store.WebWalletUseCase
 		[EffectMethod]
 		public async Task HandleRestore(WebWalletRestoreAction action, IDispatcher dispatcher)
 		{
-			var store = new AccountInMemoryStorage();
-			var name = Guid.NewGuid().ToString();
-			Wallet.Create(store, name, "", config["network"], action.privateKey);
+			try
+            {
+				var store = new AccountInMemoryStorage();
+				var name = Guid.NewGuid().ToString();
+				Wallet.Create(store, name, "", config["network"], action.privateKey);
 
-			var wallet = Wallet.Open(store, name, "");
-			if (action.selfVote)
-				wallet.VoteFor = wallet.AccountId;
+				var wallet = Wallet.Open(store, name, "");
+				if (action.selfVote)
+					wallet.VoteFor = wallet.AccountId;
 
-			await wallet.Sync(client);
+				await wallet.Sync(client);
 
-			dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+			}
+			catch(Exception ex)
+            {
+				dispatcher.Dispatch(new WebWalletResultAction(null, false, UIStage.Entry));
+			}
 		}
 
 		[EffectMethod]

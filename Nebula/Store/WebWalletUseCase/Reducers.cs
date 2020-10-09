@@ -34,8 +34,15 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState RefreshBalanceAction(WebWalletState state, WebWalletResultAction action)
         {
 			var bs = "<empty>";
-			var bst = action.wallet.GetDisplayBalancesAsync().ContinueWith(a => bs = a.Result);
-			bst.Wait();
+			if (action.wallet == null)
+            {
+
+			}
+			else
+            {
+				var bst = action.wallet.GetDisplayBalancesAsync().ContinueWith(a => bs = a.Result);
+				bst.Wait();
+			}
 
 			return state.With(new
 			{
@@ -43,7 +50,7 @@ namespace Nebula.Store.WebWalletUseCase
 				stage = action.stage,
 				IsOpening = action.IsOpening,
 				wallet = action.wallet,
-				balanceString = bs 
+				balanceString = bs
 			});
 		}			
 
