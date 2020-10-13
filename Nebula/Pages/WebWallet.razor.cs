@@ -1,6 +1,8 @@
 ﻿using Fluxor;
+using Lyra.Data.Crypto;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using Nebula.Store.BlockSearchUseCase;
 using Nebula.Store.WebWalletUseCase;
 using System;
@@ -17,6 +19,9 @@ namespace Nebula.Pages
 
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
+
+		[Inject]
+		private IJSRuntime iJS { get; set; }
 
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
@@ -39,9 +44,26 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletCreateAction());
 		}
 
-		private void RestoreWallet(MouseEventArgs e)
+		private async void RestoreWallet(MouseEventArgs e)
 		{
-			Dispatcher.Dispatch(new WebWalletRestoreAction { privateKey = prvKey, selfVote = this.selfVote });
+			if(string.IsNullOrWhiteSpace(prvKey))
+            {
+				await iJS.InvokeAsync<object>("alert", "Private Key can't be empty.");
+				return;
+			}
+            else
+            {
+				try
+                {
+					Base58Encoding.DecodePrivateKey(prvKey);
+					Dispatcher.Dispatch(new WebWalletRestoreAction { privateKey = prvKey, selfVote = this.selfVote });
+				}
+				catch (Exception)
+                {
+					await iJS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
+					return;
+				}
+            }
 		}
 
 		private void Refresh(MouseEventArgs e)
@@ -49,10 +71,12 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
         }
 
-		private void Send(MouseEventArgs e)
+		private async void Send(MouseEventArgs e)
 		{
 			if(walletState.Value.wallet.MainBalance > 1)
 				Dispatcher.Dispatch(new WebWalletSendAction {   });
+			else
+				await iJS.InvokeAsync<object>("alert", "Nothing to send.");
 		}
 
 		private void SendToken(MouseEventArgs e)

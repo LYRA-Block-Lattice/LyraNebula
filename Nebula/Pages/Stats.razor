@@ -8,6 +8,7 @@
 @if (statsState.Value.IsLoading)
 {
     <p><em>Fetching stats... This may take a while.</em></p>
+    <div class="spinner"></div>
 }
 @if (statsState.Value.transStats != null && statsState.Value.transStats.Any())
 {

@@ -5,6 +5,7 @@
 @if (feeState.Value.IsLoading)
 {
     <p><em>Fetching fee stats... This may take a while.</em></p>
+    <div class="spinner"></div>
 }
 @if (feeState.Value.Stats != null)
 {
