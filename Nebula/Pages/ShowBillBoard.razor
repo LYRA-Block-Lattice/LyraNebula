@@ -21,6 +21,7 @@
                 <th>IP Address</th>
                 <th>Votes</th>
                 <th>API Status</th>
+                <th>Now</th>
                 <th>Last Cons Block</th>
                 <th>In Sync</th>
                 <th>Version</th>
@@ -55,6 +56,7 @@
                 @if(nodeInfo.Status != null)
                     {
                 <td>Connected OK.</td>
+                <td>@nodeInfo.Status.Status.now</td>
                         @if(nodeInfo.Status.LastConsolidationHash==null || nodeInfo.Status.LastConsolidationHash.Length < 11)
                         {
                             <td></td>
@@ -81,6 +83,7 @@
                 else
                 {
                 <td>Failed to connect</td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
