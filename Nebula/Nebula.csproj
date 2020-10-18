@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <Reference Include="Lyra.Data">
-      <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\netstandard2.1\Lyra.Data.dll</HintPath>
+      <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\netstandard2.0\Lyra.Data.dll</HintPath>
     </Reference>
   </ItemGroup>
 
