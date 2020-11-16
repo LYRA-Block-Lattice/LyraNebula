@@ -29,13 +29,17 @@ namespace Nebula.Store.WebWalletUseCase
         [EffectMethod]
         public async Task HandleSend(WebWalletSendTokenAction action, IDispatcher dispatcher)
         {
-			var result = await action.wallet.Send(action.Amount, action.DstAddr, action.TokenName);
-			if(result.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
-            {
+			var result = await action.wallet.Sync(null);
+			if (result == Lyra.Core.Blocks.APIResultCodes.Success)
+			{
+				var result2 = await action.wallet.Send(action.Amount, action.DstAddr, action.TokenName);
+				if (result2.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
+				{
 
-            }
-            dispatcher.Dispatch(new WebWalletResultAction(action.wallet, true, UIStage.Main));
-        }
+				}
+			}
+			dispatcher.Dispatch(new WebWalletResultAction(action.wallet, true, UIStage.Main));
+		}
 
         [EffectMethod]
 		public async Task HandleCreation(WebWalletCreateAction action, IDispatcher dispatcher)

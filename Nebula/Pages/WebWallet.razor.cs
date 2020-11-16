@@ -34,6 +34,22 @@ namespace Nebula.Pages
 		// for settings
 		public string voteAddr { get; set; }
 
+		public string altDisplay { get; set; }
+
+		public WebWallet()
+        {
+			tokenName = "LYR";
+			altDisplay = "**************************";
+        }
+
+		private void ToggleKey(MouseEventArgs e)
+		{
+			if (altDisplay == "**************************")
+				altDisplay = walletState?.Value?.wallet?.PrivateKey;
+			else
+				altDisplay = "**************************";
+		}
+
 		private void CloseWallet(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletCloseAction());
