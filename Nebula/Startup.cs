@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nebula.Data;
 using Nebula.Store.WeatherUseCase;
+using Nethereum.Metamask.Blazor;
 
 namespace Nebula
 {
@@ -39,6 +40,11 @@ namespace Nebula
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            // for Metamask wallet
+            services.AddScoped<IMetamaskInterop, MetamaskBlazorInterop>();
+            services.AddScoped<MetamaskService>();
+            services.AddScoped<MetamaskInterceptor>();
 
             services.AddHttpClient<FetchDataActionEffect>();
 
