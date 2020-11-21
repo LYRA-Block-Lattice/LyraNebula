@@ -52,6 +52,11 @@ namespace Nebula.Store.WebWalletUseCase
         public List<string> transactions { get; set; }
     }
 
+    public class WebWalletSwapAction
+    {
+        public Wallet wallet { get; set; }
+    }
+
     public class WebWalletFreeTokenAction
     {
         public string faucetPvk { get; set; }

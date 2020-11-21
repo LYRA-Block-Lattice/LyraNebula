@@ -23,6 +23,9 @@ namespace Nebula.Pages
 		[Inject]
 		private IJSRuntime iJS { get; set; }
 
+		public string[] SwapableTokens { get; set; }
+		public string swapFromCount { get; set; }
+
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
 
@@ -38,6 +41,8 @@ namespace Nebula.Pages
 
 		public WebWallet()
         {
+			SwapableTokens = new[] { "LYR", "TLYR" };
+
 			tokenName = "LYR";
 			altDisplay = "**************************";
         }
@@ -123,6 +128,16 @@ namespace Nebula.Pages
 		private void Transactions(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletTransactionsAction { wallet = walletState.Value.wallet });
+		}
+
+		private void Swap(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+		}
+
+		private void SwapToken(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
 		}
 
 		private void Return(MouseEventArgs e)

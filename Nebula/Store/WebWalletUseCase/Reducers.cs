@@ -58,6 +58,9 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState ReduceOpenSettingsAction(WebWalletState state, WebWalletSettingsAction action) => state.With(new { stage = UIStage.Settings });
 
 		[ReducerMethod]
+		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapAction action) => state.With(new { stage = UIStage.Swap });
+
+		[ReducerMethod]
 		public static WebWalletState ReduceSaveSettingsAction(WebWalletState state, WebWalletSaveSettingsAction action)
 		{
             var state2 = state.With(new

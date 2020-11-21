@@ -28,6 +28,9 @@
     <button class="btn btn-primary" @onclick="Transactions">
         Transactions
     </button>
+    <button class="btn btn-primary" @onclick="Swap">
+        Swap
+    </button>
     <button class="btn btn-primary" @onclick="Settings">
         Settings
     </button>
@@ -103,6 +106,38 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
         <button class="btn btn-primary" @onclick="Return">Return</button>
     </div>
     }
+}
+else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
+{
+    <h3>Swap Tokens</h3>
+    <hr />
+    <p>Swap from</p>
+    <div>
+        <span>    
+            <select style="height: 30px; width: 80px">
+                <option>LYR</option>
+                <option>TLYR</option>
+            </select>
+        </span>
+        <span>
+            <input size="30" placeholder="Count" type="text" @bind="@swapFromCount" />
+        </span>
+    </div>
+    <p><label>1000 LYR available to swap</label></p>
+    <hr style="color: white" />
+    <p>Swap to</p>
+    <div>
+            <select style="height: 30px; width: 80px">
+                <option>LYR</option>
+                <option>TLYR</option>
+            </select>
+    </div>
+    <p>You will get <label>1000</label></p>
+    <hr />
+    <div>
+        <button class="btn btn-primary" @onclick="SwapToken">Swap</button>
+        <button class="btn btn-primary" @onclick="Return">Return</button>
+    </div>
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)
 {
