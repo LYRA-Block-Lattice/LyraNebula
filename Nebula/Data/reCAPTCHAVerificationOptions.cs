@@ -7,6 +7,7 @@
 
     public class SwapOptions
     {
+        public string ethUrl { get; set; }
         public string ethContract { get; set; }
         public string ethPvk { get; set; }
         public string ethPub { get; set; }

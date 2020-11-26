@@ -11,6 +11,8 @@ using Nebula.Store.WebWalletUseCase;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
 using Nethereum.StandardTokenEIP20.ContractDefinition;
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -237,22 +239,27 @@ namespace Nebula.Pages
 
 						if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
 						{
-							var web3 = new Nethereum.Web3.Web3();
-							web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
+							var url = swapOptions.CurrentValue.ethUrl;
+							var privateKey = swapOptions.CurrentValue.ethPvk;
+							var account = new Account(privateKey);
+							var web3 = new Web3(account, url);
 
-							var transactionMessage = new TransferFunction
-							{
-								FromAddress = swapOptions.CurrentValue.ethPub,
-								To = swapToAddress,
-								TokenAmount = new BigInteger(swapToCount * 100000000)	// 10^8 
-							};
+                            //var web3 = new Nethereum.Web3.Web3();
+                            //web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
 
-							var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-							var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
+                            var transactionMessage = new TransferFunction
+                            {
+                                FromAddress = swapOptions.CurrentValue.ethPub,
+                                To = swapToAddress,
+                                TokenAmount = new BigInteger(swapToCount * 100000000)   // 10^8 
+                            };
 
-							var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
-							var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
-						}
+                            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+                            var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
+
+                            var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
+                            var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
+                        }
 						else
 							throw new Exception("Unable to send from your wallet.");
 					}
