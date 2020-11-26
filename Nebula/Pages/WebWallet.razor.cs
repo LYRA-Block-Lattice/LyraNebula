@@ -23,9 +23,24 @@ namespace Nebula.Pages
 		[Inject]
 		private IJSRuntime iJS { get; set; }
 
+		// swap
 		public string[] SwapableTokens { get; set; }
-		public string swapFromCount { get; set; }
+		private string _swapFromTokenName;
+		public string swapFromToken { 
+			get
+			{
+				return _swapFromTokenName;
+			}
+			set 
+			{
+				_swapFromTokenName = value;
 
+				UpdateSwapFromBalance();
+			} 
+		}
+		public decimal fromTokenBalance { get; set; }
+		public string swapFromCount { get; set; }
+		//end swap
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
 
@@ -94,7 +109,7 @@ namespace Nebula.Pages
 
 		private async void Send(MouseEventArgs e)
 		{
-			if(walletState.Value.wallet.MainBalance > 1)
+			if(walletState.Value.wallet.BaseBalance > 1)
 				Dispatcher.Dispatch(new WebWalletSendAction {   });
 			else
 				await iJS.InvokeAsync<object>("alert", "Nothing to send.");
@@ -130,16 +145,6 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletTransactionsAction { wallet = walletState.Value.wallet });
 		}
 
-		private void Swap(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
-		}
-
-		private void SwapToken(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
-		}
-
 		private void Return(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletCancelSaveSettingsAction { });
@@ -148,6 +153,34 @@ namespace Nebula.Pages
 		private void FreeToken(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletFreeTokenAction { faucetPvk = Configuration["faucetPvk"] });
+		}
+
+		// swap
+		private void Swap(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+			UpdateSwapFromBalance();
+		}
+
+		private void SwapToken(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+		}
+
+		private void UpdateSwapFromBalance()
+        {
+			if (string.IsNullOrEmpty(_swapFromTokenName))
+				_swapFromTokenName = "LYR";
+
+			if (_swapFromTokenName == "LYR")
+			{
+				// get lyr balance
+				fromTokenBalance = walletState.Value.wallet.BaseBalance;
+			}
+			else if (_swapFromTokenName == "TLYR")
+			{
+				fromTokenBalance = 1.111111111m;
+			}
 		}
 	}
 }

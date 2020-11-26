@@ -29,6 +29,11 @@ namespace Nebula
                 {
                     config.AddEnvironmentVariables(prefix: "NEBULA_");
                 })
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
