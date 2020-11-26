@@ -2,12 +2,21 @@
 using Lyra.Data.Crypto;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
+using Nebula.Data;
 using Nebula.Store.BlockSearchUseCase;
 using Nebula.Store.WebWalletUseCase;
+using Nethereum.ABI.FunctionEncoding.Attributes;
+using Nethereum.Contracts;
+using Nethereum.StandardTokenEIP20.ContractDefinition;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Nebula.Pages
@@ -69,6 +78,11 @@ namespace Nebula.Pages
 			}
 		}
 		public decimal swapToCount { get; set; }
+
+		[Required]
+		[StringLength(120, ErrorMessage = "Name is too long.")]
+		public string swapToAddress { get; set; }
+		public string swapResultMessage { get; set; }
 		//end swap
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
@@ -191,10 +205,71 @@ namespace Nebula.Pages
 			UpdateSwapFromBalance();
 		}
 
-		private void SwapToken(MouseEventArgs e)
+		[Function("transfer", "bool")]
+		public class TransferFunction : FunctionMessage
 		{
-			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("address", "_to", 1)]
+			public string To { get; set; }
+
+			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("uint256", "_value", 2)]
+			public BigInteger TokenAmount { get; set; }
 		}
+
+		private async void SwapToken(MouseEventArgs e)
+		{
+			//Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+			var sbLog = new StringBuilder();
+			swapResultMessage = "";
+			try
+            {
+				if (_swapFromCount < 2 || swapFromToken == swapToToken)
+				{
+					sbLog.AppendLine("Unable to swap.");
+					return;
+				}
+				if (swapFromToken == "LYR" && swapToToken == "TLYR")
+				{
+					var syncResult = await walletState.Value.wallet.Sync(null);
+					if (syncResult == Lyra.Core.Blocks.APIResultCodes.Success)
+					{
+						var sendResult = await walletState.Value.wallet.Send(swapToCount,
+							swapOptions.CurrentValue.lyrPub, "LYR");
+
+						if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
+						{
+							var web3 = new Nethereum.Web3.Web3();
+							web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
+
+							var transactionMessage = new TransferFunction
+							{
+								FromAddress = swapOptions.CurrentValue.ethPub,
+								To = swapToAddress,
+								TokenAmount = new BigInteger(swapToCount * 100000000)	// 10^8 
+							};
+
+							var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+							var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
+
+							var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
+							var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
+						}
+						else
+							throw new Exception("Unable to send from your wallet.");
+					}
+					else
+						throw new Exception("Unable to sync Lyra Wallet.");
+				}
+			}
+			catch(Exception ex)
+            {
+				sbLog.AppendLine("Failed in Swap: " + ex.ToString());
+            }
+			finally
+            {
+				swapResultMessage = sbLog.ToString();
+				logger.LogInformation($"Swap Result: {swapResultMessage}\n\n");
+			}
+        }
 
 		private void UpdateSwapFromBalance()
         {

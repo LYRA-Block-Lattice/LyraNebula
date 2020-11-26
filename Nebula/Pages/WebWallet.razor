@@ -3,14 +3,18 @@
 @using Nebula.Store.WebWalletUseCase
 @using Nebula.Data
 @using Microsoft.Extensions.Configuration
-@using Blazored.LocalStorage;
+@using Blazored.LocalStorage
+@using Microsoft.Extensions.Logging
+@using Microsoft.Extensions.Options
 @inject IConfiguration Configuration
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 @inject SampleAPI SampleAPI
 @inject Blazored.LocalStorage.ILocalStorageService localStore
-@inject MetamaskService metamaskService;
-@inject MetamaskInterceptor metamaskInterceptor;
+@inject MetamaskService metamaskService
+@inject MetamaskInterceptor metamaskInterceptor
+@inject ILogger<WebWallet> logger
+@inject IOptionsMonitor<SwapOptions> swapOptions
 @using Nethereum.Web3;
 @using Nethereum.Hex.HexTypes;
 
@@ -157,18 +161,23 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         <hr style="color: white" />
         <p>Swap to:</p>
         <div>
+            <span>
                 <select style="height: 30px; width: 80px" @bind="swapToToken">
                     <option>LYR</option>
                     <option>TLYR</option>
                 </select>
+            </span>
+            <span>
+                <input size="130" placeholder="Swap To Address" type="text" @bind="@swapToAddress" />
+            </span>
         </div>
-        <p>You will get @swapToCount @swapToToken</p>
+        <p>You will get @swapToCount @swapToToken to address @swapToAddress</p>
         <hr />
         <div>
             <button class="btn btn-primary" @onclick="SwapToken">Swap</button>
             <button class="btn btn-primary" @onclick="Return">Return</button>
         </div>
-            
+        <p>@swapResultMessage</p>
     }
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)

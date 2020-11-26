@@ -35,6 +35,7 @@ namespace Nebula
             services.AddBlazoredLocalStorage();
 
             services.Configure<reCAPTCHAVerificationOptions>(Configuration.GetSection("reCAPTCHA"));
+            services.Configure<SwapOptions>(Configuration.GetSection("Swap"));
             services.AddTransient<SampleAPI>();
 
             services.AddRazorPages();
