@@ -40,6 +40,10 @@ namespace Nethereum.Metamask.Blazor
             return await _jsRuntime.InvokeAsync<string>("NethereumMetamaskInterop.GetSelectedAddress");
         }
 
+        public async ValueTask<string> GetChainId()
+        {
+            return await _jsRuntime.InvokeAsync<string>("NethereumMetamaskInterop.GetChainId");
+        }
 
         [JSInvokable()]
         public static async Task MetamaskAvailableChanged(bool available)

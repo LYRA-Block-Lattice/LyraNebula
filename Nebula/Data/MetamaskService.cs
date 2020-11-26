@@ -36,6 +36,27 @@ namespace Nethereum.Metamask.Blazor
             return result;
         }
 
+        public async ValueTask<string> GetChainName()
+        {
+            var result = await _metamaskInterop.GetChainId();
+            
+            switch(result)
+            {
+                case "0x1": 
+                    return "Ethereum Main Network";
+                case "0x3":
+                    return "Ropsten Test Network";
+                case "0x4":
+                    return "Rinkeby Test Network";
+                case "0x5":
+                    return "Goerli Test Network";
+                case "0x42":
+                    return "Kovan Test Network";
+                default:
+                    return "Unknown";
+            }                
+        }
+
         public async ValueTask<string> GetSelectedAccount()
         {
             var result = await _metamaskInterop.GetSelectedAddress();

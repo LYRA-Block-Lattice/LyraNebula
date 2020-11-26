@@ -24,6 +24,10 @@
         return ethereum.selectedAddress;
     },
 
+    GetChainId: () => {
+        return ethereum.chainId;
+    },
+
     Send: async (message) => {
         return new Promise(function (resolve, reject) {
             ethereum.send(JSON.parse(message), function (error, result) {

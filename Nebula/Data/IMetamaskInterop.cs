@@ -7,6 +7,7 @@ namespace Nethereum.Metamask.Blazor
     {
         ValueTask<bool> EnableEthereumAsync();
         ValueTask<bool> CheckMetamaskAvailability();
+        ValueTask<string> GetChainId();
         ValueTask<string> GetSelectedAddress();
         ValueTask<RpcResponseMessage> SendAsync(RpcRequestMessage rpcRequestMessage);
         ValueTask<RpcResponseMessage> SendTransactionAsync(MetamaskRpcRequestMessage rpcRequestMessage);

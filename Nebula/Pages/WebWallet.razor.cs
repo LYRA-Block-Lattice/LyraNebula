@@ -38,8 +38,37 @@ namespace Nebula.Pages
 				UpdateSwapFromBalance();
 			} 
 		}
+		private string _swapToTokenName;
+		public string swapToToken
+		{
+			get
+			{
+				return _swapToTokenName;
+			}
+			set
+			{
+				_swapToTokenName = value;
+
+				UpdateSwapToBalance();
+			}
+		}
+
 		public decimal fromTokenBalance { get; set; }
-		public string swapFromCount { get; set; }
+
+		private decimal _swapFromCount;
+		public decimal swapFromCount
+		{
+			get
+			{
+				return _swapFromCount;
+			}
+			set
+			{
+				_swapFromCount = value;
+				UpdateSwapToBalance();
+			}
+		}
+		public decimal swapToCount { get; set; }
 		//end swap
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
@@ -180,6 +209,18 @@ namespace Nebula.Pages
 			else if (_swapFromTokenName == "TLYR")
 			{
 				fromTokenBalance = 1.111111111m;
+			}
+		}
+
+		private void UpdateSwapToBalance()
+		{
+			if (_swapFromTokenName == "LYR")
+			{
+				swapToCount = swapFromCount - 1; // remember -GAS
+			}
+			else if (_swapFromTokenName == "TLYR")
+			{
+				swapToCount = 2.222222m;
 			}
 		}
 	}
