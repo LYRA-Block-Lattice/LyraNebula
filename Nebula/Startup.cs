@@ -42,6 +42,9 @@ namespace Nebula
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
+            services.AddMvc();
+            services.AddControllers();
+
             // for Metamask wallet
             services.AddScoped<IMetamaskInterop, MetamaskBlazorInterop>();
             services.AddScoped<MetamaskService>();
@@ -79,6 +82,7 @@ namespace Nebula
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
+                endpoints.MapControllers();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
