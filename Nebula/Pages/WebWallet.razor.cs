@@ -1,4 +1,6 @@
 ﻿using Fluxor;
+using Lyra.Core.Accounts;
+using Lyra.Core.API;
 using Lyra.Data.Crypto;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -259,12 +261,59 @@ namespace Nebula.Pages
 
                             var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
                             var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
-                        }
+
+							sbLog.AppendLine("Swap succeed!");
+						}
 						else
 							throw new Exception("Unable to send from your wallet.");
 					}
 					else
 						throw new Exception("Unable to sync Lyra Wallet.");
+				}
+
+				if (swapFromToken == "TLYR" && swapToToken == "LYR")
+				{
+                    var web3 = new Web3();
+                    web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
+
+                    var transactionMessage = new TransferFunction
+					{
+						FromAddress = SelectedAccount,
+						To = swapOptions.CurrentValue.ethPub,
+						TokenAmount = new BigInteger(swapFromCount * 100000000)   // 10^8 
+					};
+
+					var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+					var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
+
+					var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
+					var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
+
+					if(true) // test if success transfer
+                    {
+						var store = new AccountInMemoryStorage();
+						var wallet = Wallet.Create(store, "default", "", Configuration["network"],
+							swapOptions.CurrentValue.lyrPvk);
+						var lyraClient = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(),
+							"Nebula Swap", "1.0");
+
+						var syncResult = await wallet.Sync(lyraClient);
+						if (syncResult == Lyra.Core.Blocks.APIResultCodes.Success)
+						{
+							var sendResult = await wallet.Send(swapToCount,
+								swapToAddress, "LYR");
+
+							if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
+							{
+								sbLog.AppendLine("Swap succeed!");
+							}
+							else
+								throw new Exception("Unable to send from your wallet.");
+						}
+						else
+							throw new Exception("Unable to sync Lyra Wallet.");
+					}
+
 				}
 			}
 			catch(Exception ex)
