@@ -140,7 +140,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         <div>
             <span>    
                 <select style="height: 30px; width: 80px" @bind="swapFromToken">
-                    <option>LYR</option>
+                    <option selected>LYR</option>
                     <option>TLYR</option>
                 </select>
     @*             <InputSelect ValueExpression="@(()=>comment.Country)" 
@@ -164,7 +164,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
             <span>
                 <select style="height: 30px; width: 80px" @bind="swapToToken">
                     <option>LYR</option>
-                    <option>TLYR</option>
+                    <option selected>TLYR</option>
                 </select>
             </span>
             <span>

@@ -47,8 +47,8 @@ namespace Nebula.Pages
 			set 
 			{
 				_swapFromTokenName = value;
-
-				UpdateSwapFromBalance();
+				swapFromCount = 0;
+				_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });				
 			} 
 		}
 		private string _swapToTokenName;
@@ -205,8 +205,17 @@ namespace Nebula.Pages
 		// swap
 		private void Swap(MouseEventArgs e)
 		{
+			swapFromToken = "LYR";
+			swapToToken = "TLYR";
 			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
-			UpdateSwapFromBalance();
+			_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });
+		}
+
+		[Function("balanceOf", "uint256")]
+		public class BalanceOfFunction : FunctionMessage
+		{
+			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("address", "_owner", 1)]
+			public string Owner { get; set; }
 		}
 
 		[Function("transfer", "bool")]
@@ -327,7 +336,7 @@ namespace Nebula.Pages
 			}
         }
 
-		private void UpdateSwapFromBalance()
+		private async Task UpdateSwapFromBalanceAsync()
         {
 			if (string.IsNullOrEmpty(_swapFromTokenName))
 				_swapFromTokenName = "LYR";
@@ -339,7 +348,22 @@ namespace Nebula.Pages
 			}
 			else if (_swapFromTokenName == "TLYR")
 			{
-				fromTokenBalance = 1.111111111m;
+				var web3 = new Web3(swapOptions.CurrentValue.ethUrl);
+
+				var balanceMessage = new BalanceOfFunction
+				{
+					Owner = SelectedAccount
+				};
+
+				var balanceHandler = web3.Eth.GetContractQueryHandler<BalanceOfFunction>();
+				var balance = await balanceHandler.QueryAsync<BigInteger>(swapOptions.CurrentValue.ethContract, balanceMessage);
+
+				fromTokenBalance = (decimal)(balance / 100000000);
+
+                await InvokeAsync(() =>
+                {
+                    StateHasChanged();
+                });
 			}
 		}
 
@@ -348,10 +372,12 @@ namespace Nebula.Pages
 			if (_swapFromTokenName == "LYR")
 			{
 				swapToCount = swapFromCount - 1; // remember -GAS
+				swapToAddress = SelectedAccount;
 			}
 			else if (_swapFromTokenName == "TLYR")
 			{
-				swapToCount = 2.222222m;
+				swapToCount = swapFromCount - 1; // remember -GAS
+				swapToAddress = walletState.Value.wallet.AccountId;
 			}
 		}
 	}
