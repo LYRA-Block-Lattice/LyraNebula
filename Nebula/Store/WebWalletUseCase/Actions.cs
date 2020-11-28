@@ -1,4 +1,6 @@
 ﻿using Lyra.Core.Accounts;
+using Nebula.Data;
+using Nethereum.Metamask.Blazor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +56,31 @@ namespace Nebula.Store.WebWalletUseCase
 
     public class WebWalletSwapAction
     {
+
+    }
+
+    public class WebWalletSwapTokenAction
+    {
+        // lyra specified
         public Wallet wallet { get; set; }
+
+        // swap specified
+        public string fromToken { get; set; }
+        public string toToken { get; set; }
+        public string fromAddress { get; set; }
+        public string toAddress { get; set; }
+        public decimal fromAmount { get; set; }
+        public decimal toAmount { get; set; }
+
+        // eth contract, metamask, etc.
+        public SwapOptions options { get; set; }
+        public MetamaskInterceptor metamask { get; set; }
+    }
+
+    public class WebWalletSwapResultAction
+    {
+        public bool Success { get; set; }
+        public string errMessage { get; set; }
     }
 
     public class WebWalletFreeTokenAction

@@ -207,133 +207,26 @@ namespace Nebula.Pages
 		{
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
-			Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
+			Dispatcher.Dispatch(new WebWalletSwapAction ());
 			_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });
 		}
 
-		[Function("balanceOf", "uint256")]
-		public class BalanceOfFunction : FunctionMessage
+		private void SwapToken(MouseEventArgs e)
 		{
-			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("address", "_owner", 1)]
-			public string Owner { get; set; }
-		}
+			Dispatcher.Dispatch(new WebWalletSwapTokenAction { 
+				wallet = walletState.Value.wallet,
 
-		[Function("transfer", "bool")]
-		public class TransferFunction : FunctionMessage
-		{
-			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("address", "_to", 1)]
-			public string To { get; set; }
+				fromToken = swapFromToken,
+				fromAddress = swapFromToken == "LYR" ? walletState.Value.wallet.AccountId : SelectedAccount,
+				fromAmount = swapFromCount,
 
-			[Nethereum.ABI.FunctionEncoding.Attributes.Parameter("uint256", "_value", 2)]
-			public BigInteger TokenAmount { get; set; }
-		}
+				toToken = swapToToken,
+				toAddress = swapToAddress,
+				toAmount = swapToCount,
 
-		private async void SwapToken(MouseEventArgs e)
-		{
-			//Dispatcher.Dispatch(new WebWalletSwapAction { wallet = walletState.Value.wallet });
-			var sbLog = new StringBuilder();
-			swapResultMessage = "";
-			try
-            {
-				if (_swapFromCount < 2 || swapFromToken == swapToToken)
-				{
-					sbLog.AppendLine("Unable to swap.");
-					return;
-				}
-				if (swapFromToken == "LYR" && swapToToken == "TLYR")
-				{
-					var syncResult = await walletState.Value.wallet.Sync(null);
-					if (syncResult == Lyra.Core.Blocks.APIResultCodes.Success)
-					{
-						var sendResult = await walletState.Value.wallet.Send(swapToCount,
-							swapOptions.CurrentValue.lyrPub, "LYR");
-
-						if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
-						{
-							var url = swapOptions.CurrentValue.ethUrl;
-							var privateKey = swapOptions.CurrentValue.ethPvk;
-							var account = new Account(privateKey);
-							var web3 = new Web3(account, url);
-
-                            //var web3 = new Nethereum.Web3.Web3();
-                            //web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
-
-                            var transactionMessage = new TransferFunction
-                            {
-                                FromAddress = swapOptions.CurrentValue.ethPub,
-                                To = swapToAddress,
-                                TokenAmount = new BigInteger(swapToCount * 100000000)   // 10^8 
-                            };
-
-                            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-                            var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
-
-                            var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
-                            var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
-
-							sbLog.AppendLine("Swap succeed!");
-						}
-						else
-							throw new Exception("Unable to send from your wallet.");
-					}
-					else
-						throw new Exception("Unable to sync Lyra Wallet.");
-				}
-
-				if (swapFromToken == "TLYR" && swapToToken == "LYR")
-				{
-                    var web3 = new Web3();
-                    web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
-
-                    var transactionMessage = new TransferFunction
-					{
-						FromAddress = SelectedAccount,
-						To = swapOptions.CurrentValue.ethPub,
-						TokenAmount = new BigInteger(swapFromCount * 100000000)   // 10^8 
-					};
-
-					var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-					var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(swapOptions.CurrentValue.ethContract, transactionMessage);
-
-					var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
-					var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
-
-					if(true) // test if success transfer
-                    {
-						var store = new AccountInMemoryStorage();
-						var wallet = Wallet.Create(store, "default", "", Configuration["network"],
-							swapOptions.CurrentValue.lyrPvk);
-						var lyraClient = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(),
-							"Nebula Swap", "1.0");
-
-						var syncResult = await wallet.Sync(lyraClient);
-						if (syncResult == Lyra.Core.Blocks.APIResultCodes.Success)
-						{
-							var sendResult = await wallet.Send(swapToCount,
-								swapToAddress, "LYR");
-
-							if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
-							{
-								sbLog.AppendLine("Swap succeed!");
-							}
-							else
-								throw new Exception("Unable to send from your wallet.");
-						}
-						else
-							throw new Exception("Unable to sync Lyra Wallet.");
-					}
-
-				}
-			}
-			catch(Exception ex)
-            {
-				sbLog.AppendLine("Failed in Swap: " + ex.ToString());
-            }
-			finally
-            {
-				swapResultMessage = sbLog.ToString();
-				logger.LogInformation($"Swap Result: {swapResultMessage}\n\n");
-			}
+				options = swapOptions.CurrentValue,
+				metamask = metamaskInterceptor
+			});
         }
 
 		private async Task UpdateSwapFromBalanceAsync()
@@ -348,17 +241,8 @@ namespace Nebula.Pages
 			}
 			else if (_swapFromTokenName == "TLYR")
 			{
-				var web3 = new Web3(swapOptions.CurrentValue.ethUrl);
-
-				var balanceMessage = new BalanceOfFunction
-				{
-					Owner = SelectedAccount
-				};
-
-				var balanceHandler = web3.Eth.GetContractQueryHandler<BalanceOfFunction>();
-				var balance = await balanceHandler.QueryAsync<BigInteger>(swapOptions.CurrentValue.ethContract, balanceMessage);
-
-				fromTokenBalance = (decimal)(balance / 100000000);
+				fromTokenBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
+                    swapOptions.CurrentValue.ethContract, SelectedAccount);
 
                 await InvokeAsync(() =>
                 {
@@ -369,12 +253,12 @@ namespace Nebula.Pages
 
 		private void UpdateSwapToBalance()
 		{
-			if (_swapFromTokenName == "LYR")
+			if (_swapToTokenName == "TLYR")
 			{
 				swapToCount = swapFromCount - 1; // remember -GAS
 				swapToAddress = SelectedAccount;
 			}
-			else if (_swapFromTokenName == "TLYR")
+			else if (_swapToTokenName == "LYR")
 			{
 				swapToCount = swapFromCount - 1; // remember -GAS
 				swapToAddress = walletState.Value.wallet.AccountId;

@@ -98,7 +98,8 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState ReduceSendMeFreeTokenAction(WebWalletState state, WebWalletSendMeFreeTokenResultAction action)
         {
 			var stt = state.With(new { 
-				stage = UIStage.Main
+				stage = UIStage.Main,
+				LastOperationIsSuccess = action.Success
 			});
 
 			if (action.Success)
@@ -106,6 +107,25 @@ namespace Nebula.Store.WebWalletUseCase
 				stt.freeTokenSent = true;
 				stt.freeTokenTimes++;
 			}
+			return stt;
+		}
+
+		[ReducerMethod]
+		public static WebWalletState SwapHandler(WebWalletState state, WebWalletSwapAction action) => state.With(new { stage = UIStage.Swap });
+
+		[ReducerMethod]
+		public static WebWalletState SwapTokenHandler(WebWalletState state, WebWalletSwapTokenAction action) => state.With(new { IsLoading = true });
+
+		[ReducerMethod]
+		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapResultAction action)
+		{
+			var stt = state.With(new
+			{
+				IsLoading = false,
+				stage = UIStage.Main,
+				LastOperationIsSuccess = action.Success
+			});
+
 			return stt;
 		}
 
