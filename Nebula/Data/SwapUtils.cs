@@ -48,16 +48,35 @@ namespace Nebula.Data
                 var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
                 var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(ethContract, transactionMessage);
 
-                var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
-                var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
+                //var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
+                //var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
 
-                return true; // verify by balance
+                var txDetails = await GetTxDetailsAsync(ethApiUrl, transferReceipt.TransactionHash);
+                if(txDetails.FromAddress.Equals(ethAddress, StringComparison.InvariantCultureIgnoreCase) 
+                    && txDetails.To.Equals(targetEthAddress, StringComparison.InvariantCultureIgnoreCase)
+                    && txDetails.TokenAmount == tokenCount)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             catch(Exception ex)
             {
                 return false; // verify either
             }
         }
+
+        public static async Task<TransferFunction> GetTxDetailsAsync(string ethApiUrl, string ethTxHash)
+        {
+            var web3 = new Web3(ethApiUrl);
+            var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(ethTxHash);
+            var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
+            return transferDecoded;
+        }
+
         public static async Task<decimal> GetEthContractBalanceAsync(string ethApiUrl, string ethContract, string ethAddress)
         {
             var web3 = new Web3(ethApiUrl);

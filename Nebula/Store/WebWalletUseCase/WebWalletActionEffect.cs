@@ -218,7 +218,7 @@ namespace Nebula.Store.WebWalletUseCase
 				if (action.fromToken == "TLYR" && action.toToken == "LYR")
 				{
 					var result = await SwapUtils.SendEthContractTokenAsync(
-						null, action.options.ethContract, action.fromAddress,
+						action.options.ethUrl, action.options.ethContract, action.fromAddress,
 						null,
 						action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
 						action.metamask);
