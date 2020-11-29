@@ -209,6 +209,7 @@ namespace Nebula.Pages
 		// swap
 		private void Swap(MouseEventArgs e)
 		{
+			logger.LogInformation("Begin swapping!");
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
 			Dispatcher.Dispatch(new WebWalletSwapAction ());
