@@ -1,6 +1,7 @@
 ﻿using Fluxor;
 using Lyra.Core.Accounts;
 using Lyra.Core.API;
+using Lyra.Core.Blocks;
 using Lyra.Data.Crypto;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -37,6 +38,9 @@ namespace Nebula.Pages
 		private IJSRuntime iJS { get; set; }
 
 		// swap
+		public string queryingNotify { get; set; }
+		public decimal lyrReserveBalance { get; set; }
+		public decimal tlyrReserveBalance { get; set; }
 		public string[] SwapableTokens { get; set; }
 		private string _swapFromTokenName;
 		public string swapFromToken { 
@@ -208,7 +212,7 @@ namespace Nebula.Pages
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
 			Dispatcher.Dispatch(new WebWalletSwapAction ());
-			_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });
+			_ = Task.Run(async () => { await UpdateSwapBalanceAsync(); });
 		}
 
 		private void SwapToken(MouseEventArgs e)
@@ -229,8 +233,27 @@ namespace Nebula.Pages
 			});
         }
 
-		private async Task UpdateSwapFromBalanceAsync()
+		private async Task UpdateSwapBalanceAsync()
         {
+			queryingNotify = "Querying balance ...";
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
+
+			lyrReserveBalance = await SwapUtils.GetLyraBalanceAsync(Configuration["network"], swapOptions.CurrentValue.lyrPvk);
+			tlyrReserveBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
+					swapOptions.CurrentValue.ethContract, swapOptions.CurrentValue.ethPub);
+
+			queryingNotify = "";
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
+		}
+
+		private async Task UpdateSwapFromBalanceAsync()
+		{
 			if (string.IsNullOrEmpty(_swapFromTokenName))
 				_swapFromTokenName = "LYR";
 
@@ -242,13 +265,13 @@ namespace Nebula.Pages
 			else if (_swapFromTokenName == "TLYR")
 			{
 				fromTokenBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
-                    swapOptions.CurrentValue.ethContract, SelectedAccount);
-
-                await InvokeAsync(() =>
-                {
-                    StateHasChanged();
-                });
+					swapOptions.CurrentValue.ethContract, SelectedAccount);
 			}
+
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
 		}
 
 		private void UpdateSwapToBalance()

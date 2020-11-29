@@ -15,6 +15,7 @@
 @inject MetamaskInterceptor metamaskInterceptor
 @inject ILogger<WebWallet> logger
 @inject IOptionsMonitor<SwapOptions> swapOptions
+@inject LyraRestClient lyraClient
 @using Nethereum.Web3;
 @using Nethereum.Hex.HexTypes;
 
@@ -120,6 +121,9 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
     <h3>Swap Tokens</h3>
     <p>Current supported Ethereum network: Rinkeby Test Network.</p>
     <p>Add TLYR token to MetaMask by Ethereum Contract hash: @swapOptions.CurrentValue.ethContract</p>
+    <p>Balance of LYR reservation account: <b>@lyrReserveBalance</b></p>
+    <p>Balance of TLYR reservation account: <b>@tlyrReserveBalance</b></p>
+    <p style="color:blue"><i>@queryingNotify</i></p>
     @if(!MetamaskAvailable)
     {
         <p>To use swap, you need to install MetaMask wallet. </p>
@@ -177,10 +181,12 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         <hr />
         <div>
             <button class="btn btn-primary" @onclick="SwapToken">Swap</button>
-            <button class="btn btn-primary" @onclick="Return">Return</button>
         </div>
         <p>@swapResultMessage</p>
         }
+        <div>
+            <button class="btn btn-primary" @onclick="Return">Return</button>
+        </div>
     }
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)

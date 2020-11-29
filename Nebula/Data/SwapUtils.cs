@@ -1,4 +1,7 @@
-﻿using Nethereum.ABI.FunctionEncoding.Attributes;
+﻿using Lyra.Core.Accounts;
+using Lyra.Core.API;
+using Lyra.Core.Blocks;
+using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
 using Nethereum.Metamask.Blazor;
 using Nethereum.Web3;
@@ -87,6 +90,24 @@ namespace Nebula.Data
 
             [Nethereum.ABI.FunctionEncoding.Attributes.Parameter("uint256", "_value", 2)]
             public BigInteger TokenAmount { get; set; }
+        }
+
+        public static async Task<decimal> GetLyraBalanceAsync(string lyraNetwork, string accountPvk)
+        {
+            var store = new AccountInMemoryStorage();
+            var wallet = Wallet.Create(store, "default", "", lyraNetwork,
+                accountPvk);
+            var lyraClient = LyraRestClient.Create(lyraNetwork, Environment.OSVersion.ToString(),
+                "Nebula Swap", "1.0");
+
+            var syncResult = await wallet.Sync(lyraClient);
+            if (syncResult == APIResultCodes.Success)
+            {
+                var block = wallet.GetLatestBlock();
+                return block.Balances["LYR"] / LyraGlobal.TOKENSTORAGERITO;
+            }
+
+            return 0m;
         }
     }
 }
