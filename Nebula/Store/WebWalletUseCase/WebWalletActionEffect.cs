@@ -13,6 +13,7 @@ using System.IO;
 using Lyra.Core.Accounts;
 using Lyra.Core.Blocks;
 using System.Numerics;
+using Microsoft.Extensions.Logging;
 
 namespace Nebula.Store.WebWalletUseCase
 {
@@ -20,11 +21,15 @@ namespace Nebula.Store.WebWalletUseCase
 	{
 		private readonly LyraRestClient client;
 		private readonly IConfiguration config;
+		private readonly ILogger<Effects> logger;
 
-		public Effects(LyraRestClient lyraClient, IConfiguration configuration)
+		public Effects(LyraRestClient lyraClient, 
+			IConfiguration configuration,
+			ILogger<Effects> logger)
 		{
 			client = lyraClient;
 			config = configuration;
+			this.logger = logger;
 		}
 
         [EffectMethod]
@@ -200,16 +205,20 @@ namespace Nebula.Store.WebWalletUseCase
 
 						if (sendResult.ResultCode == APIResultCodes.Success)
 						{
+							logger.LogInformation($"first stage is ok for {action.fromAddress}");
 							var result = await SwapUtils.SendEthContractTokenAsync(
 								action.options.ethUrl, action.options.ethContract, action.options.ethPub,
 								action.options.ethPvk, 
 								action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
 								null);
 
+							if (!result)
+								throw new Exception("Eth sending failed.");
+
 							IsSuccess = result;
 						}
 						else
-							throw new Exception("Unable to send from your wallet.");
+							throw new Exception("Unable to send from your Lyra wallet.");
 					}
 					else
 						throw new Exception("Unable to sync Lyra Wallet.");
@@ -225,6 +234,8 @@ namespace Nebula.Store.WebWalletUseCase
 
 					if (result) // test if success transfer
 					{
+						logger.LogInformation($"first stage is ok for {action.fromAddress}");
+
 						var store = new AccountInMemoryStorage();
 						var wallet = Wallet.Create(store, "default", "", config["network"],
 							action.options.lyrPvk);
@@ -247,12 +258,17 @@ namespace Nebula.Store.WebWalletUseCase
 						else
 							throw new Exception("Unable to sync Lyra Wallet.");
 					}
+					else
+                    {
+						throw new Exception("Eth sending failed.");
+                    }
 				}
-
+				logger.LogInformation($"Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is succeed.");
 				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = IsSuccess });
 			}
 			catch(Exception ex)
             {
+				logger.LogInformation($"Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is failed. Error: {ex}");
 				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = false, errMessage = ex.ToString() });
 			}
 		}

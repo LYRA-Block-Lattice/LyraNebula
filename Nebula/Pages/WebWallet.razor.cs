@@ -38,6 +38,7 @@ namespace Nebula.Pages
 		private IJSRuntime iJS { get; set; }
 
 		// swap
+		protected bool IsDisabled { get; set; }
 		public string queryingNotify { get; set; }
 		public decimal lyrReserveBalance { get; set; }
 		public decimal tlyrReserveBalance { get; set; }
@@ -207,18 +208,32 @@ namespace Nebula.Pages
 		}
 
 		// swap
-		private void Swap(MouseEventArgs e)
+		private async Task Swap(MouseEventArgs e)
 		{
-			logger.LogInformation("Begin swapping!");
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
+			IsDisabled = false;
+			swapResultMessage = "";
+			walletState.Value.Message = "";
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
 			Dispatcher.Dispatch(new WebWalletSwapAction ());
 			_ = Task.Run(async () => { await UpdateSwapBalanceAsync(); });
 		}
 
-		private void SwapToken(MouseEventArgs e)
+		private async Task SwapToken(MouseEventArgs e)
 		{
-			Dispatcher.Dispatch(new WebWalletSwapTokenAction { 
+			swapResultMessage = "Do swapping... please wait...";
+			walletState.Value.Message = "";
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
+
+			var arg = new WebWalletSwapTokenAction
+			{
 				wallet = walletState.Value.wallet,
 
 				fromToken = swapFromToken,
@@ -231,8 +246,11 @@ namespace Nebula.Pages
 
 				options = swapOptions.CurrentValue,
 				metamask = metamaskInterceptor
-			});
-        }
+			};
+			logger.LogInformation($"Begin swapping {arg.fromAmount} from {arg.fromAddress} to {arg.toAddress} amount {arg.toAmount}");
+			Dispatcher.Dispatch(arg);
+			IsDisabled = true;
+		}
 
 		private async Task UpdateSwapBalanceAsync()
         {

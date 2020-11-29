@@ -122,8 +122,8 @@ namespace Nebula.Store.WebWalletUseCase
 			var stt = state.With(new
 			{
 				IsLoading = false,
-				stage = UIStage.Main,
-				LastOperationIsSuccess = action.Success
+				LastOperationIsSuccess = action.Success,
+				Message = action.Success ? "Swapping is succeed!" : "Swapping is failed."
 			});
 
 			return stt;

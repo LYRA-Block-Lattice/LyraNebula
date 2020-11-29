@@ -20,52 +20,42 @@ namespace Nebula.Data
             string ethAddress, string ethPrivateKey, string targetEthAddress, BigInteger tokenCount,
             MetamaskInterceptor metamask)
         {
-            try
+            Web3 web3;
+            if (metamask == null)
             {
-                Web3 web3;
-                if(metamask == null)
+                if (string.IsNullOrWhiteSpace(ethPrivateKey))
                 {
-                    if (string.IsNullOrWhiteSpace(ethPrivateKey))
-                    {
-                        throw new ArgumentNullException("Need key for ethereum account.");
-                    }
-                    var account = new Account(ethPrivateKey);
-                    web3 = new Web3(account, ethApiUrl);
+                    throw new ArgumentNullException("Need key for ethereum account.");
                 }
-                else
-                {
-                    web3 = new Nethereum.Web3.Web3();
-                    web3.Client.OverridingRequestInterceptor = metamask;
-                }
-
-                var transactionMessage = new TransferFunction
-                {
-                    FromAddress = ethAddress,
-                    To = targetEthAddress,
-                    TokenAmount = tokenCount
-                };
-
-                var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-                var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(ethContract, transactionMessage);
-
-                //var transaction = await web3.Eth.Transactions.GetTransactionByHash.SendRequestAsync(transferReceipt.TransactionHash);
-                //var transferDecoded = transaction.DecodeTransactionToFunctionMessage<TransferFunction>();
-
-                var txDetails = await GetTxDetailsAsync(ethApiUrl, transferReceipt.TransactionHash);
-                if(txDetails.FromAddress.Equals(ethAddress, StringComparison.InvariantCultureIgnoreCase) 
-                    && txDetails.To.Equals(targetEthAddress, StringComparison.InvariantCultureIgnoreCase)
-                    && txDetails.TokenAmount == tokenCount)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                var account = new Account(ethPrivateKey);
+                web3 = new Web3(account, ethApiUrl);
             }
-            catch(Exception ex)
+            else
             {
-                return false; // verify either
+                web3 = new Nethereum.Web3.Web3();
+                web3.Client.OverridingRequestInterceptor = metamask;
+            }
+
+            var transactionMessage = new TransferFunction
+            {
+                FromAddress = ethAddress,
+                To = targetEthAddress,
+                TokenAmount = tokenCount
+            };
+
+            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+            var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(ethContract, transactionMessage);
+
+            var txDetails = await GetTxDetailsAsync(ethApiUrl, transferReceipt.TransactionHash);
+            if (txDetails.FromAddress.Equals(ethAddress, StringComparison.InvariantCultureIgnoreCase)
+                && txDetails.To.Equals(targetEthAddress, StringComparison.InvariantCultureIgnoreCase)
+                && txDetails.TokenAmount == tokenCount)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

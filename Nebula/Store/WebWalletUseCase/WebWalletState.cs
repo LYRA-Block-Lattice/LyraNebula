@@ -31,5 +31,6 @@ namespace Nebula.Store.WebWalletUseCase
 		public bool DisablePostButton => !ValidReCAPTCHA || ServerVerificatiing;
 
 		public bool LastOperationIsSuccess { get; set; }
+		public string Message { get; set; }
 	}
 }
