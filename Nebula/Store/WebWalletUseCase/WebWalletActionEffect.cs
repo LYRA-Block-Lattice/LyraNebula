@@ -205,14 +205,14 @@ namespace Nebula.Store.WebWalletUseCase
 
 						if (sendResult.ResultCode == APIResultCodes.Success)
 						{
-							logger.LogInformation($"first stage is ok for {action.fromAddress}");
+							logger.LogInformation($"TokenSwap: first stage is ok for {action.fromAddress}");
 							var result = await SwapUtils.SendEthContractTokenAsync(
 								action.options.ethUrl, action.options.ethContract, action.options.ethPub,
 								action.options.ethPvk, 
 								action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
 								null);
 
-							logger.LogInformation($"second stage for {action.fromAddress} eth tx hash is {result}");
+							logger.LogInformation($"TokenSwap: second stage for {action.fromAddress} eth tx hash is {result}");
 
 							if (string.IsNullOrEmpty(result))
 								throw new Exception("Eth sending failed.");
@@ -234,7 +234,7 @@ namespace Nebula.Store.WebWalletUseCase
 						action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
 						action.metamask);
 
-					logger.LogInformation($"first stage for {action.fromAddress} eth tx hash {result}");
+					logger.LogInformation($"TokenSwap: first stage for {action.fromAddress} eth tx hash {result}");
 
 					if (!string.IsNullOrEmpty(result)) // test if success transfer
 					{
@@ -265,12 +265,12 @@ namespace Nebula.Store.WebWalletUseCase
 						throw new Exception("Eth sending failed.");
                     }
 				}
-				logger.LogInformation($"Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is succeed.");
+				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is succeed.");
 				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = IsSuccess });
 			}
 			catch(Exception ex)
             {
-				logger.LogInformation($"Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is failed. Error: {ex}");
+				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is failed. Error: {ex}");
 				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = false, errMessage = ex.ToString() });
 			}
 		}

@@ -298,7 +298,7 @@ namespace Nebula.Pages
 				options = swapOptions.CurrentValue,
 				metamask = metamaskInterceptor
 			};
-			logger.LogInformation($"Begin swapping {arg.fromAmount} from {arg.fromAddress} to {arg.toAddress} amount {arg.toAmount}");
+			logger.LogInformation($"TokenSwap: Begin  {arg.fromAmount} from {arg.fromAddress} to {arg.toAddress} amount {arg.toAmount}");
 			Dispatcher.Dispatch(arg);
 			IsDisabled = true;
 		}
