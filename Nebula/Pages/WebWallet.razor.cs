@@ -251,17 +251,19 @@ namespace Nebula.Pages
 				swapResultMessage = "Swap amount too large. (> 1M)";
 			else if (swapFromToken == "LYR" && swapFromCount > walletState.Value.wallet.BaseBalance)
 				swapResultMessage = "Not enough LYR in Lyra Wallet.";
-			else if(swapFromToken == "TLYR")
-            {
+			else if (string.IsNullOrWhiteSpace(swapToAddress))
+				swapResultMessage = "Not valid swap to address.";
+			else if (swapFromToken == "TLYR")
+			{
 				try
-                {
+				{
 					var tlyrBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
 						swapOptions.CurrentValue.ethContract, SelectedAccount);
 					if (tlyrBalance < swapFromCount)
 						swapResultMessage = "Not enough TLYR in Ethereum Wallet.";
 				}
-				catch(Exception)
-                {
+				catch (Exception)
+				{
 					swapResultMessage = "Unable to get TLYR balance.";
 				}
 			}
