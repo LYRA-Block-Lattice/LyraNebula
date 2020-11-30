@@ -212,10 +212,12 @@ namespace Nebula.Store.WebWalletUseCase
 								action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
 								null);
 
-							if (!result)
+							logger.LogInformation($"second stage for {action.fromAddress} eth tx hash is {result}");
+
+							if (string.IsNullOrEmpty(result))
 								throw new Exception("Eth sending failed.");
 
-							IsSuccess = result;
+							IsSuccess = true;
 						}
 						else
 							throw new Exception("Unable to send from your Lyra wallet.");
@@ -232,10 +234,10 @@ namespace Nebula.Store.WebWalletUseCase
 						action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
 						action.metamask);
 
-					if (result) // test if success transfer
-					{
-						logger.LogInformation($"first stage is ok for {action.fromAddress}");
+					logger.LogInformation($"first stage for {action.fromAddress} eth tx hash {result}");
 
+					if (!string.IsNullOrEmpty(result)) // test if success transfer
+					{
 						var store = new AccountInMemoryStorage();
 						var wallet = Wallet.Create(store, "default", "", config["network"],
 							action.options.lyrPvk);

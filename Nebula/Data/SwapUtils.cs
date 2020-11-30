@@ -16,7 +16,7 @@ namespace Nebula.Data
 {
     public class SwapUtils
     {
-        public static async Task<bool> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
+        public static async Task<string> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
             string ethAddress, string ethPrivateKey, string targetEthAddress, BigInteger tokenCount,
             MetamaskInterceptor metamask)
         {
@@ -51,11 +51,11 @@ namespace Nebula.Data
                 && txDetails.To.Equals(targetEthAddress, StringComparison.InvariantCultureIgnoreCase)
                 && txDetails.TokenAmount == tokenCount)
             {
-                return true;
+                return transferReceipt.TransactionHash;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 
