@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
+    <PackageReference Include="CoinGeckoAsyncApi" Version="1.3.5" />
     <PackageReference Include="Converto" Version="2.1.0" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="3.9.0" />
     <PackageReference Include="IP-2-Country" Version="2.0.1" />

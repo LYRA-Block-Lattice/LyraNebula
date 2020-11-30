@@ -16,6 +16,20 @@ namespace Nebula.Data
 {
     public class SwapUtils
     {
+        //public static async Task<BigInteger> EstimateEthTransferFeeAsync(string ethApiUrl, string ethContract,
+        //    string ethAddress)
+        //{
+        //    var web3 = new Web3(ethApiUrl);
+        //    var transactionMessage = new TransferFunction
+        //    {
+        //        To = ethAddress,
+        //        TokenAmount = 100
+        //    };
+
+        //    var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+        //    var estimate = await transferHandler.EstimateGasAsync(ethContract, transactionMessage);
+        //    return estimate.Value;
+        //}
         public static async Task<string> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
             string ethAddress, string ethPrivateKey, string targetEthAddress, BigInteger tokenCount,
             MetamaskInterceptor metamask)

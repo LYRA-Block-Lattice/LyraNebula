@@ -1,4 +1,6 @@
-﻿using Fluxor;
+﻿using CoinGecko.Clients;
+using CoinGecko.Interfaces;
+using Fluxor;
 using Lyra.Core.Accounts;
 using Lyra.Core.API;
 using Lyra.Core.Blocks;
@@ -38,6 +40,9 @@ namespace Nebula.Pages
 		private IJSRuntime iJS { get; set; }
 
 		// swap
+		protected decimal ethGasFee { get; set; }
+		protected decimal lyraPrice { get; set; }
+		protected decimal serviceFee { get; set; }
 		protected bool IsDisabled { get; set; }
 		public string queryingNotify { get; set; }
 		public decimal lyrReserveBalance { get; set; }
@@ -225,6 +230,52 @@ namespace Nebula.Pages
 
 		private async Task SwapToken(MouseEventArgs e)
 		{
+			IsDisabled = true;
+			swapResultMessage = "Checking for configurations...";
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
+
+			// do check		
+			swapResultMessage = "";
+			if (!EthereumEnabled || !walletState.Value.IsOpening)
+				swapResultMessage = "Wallet(s) not opening or connected.";
+			else if (swapFromToken == swapToToken)
+				swapResultMessage = "No need to swap.";
+			else if (!((swapFromToken == "LYR" && swapToToken == "TLYR") || (swapFromToken == "TLYR" && swapToToken == "LYR")))
+				swapResultMessage = "Unknown token pair";
+			else if (swapFromCount < 10)
+				swapResultMessage = "Swap amount too small. (< 10)";
+			else if (swapFromCount > 1000000)
+				swapResultMessage = "Swap amount too large. (> 1M)";
+			else if (swapFromToken == "LYR" && swapFromCount > walletState.Value.wallet.BaseBalance)
+				swapResultMessage = "Not enough LYR in Lyra Wallet.";
+			else if(swapFromToken == "TLYR")
+            {
+				try
+                {
+					var tlyrBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
+						swapOptions.CurrentValue.ethContract, SelectedAccount);
+					if (tlyrBalance < swapFromCount)
+						swapResultMessage = "Not enough TLYR in Ethereum Wallet.";
+				}
+				catch(Exception)
+                {
+					swapResultMessage = "Unable to get TLYR balance.";
+				}
+			}
+
+			if(!string.IsNullOrEmpty(swapResultMessage))
+            {
+				IsDisabled = false;
+				await InvokeAsync(() =>
+				{
+					StateHasChanged();
+				});
+				return;
+			}
+
 			swapResultMessage = "Do swapping... please wait...";
 			walletState.Value.Message = "";
 			await InvokeAsync(() =>
@@ -264,6 +315,17 @@ namespace Nebula.Pages
 			tlyrReserveBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
 					swapOptions.CurrentValue.ethContract, swapOptions.CurrentValue.ethPub);
 
+   //         var ethGas = await SwapUtils.EstimateEthTransferFeeAsync(swapOptions.CurrentValue.ethUrl,
+   //                 swapOptions.CurrentValue.ethContract, swapOptions.CurrentValue.ethPub);
+
+   //         ICoinGeckoClient _client;
+   //         _client = CoinGeckoClient.Instance;
+   //         const string vsCurrencies = "usd";
+   //         var prices = await _client.SimpleClient.GetSimplePrice(new[] { "ethereum", "lyra" }, new[] { vsCurrencies });
+
+			//ethGasFee = (decimal)((double)(ethGas / 10000000000) * prices["ethereum"]["usd"].GetValueOrDefault());
+			//lyraPrice = (decimal) prices["lyra"]["usd"].Value;
+
 			queryingNotify = "";
 			await InvokeAsync(() =>
 			{
@@ -283,6 +345,7 @@ namespace Nebula.Pages
 			}
 			else if (_swapFromTokenName == "TLYR")
 			{
+				fromTokenBalance = 0;
 				fromTokenBalance = await SwapUtils.GetEthContractBalanceAsync(swapOptions.CurrentValue.ethUrl,
 					swapOptions.CurrentValue.ethContract, SelectedAccount);
 			}
@@ -297,14 +360,18 @@ namespace Nebula.Pages
 		{
 			if (_swapToTokenName == "TLYR")
 			{
-				swapToCount = swapFromCount - 1; // remember -GAS
+				swapToCount = swapFromCount - (1 + swapFromCount / 1000);
 				swapToAddress = SelectedAccount;
 			}
 			else if (_swapToTokenName == "LYR")
 			{
-				swapToCount = swapFromCount - 1; // remember -GAS
+				swapToCount = swapFromCount - (1 + swapFromCount / 1000);
 				swapToAddress = walletState.Value.wallet.AccountId;
 			}
-		}
+
+            //// calculate fees
+            //serviceFee = ethGasFee
+            //    + lyraPrice * (swapFromCount * 0.001m + 1);
+        }
 	}
 }
