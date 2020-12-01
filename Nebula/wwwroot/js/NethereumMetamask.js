@@ -3,18 +3,31 @@
         try {
             await ethereum.enable();
             ethereum.autoRefreshOnNetworkChange = false;
-            ethereum.on("accountsChanged",
-                function(accounts) {
-
-                });
+            //ethereum.on("accountsChanged",
+            //    function (accounts) {
+            //        ethAccountChanged(accounts);
+            //        //DotNet.invokeMethodAsync('Nebula', 'ethAccountsChanged', accounts);
+            //            //.then(data => {
+            //            //    data.push(4);
+            //            //    console.log(data);
+            //            //});
+            //    });
             ethereum.on("networkChanged",
                 function (networkId) {
-
+                    window.location.reload();
                 });
             return true;
         } catch (error) {
             return false;
         }
+    },
+    RegisterHandler: (dotNetObjRef) => {
+        ethereum.on("accountsChanged",
+            function (accounts) {
+                dotNetObjRef.invokeMethodAsync("ethAccountsChanged", accounts);
+            });
+
+        return "registered!";
     },
     IsMetamaskAvailable: () => {
         if (window.ethereum) return true;

@@ -321,6 +321,9 @@ else if (walletState.Value.stage == UIStage.Entry)
         EthereumEnabled = await metamaskService.EnableEthereumAsync();
         if (EthereumEnabled)
         {
+            var dotNetObjRef = DotNetObjectReference.Create(this);
+            var bOk = await metamaskService.RegisterEventsAsync(dotNetObjRef);
+
             CurrentChainName = await metamaskService.GetChainName();
             SelectedAccount = await metamaskService.GetSelectedAccount();
         }

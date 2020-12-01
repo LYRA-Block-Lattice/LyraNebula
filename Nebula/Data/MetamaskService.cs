@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using Nebula.Pages;
 using Nethereum.Contracts.TransactionHandlers;
 
 namespace Nethereum.Metamask.Blazor
@@ -34,6 +36,12 @@ namespace Nethereum.Metamask.Blazor
                 await EthereumEnabled.Invoke(result);
             }
             return result;
+        }
+
+        public async Task<bool> RegisterEventsAsync(DotNetObjectReference<WebWallet> dotNetObjRef)
+        {
+            var result = await _metamaskInterop.RegisterHandler(dotNetObjRef);
+            return result == "registered!";
         }
 
         public async ValueTask<string> GetChainName()

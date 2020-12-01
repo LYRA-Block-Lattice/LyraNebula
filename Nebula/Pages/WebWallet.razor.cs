@@ -39,6 +39,12 @@ namespace Nebula.Pages
 		[Inject]
 		private IJSRuntime iJS { get; set; }
 
+		[JSInvokable]
+		public void ethAccountsChanged(string[] accounts)
+		{
+			SelectedAccount = accounts[0];
+		}
+
 		// swap
 		protected decimal ethGasFee { get; set; }
 		protected decimal lyraPrice { get; set; }
@@ -239,7 +245,14 @@ namespace Nebula.Pages
 
 			// do check		
 			swapResultMessage = "";
-			if (!EthereumEnabled || !walletState.Value.IsOpening)
+
+			// check network id
+			CurrentChainName = await metamaskService.GetChainName();
+			if (Configuration["network"] == "testnet" && CurrentChainName != "Rinkeby Test Network")
+				swapResultMessage = "Only Rinkeby Test Network is supported for testnet.";
+			else if(Configuration["network"] == "mainnet" && CurrentChainName != "Ethereum Main Network")
+				swapResultMessage = "Only Ethereum Main Network is supported for mainnet.";
+			else if (!EthereumEnabled || !walletState.Value.IsOpening)
 				swapResultMessage = "Wallet(s) not opening or connected.";
 			else if (swapFromToken == swapToToken)
 				swapResultMessage = "No need to swap.";

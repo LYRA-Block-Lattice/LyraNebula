@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.JSInterop;
+using Nebula.Pages;
 using Nethereum.JsonRpc.Client.RpcMessages;
 using Newtonsoft.Json;
 
@@ -33,6 +34,11 @@ namespace Nethereum.Metamask.Blazor
         {
             var response = await _jsRuntime.InvokeAsync<string>("NethereumMetamaskInterop.Send", JsonConvert.SerializeObject(rpcRequestMessage));
             return JsonConvert.DeserializeObject<RpcResponseMessage>(response);
+        }
+
+        public async ValueTask<string> RegisterHandler(DotNetObjectReference<WebWallet> dotNetObjRef)
+        {
+            return await _jsRuntime.InvokeAsync<string>("NethereumMetamaskInterop.RegisterHandler", dotNetObjRef);
         }
 
         public async ValueTask<string> GetSelectedAddress()
