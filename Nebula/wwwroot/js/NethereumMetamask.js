@@ -12,7 +12,7 @@
             //            //    console.log(data);
             //            //});
             //    });
-            ethereum.on("networkChanged",
+            ethereum.on("chainChanged",
                 function (networkId) {
                     window.location.reload();
                 });

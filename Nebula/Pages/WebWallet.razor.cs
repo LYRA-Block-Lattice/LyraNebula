@@ -36,9 +36,6 @@ namespace Nebula.Pages
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
 
-		[Inject]
-		private IJSRuntime iJS { get; set; }
-
 		[JSInvokable]
 		public void ethAccountsChanged(string[] accounts)
 		{
@@ -147,7 +144,7 @@ namespace Nebula.Pages
 		{
 			if(string.IsNullOrWhiteSpace(prvKey))
             {
-				await iJS.InvokeAsync<object>("alert", "Private Key can't be empty.");
+				await JS.InvokeAsync<object>("alert", "Private Key can't be empty.");
 				return;
 			}
             else
@@ -159,7 +156,7 @@ namespace Nebula.Pages
 				}
 				catch (Exception)
                 {
-					await iJS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
+					await JS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
 					return;
 				}
             }
@@ -175,7 +172,7 @@ namespace Nebula.Pages
 			if(walletState.Value.wallet.BaseBalance > 1)
 				Dispatcher.Dispatch(new WebWalletSendAction {   });
 			else
-				await iJS.InvokeAsync<object>("alert", "Nothing to send.");
+				await JS.InvokeAsync<object>("alert", "Nothing to send.");
 		}
 
 		private void SendToken(MouseEventArgs e)
