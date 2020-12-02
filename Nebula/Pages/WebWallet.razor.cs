@@ -40,6 +40,11 @@ namespace Nebula.Pages
 		public void ethAccountsChanged(string[] accounts)
 		{
 			SelectedAccount = accounts[0];
+
+			_ = Task.Run(async () => {
+				UpdateSwapToBalance();
+				await UpdateSwapFromBalanceAsync();				
+			});
 		}
 
 		// swap
