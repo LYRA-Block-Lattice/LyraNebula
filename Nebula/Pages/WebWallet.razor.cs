@@ -268,6 +268,10 @@ namespace Nebula.Pages
 				swapResultMessage = "Not enough LYR in Lyra Wallet.";
 			else if (string.IsNullOrWhiteSpace(swapToAddress))
 				swapResultMessage = "Not valid swap to address.";
+			else if(swapToToken == "TLYR" && swapToCount > 0.8m * tlyrReserveBalance)
+				swapResultMessage = "Reserve account of TLYR is running low. Please contact support.";
+			else if (swapToToken == "LYR" && swapToCount > 0.8m * lyrReserveBalance)
+				swapResultMessage = "Reserve account of LYR is running low. Please contact support.";
 			else if (swapFromToken == "TLYR")
 			{
 				try
@@ -377,12 +381,12 @@ namespace Nebula.Pages
 		{
 			if (_swapToTokenName == "TLYR")
 			{
-				swapToCount = swapFromCount - (1 + swapFromCount / 1000);
+				swapToCount = swapFromCount - (swapFromCount / 1000);
 				swapToAddress = SelectedAccount;
 			}
 			else if (_swapToTokenName == "LYR")
 			{
-				swapToCount = swapFromCount - (1 + swapFromCount / 1000);
+				swapToCount = swapFromCount - (swapFromCount / 1000);
 				swapToAddress = walletState.Value.wallet.AccountId;
 			}
 

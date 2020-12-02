@@ -118,11 +118,11 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
 {
-    <h3>Swap Tokens</h3>
+    <h3>Swap tokens between LYR and TLYR (ERC20 Tether of LYR)</h3>
     <p>Current supported Ethereum network: Rinkeby Test Network.</p>
     <p>Add TLYR token to MetaMask by Ethereum Contract hash: @swapOptions.CurrentValue.ethContract</p>
-    <p>Balance of LYR reservation account: <b>@lyrReserveBalance</b></p>
-    <p>Balance of TLYR reservation account: <b>@tlyrReserveBalance</b></p>
+    <p>Balance of LYR reserve account: <b>@lyrReserveBalance</b></p>
+    <p>Balance of TLYR reserve account: <b>@tlyrReserveBalance</b></p>
     <p style="color:blue"><i>@queryingNotify</i></p>
     @if(!MetamaskAvailable)
     {
@@ -139,10 +139,11 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         }
         else
         {
+            <h3>Swap Tokens</h3>
             <p>My Lyra Account @walletState.Value.wallet.AccountId on @Configuration["network"]</p>
             <p>My Etnereum Account @SelectedAccount on @CurrentChainName</p>
         
-        <p>Swap from:</p>
+        <h5>Swap from:</h5>
         <div>
             <span>    
                 <select style="height: 30px; width: 80px" @bind="swapFromToken">
@@ -164,8 +165,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
             </span>
         </div>
         <p>@fromTokenBalance @swapFromToken available to swap</p>
-        <hr style="color: white" />
-        <p>Swap to:</p>
+        <h5>Swap to:</h5>
         <div>
             <span>
                 <select style="height: 30px; width: 80px" @bind="swapToToken">
@@ -178,7 +178,8 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
             </span>
         </div>
         <p>You will get @swapToCount @swapToToken to address @swapToAddress</p>
-        <p>Service fee: @swapFromCount * 0.1% + 1</p>
+        <hr style="color: white" />
+        <p>Service fee: @swapFromCount * 0.1% (plus 1 LYR if LYR->TLYR)</p>
         <hr />
         <div>
             <button disabled="@IsDisabled" class="btn btn-primary" @onclick="SwapToken">Swap</button>
