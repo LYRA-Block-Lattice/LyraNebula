@@ -4,32 +4,82 @@ using Lyra.Core.Blocks;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 using Nethereum.Contracts;
 using Nethereum.Metamask.Blazor;
+using Nethereum.Util;
 using Nethereum.Web3;
 using Nethereum.Web3.Accounts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Nebula.Data
 {
+    public class Result
+    {
+        public long LastBlock { get; set; }
+        public int SafeGasPrice { get; set; }
+        public int ProposeGasPrice { get; set; }
+        public int FastGasPrice { get; set; }
+    }
+
+    public class GasOracle
+    {
+        public int status { get; set; }
+        public string message { get; set; }
+        public Result result { get; set; }
+    }
+
+    public class TransTimeResult
+    {
+        public int status { get; set; }
+        public string message { get; set; }
+        public int result { get; set; }
+    }
+
     public class SwapUtils
     {
-        //public static async Task<BigInteger> EstimateEthTransferFeeAsync(string ethApiUrl, string ethContract,
-        //    string ethAddress)
-        //{
-        //    var web3 = new Web3(ethApiUrl);
-        //    var transactionMessage = new TransferFunction
-        //    {
-        //        To = ethAddress,
-        //        TokenAmount = 100
-        //    };
+        public static async Task<int> GetGasOracle(string apiKey)
+        {
+            var url = "https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=" + apiKey;
+            var htclient = new HttpClient();
+            var gasOracle = await htclient.GetFromJsonAsync<GasOracle>(url);
+            if (gasOracle.message == "OK")
+                return gasOracle.result.ProposeGasPrice + 1;
+            else
+                throw new Exception("Failed to get Gas Oracle.");
+        }
 
-        //    var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
-        //    var estimate = await transferHandler.EstimateGasAsync(ethContract, transactionMessage);
-        //    return estimate.Value;
-        //}
+        public static async Task<int> EstimateTransferTime(string apiKey, int gasPrice)
+        {
+            var url = $"https://api.etherscan.io/api?module=gastracker&action=gasestimate&gasprice={gasPrice}000000000&apikey={apiKey}";
+            var htclient = new HttpClient();
+            var transTime = await htclient.GetFromJsonAsync<TransTimeResult>(url);
+            if (transTime.message == "OK")
+                return transTime.result;
+            else
+                throw new Exception("Failed to estimate transfer time.");
+        }
+
+        public static async Task<BigInteger> EstimateEthTransferFeeAsync(string ethApiUrl, string ethContract,
+            string fromEthAddress, string toEthAddress)
+        {
+            var web3 = new Web3(ethApiUrl);
+            var transactionMessage = new TransferFunction
+            {
+                FromAddress = fromEthAddress,
+                To = toEthAddress,
+                TokenAmount = 100,
+                GasPrice = Web3.Convert.ToWei(36, UnitConversion.EthUnit.Gwei)
+            };
+
+            var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
+            var estimate = await transferHandler.EstimateGasAsync(ethContract, transactionMessage);
+            return estimate.Value;
+        }
+
         public static async Task<string> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
             string ethAddress, string ethPrivateKey, string targetEthAddress, BigInteger tokenCount,
             MetamaskInterceptor metamask)
@@ -54,7 +104,8 @@ namespace Nebula.Data
             {
                 FromAddress = ethAddress,
                 To = targetEthAddress,
-                TokenAmount = tokenCount
+                TokenAmount = tokenCount,
+                GasPrice = Web3.Convert.ToWei(36, UnitConversion.EthUnit.Gwei)
             };
 
             var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();

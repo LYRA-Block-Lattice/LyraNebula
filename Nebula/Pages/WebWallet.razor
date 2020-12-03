@@ -57,7 +57,7 @@
     </div>
     <hr />
     <div>
-        <p title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is: @altDisplay</p>
+        <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is: </span><span>@altDisplay</span></p>
         <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
         <p>Your wallet's balance is: @walletState.Value.balanceString</p>
         <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>
@@ -119,7 +119,14 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
 {
     <h3>Swap tokens between LYR and TLYR (ERC20 Tether of LYR)</h3>
-    <p>Current supported Ethereum network: Rinkeby Test Network.</p>
+    @if(Configuration["network"] == "testnet")
+    {
+        <p>Current supported Ethereum network: Rinkeby Test Network.</p>
+    }
+    @if(Configuration["network"] == "mainnet")
+    {
+        <p>Current supported Ethereum network: Ethereum Main Network.</p>
+    }
     <p>Add TLYR token to MetaMask by Ethereum Contract hash: @swapOptions.CurrentValue.ethContract</p>
     <p>Balance of LYR reserve account: <b>@lyrReserveBalance</b></p>
     <p>Balance of TLYR reserve account: <b>@tlyrReserveBalance</b></p>
@@ -179,7 +186,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         </div>
         <p>You will get @swapToCount @swapToToken to address @swapToAddress</p>
         <hr style="color: white" />
-        <p>Service fee: @swapFromCount * 0.1% (plus 1 LYR if LYR->TLYR)</p>
+        <p>Service fee: @swapFeeDesc</p>
         <hr />
         <div>
             <button disabled="@IsDisabled" class="btn btn-primary" @onclick="SwapToken">Swap</button>
