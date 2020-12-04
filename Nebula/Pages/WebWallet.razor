@@ -57,7 +57,7 @@
     </div>
     <hr />
     <div>
-        <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is: </span><span>@altDisplay</span></p>
+        <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
         <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
         <p>Your wallet's balance is: @walletState.Value.balanceString</p>
         <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>

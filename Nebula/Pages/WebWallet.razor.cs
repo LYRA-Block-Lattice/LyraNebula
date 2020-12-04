@@ -125,15 +125,15 @@ namespace Nebula.Pages
 			SwapableTokens = new[] { "LYR", "TLYR" };
 
 			tokenName = "LYR";
-			altDisplay = "**************************";
+			altDisplay = "************";
         }
 
 		private void ToggleKey(MouseEventArgs e)
 		{
-			if (altDisplay == "**************************")
+			if (altDisplay == "************")
 				altDisplay = walletState?.Value?.wallet?.PrivateKey;
 			else
-				altDisplay = "**************************";
+				altDisplay = "************";
 		}
 
 		private void CloseWallet(MouseEventArgs e)
@@ -253,7 +253,7 @@ namespace Nebula.Pages
 			CurrentChainName = await metamaskService.GetChainName();
 			if (Configuration["network"] == "testnet" && CurrentChainName != "Rinkeby Test Network")
 				swapResultMessage = "Only Rinkeby Test Network is supported for testnet.";
-			else if(Configuration["network"] == "mainnet" && CurrentChainName != "Ethereum Main Network")
+			else if (Configuration["network"] == "mainnet" && CurrentChainName != "Ethereum Main Network")
 				swapResultMessage = "Only Ethereum Main Network is supported for mainnet.";
 			else if (!EthereumEnabled || !walletState.Value.IsOpening)
 				swapResultMessage = "Wallet(s) not opening or connected.";
@@ -269,10 +269,12 @@ namespace Nebula.Pages
 				swapResultMessage = "Not enough LYR in Lyra Wallet.";
 			else if (string.IsNullOrWhiteSpace(swapToAddress))
 				swapResultMessage = "Not valid swap to address.";
-			else if(swapToToken == "TLYR" && swapToCount > 0.8m * tlyrReserveBalance)
+			else if (swapToToken == "TLYR" && swapToCount > 0.8m * tlyrReserveBalance)
 				swapResultMessage = "Reserve account of TLYR is running low. Please contact support.";
 			else if (swapToToken == "LYR" && swapToCount > 0.8m * lyrReserveBalance)
 				swapResultMessage = "Reserve account of LYR is running low. Please contact support.";
+			else if (swapToCount < 1)
+				swapResultMessage = "Swap to amount too small.";
 			else if (swapFromToken == "TLYR")
 			{
 				try
