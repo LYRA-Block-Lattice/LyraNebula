@@ -16,6 +16,9 @@ using Microsoft.Extensions.Hosting;
 using Nebula.Data;
 using Nebula.Store.WeatherUseCase;
 using Nethereum.Metamask.Blazor;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace Nebula
 {
@@ -75,6 +78,24 @@ namespace Nebula
             }
 
             //app.UseHttpsRedirection();
+            app.UseDefaultFiles();
+
+            // Set up custom content types - associating file extension to MIME type
+            var provider = new FileExtensionContentTypeProvider();
+            // Add new mappings
+            provider.Mappings[".appx"] = "application/appx";
+            provider.Mappings[".msix"] = "application/msix";
+            provider.Mappings[".appxbundle"] = "application/appxbundle";
+            provider.Mappings[".msixbundle"] = "application/msixbundle";
+            provider.Mappings[".appinstaller"] = "application/appinstaller";
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(env.WebRootPath, "apps")),
+                RequestPath = "/apps",
+                ContentTypeProvider = provider
+            });
             app.UseStaticFiles();
 
             app.UseRouting();
