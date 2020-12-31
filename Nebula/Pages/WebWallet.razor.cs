@@ -193,6 +193,7 @@ namespace Nebula.Pages
 
 		private void Settings(MouseEventArgs e)
 		{
+			voteAddr = walletState.Value.wallet.VoteFor;
 			Dispatcher.Dispatch(new WebWalletSettingsAction { });
 		}
 

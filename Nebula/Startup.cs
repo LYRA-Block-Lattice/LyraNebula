@@ -88,6 +88,7 @@ namespace Nebula
             provider.Mappings[".appxbundle"] = "application/appxbundle";
             provider.Mappings[".msixbundle"] = "application/msixbundle";
             provider.Mappings[".appinstaller"] = "application/appinstaller";
+            provider.Mappings[".cer"] = "application/pkix-cert";
 
             app.UseStaticFiles(new StaticFileOptions
             {
