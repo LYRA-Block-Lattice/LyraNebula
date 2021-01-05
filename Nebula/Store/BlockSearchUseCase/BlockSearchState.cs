@@ -11,6 +11,7 @@ namespace Nebula.Store.BlockSearchUseCase
 	{
 		public bool IsLoading { get; }
 		public Block block { get; }
+		public Block prevBlock { get; }
 
 		public string Key { get; }
 		public long MaxHeight { get; }
@@ -19,10 +20,11 @@ namespace Nebula.Store.BlockSearchUseCase
 		public long nextHeight => block.Height < MaxHeight ? block.Height + 1 : block.Height;
 		public bool IsBlockValid => block.Hash.Equals(block.CalculateHash());
 
-		public BlockSearchState(bool isLoading, Block blockResult, string pageKey, long maxHeight)
+		public BlockSearchState(bool isLoading, Block blockResult, Block previousBlock, string pageKey, long maxHeight)
 		{
 			IsLoading = isLoading;
 			block = blockResult ?? null;
+			prevBlock = previousBlock;
 			Key = pageKey;
 			MaxHeight = maxHeight;
 		}
@@ -65,6 +67,25 @@ namespace Nebula.Store.BlockSearchUseCase
 			var html = r.Replace(block.Print(), Matcher);
 
 			html = Regex.Replace(html, @"\s(\w{43,})\W", HashMatcher);
+
+			// display send amount or receive amount
+
+			if(block is SendTransferBlock sendBlock && prevBlock != null)
+            {
+				var delta = sendBlock.GetBalanceChanges(prevBlock as TransactionBlock);
+
+				foreach(var chg in delta.Changes)
+					html += $"\nSending {chg.Value} {chg.Key}";
+				html += $"\nFee: {delta.FeeAmount} {delta.FeeCode}";
+			}
+			else if (block is ReceiveTransferBlock recvBlock && prevBlock != null)
+			{
+				var delta = recvBlock.GetBalanceChanges(prevBlock as TransactionBlock);
+
+				foreach (var chg in delta.Changes)
+					html += $"\nReceiving {chg.Value} {chg.Key}";
+				html += $"\nFee: {delta.FeeAmount} {delta.FeeCode}";
+			}
 
 			return html;
         }

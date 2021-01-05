@@ -18,7 +18,6 @@
     <PackageReference Include="IP-2-Country.Ludost" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MarkusGo" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MaxMind" Version="1.2.0" />
-    <PackageReference Include="Lyra.Data" Version="1.7.11.10" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="MongoDB.Bson" Version="2.11.5" />
@@ -32,6 +31,12 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\apps\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Lyra.Data">
+      <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\netstandard2.0\Lyra.Data.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

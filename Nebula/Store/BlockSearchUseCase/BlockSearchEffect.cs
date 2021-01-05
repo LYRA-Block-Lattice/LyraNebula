@@ -25,6 +25,7 @@ namespace Nebula.Store.BlockSearchUseCase
 		{
 			var hashToSearch = action.hash;
 			Block blockResult = null;
+			Block prevBlock = null;
 			long maxHeight = 0;
 			string key = null;
 			if(string.IsNullOrWhiteSpace(hashToSearch))
@@ -32,7 +33,7 @@ namespace Nebula.Store.BlockSearchUseCase
 				var genSvcRet = await client.GetLastConsolidationBlock();
 				if(genSvcRet.ResultCode == APIResultCodes.Success)
                 {
-					blockResult = genSvcRet.GetBlock();					
+					blockResult = genSvcRet.GetBlock();
 				}
             }
 			else
@@ -64,8 +65,14 @@ namespace Nebula.Store.BlockSearchUseCase
 			}
 
 			(key, maxHeight) = await GetMaxHeightAsync(blockResult);
-			
-			dispatcher.Dispatch(new BlockSearchResultAction(blockResult, key, maxHeight));
+
+			try
+			{
+				prevBlock = blockResult.PreviousHash == null ? null : (await client.GetBlock(blockResult.PreviousHash)).GetBlock();
+			}
+			catch (Exception) { }
+
+			dispatcher.Dispatch(new BlockSearchResultAction(blockResult, prevBlock, key, maxHeight));
 		}
 
 		private async Task<(string, long)> GetMaxHeightAsync(Block block)

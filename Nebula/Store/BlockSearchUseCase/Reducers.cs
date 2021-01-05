@@ -13,6 +13,7 @@ namespace Nebula.Store.BlockSearchUseCase
 			new BlockSearchState(
 				isLoading: true,
 				blockResult: null,
+				previousBlock: null,
 				pageKey: null,
 				maxHeight: 0);
 
@@ -21,6 +22,7 @@ namespace Nebula.Store.BlockSearchUseCase
 			new BlockSearchState(
 				isLoading: false,
 				blockResult: action.block,
+				previousBlock: action.prevBlock,
 				pageKey: action.key,
 				maxHeight: action.maxHeight);
 	}

@@ -301,7 +301,8 @@ namespace Nebula.Pages
 				return;
 			}
 
-			swapResultMessage = "Do swapping... please wait...";
+			var mmmsg = swapFromToken == "TLYR" ? "Please open Matamask and confirm transaction." : "";
+				swapResultMessage = $"Do swapping... {mmmsg} Please wait for a moment... ";
 			walletState.Value.Message = "";
 			await InvokeAsync(() =>
 			{
