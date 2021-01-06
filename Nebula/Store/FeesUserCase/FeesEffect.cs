@@ -15,19 +15,19 @@ namespace Nebula.Store.FeesUserCase
 {
 	public class FeesEffect : Effect<FeesAction>
 	{
-		private readonly LyraRestClient client;
+		private readonly ILyraAPI client;
 
-		public FeesEffect(LyraRestClient lyraClient)
+		public FeesEffect(ILyraAPI lyraClient)
 		{
 			client = lyraClient;
 		}
 
 		protected override async Task HandleAsync(FeesAction action, IDispatcher dispatcher)
 		{
-			var stats = await client.GetFeeStatsAsync();
+			var stats = client.GetFeeStats();// .GetFeeStatsAsync();
 			var sbResult = await client.GetLastServiceBlock();
 			var sb = sbResult.GetBlock() as ServiceBlock;
-			var voters = await client.GetVotersAsync(new VoteQueryModel
+			var voters = client.GetVoters(new VoteQueryModel
 			{
 				posAccountIds = sb.Authorizers.Keys.ToList(),
 				endTime = sb.TimeStamp

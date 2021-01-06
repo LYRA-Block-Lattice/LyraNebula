@@ -10,15 +10,16 @@ using System.Net.Http.Json;
 using Lyra.Core.API;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
+using Lyra.Data.API;
 
 namespace Nebula.Store.NodeViewUseCase
 {
 	public class NodeViewActionEffect : Effect<NodeViewAction>
 	{
-		private readonly LyraRestClient client;
+		private readonly ILyraAPI client;
 		private readonly IConfiguration config;
 
-		public NodeViewActionEffect(LyraRestClient lyraClient, IConfiguration configuration)
+		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration)
 		{
 			client = lyraClient;
 			config = configuration;
@@ -36,10 +37,10 @@ namespace Nebula.Store.NodeViewUseCase
 			var tasks = bb.NodeAddresses
 				.Select(async node =>
 			{
-				var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
+				//var lcx = ILyraAPI.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
 				try
                 {
-					var syncState = await lcx.GetSyncState();
+					var syncState = await client.GetSyncState();
 					bag.TryAdd(node.Key, syncState);
 				}
 				catch(Exception ex)

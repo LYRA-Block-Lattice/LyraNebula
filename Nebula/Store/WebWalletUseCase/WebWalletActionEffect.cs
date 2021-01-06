@@ -14,16 +14,17 @@ using Lyra.Core.Accounts;
 using Lyra.Core.Blocks;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
+using Lyra.Data.API;
 
 namespace Nebula.Store.WebWalletUseCase
 {
 	public class Effects
 	{
-		private readonly LyraRestClient client;
+		private readonly ILyraAPI client;
 		private readonly IConfiguration config;
 		private readonly ILogger<Effects> logger;
 
-		public Effects(LyraRestClient lyraClient, 
+		public Effects(ILyraAPI lyraClient, 
 			IConfiguration configuration,
 			ILogger<Effects> logger)
 		{
@@ -241,10 +242,8 @@ namespace Nebula.Store.WebWalletUseCase
 						var store = new AccountInMemoryStorage();
 						var wallet = Wallet.Create(store, "default", "", config["network"],
 							action.options.lyrPvk);
-						var lyraClient = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(),
-							"Nebula Swap", "1.0");
 
-						var syncResult = await wallet.Sync(lyraClient);
+						var syncResult = await wallet.Sync(client);
 						if (syncResult == APIResultCodes.Success)
 						{
 							var sendResult = await wallet.Send(action.toAmount,

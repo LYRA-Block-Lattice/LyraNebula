@@ -19,6 +19,7 @@ using Nethereum.Metamask.Blazor;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Lyra.Data.API;
 
 namespace Nebula
 {
@@ -57,7 +58,15 @@ namespace Nebula
 
             var networkid = Configuration["network"];
             // use dedicate host to avoid "random" result from api.lyra.live which is dns round-robbined. <-- not fail safe
-            services.AddTransient<LyraRestClient>(a => LyraRestClient.Create(networkid, Environment.OSVersion.ToString(), "Nebula", "1.0"/*, $"http://nebula.{networkid}.lyra.live:{Neo.Settings.Default.P2P.WebAPI}/api/Node/"*/));
+            //services.AddTransient<LyraRestClient>(a => LyraRestClient.Create(networkid, Environment.OSVersion.ToString(), "Nebula", "1.0"/*, $"http://nebula.{networkid}.lyra.live:{Neo.Settings.Default.P2P.WebAPI}/api/Node/"*/));
+
+            services.AddScoped<ILyraAPI>(provider =>
+            {
+                var client = new LyraAggregatedClient(networkid);
+                var t = Task.Run(async () => { await client.InitAsync(); });
+                Task.WaitAll(t);
+                return client;
+            });
 
             var currentAssembly = typeof(Startup).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(currentAssembly));

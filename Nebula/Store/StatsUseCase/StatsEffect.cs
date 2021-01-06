@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 using System.Net.Http.Json;
 using Lyra.Core.API;
 using Lyra.Core.Blocks;
+using Lyra.Data.API;
 
 namespace Nebula.Store.StatsUseCase
 {
 	public class StatsEffect : Effect<StatsAction>
 	{
-		private readonly LyraRestClient client;
+		private readonly ILyraAPI client;
 
-		public StatsEffect(LyraRestClient lyraClient)
+		public StatsEffect(ILyraAPI lyraClient)
 		{
 			client = lyraClient;
 		}

@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 using System.Net.Http.Json;
 using Lyra.Core.API;
 using Lyra.Core.Blocks;
+using Lyra.Data.API;
 
 namespace Nebula.Store.BlockSearchUseCase
 {
 	public class BlockSearchEffect : Effect<BlockSearchAction>
 	{
-		private readonly LyraRestClient client;
+		private readonly ILyraAPI client;
 
-		public BlockSearchEffect(LyraRestClient lyraClient)
+		public BlockSearchEffect(ILyraAPI lyraClient)
 		{
 			client = lyraClient;
 		}
