@@ -37,10 +37,10 @@ namespace Nebula.Store.NodeViewUseCase
 			var tasks = bb.NodeAddresses
 				.Select(async node =>
 			{
-				//var lcx = ILyraAPI.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
+				var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
 				try
                 {
-					var syncState = await client.GetSyncState();
+					var syncState = await lcx.GetSyncState();
 					bag.TryAdd(node.Key, syncState);
 				}
 				catch(Exception ex)
