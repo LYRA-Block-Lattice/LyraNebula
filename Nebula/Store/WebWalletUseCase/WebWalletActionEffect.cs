@@ -191,7 +191,7 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
-		public async Task HandleSwap(WebWalletSwapTokenAction action, IDispatcher dispatcher)
+		public async Task HandleSwap(WebWalletBeginSwapTLYRAction action, IDispatcher dispatcher)
 		{
 			bool IsSuccess = false;
 			try
@@ -265,12 +265,12 @@ namespace Nebula.Store.WebWalletUseCase
                     }
 				}
 				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is succeed.");
-				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = IsSuccess });
+				dispatcher.Dispatch(new WebWalletSwapTLYRResultAction { Success = IsSuccess });
 			}
 			catch(Exception ex)
             {
 				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is failed. Error: {ex}");
-				dispatcher.Dispatch(new WebWalletSwapResultAction { Success = false, errMessage = ex.ToString() });
+				dispatcher.Dispatch(new WebWalletSwapTLYRResultAction { Success = false, errMessage = ex.ToString() });
 			}
 		}
 	}

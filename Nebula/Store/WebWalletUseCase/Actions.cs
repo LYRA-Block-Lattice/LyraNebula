@@ -54,12 +54,17 @@ namespace Nebula.Store.WebWalletUseCase
         public List<string> transactions { get; set; }
     }
 
-    public class WebWalletSwapAction
+    public class WebWalletSwapTokenAction
     {
 
     }
 
-    public class WebWalletSwapTokenAction
+    public class WebWalletSwapTLYRAction
+    {
+
+    }
+
+    public class WebWalletBeginSwapTLYRAction
     {
         // lyra specified
         public Wallet wallet { get; set; }
@@ -77,7 +82,7 @@ namespace Nebula.Store.WebWalletUseCase
         public MetamaskInterceptor metamask { get; set; }
     }
 
-    public class WebWalletSwapResultAction
+    public class WebWalletSwapTLYRResultAction
     {
         public bool Success { get; set; }
         public string errMessage { get; set; }

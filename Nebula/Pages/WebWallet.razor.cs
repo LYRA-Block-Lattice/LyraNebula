@@ -222,8 +222,13 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletFreeTokenAction { faucetPvk = Configuration["faucetPvk"] });
 		}
 
-		// swap
-		private async Task Swap(MouseEventArgs e)
+		private async Task SwapToken(MouseEventArgs e)
+        {
+
+        }
+
+		// swap tlyr
+		private async Task SwapTLYR(MouseEventArgs e)
 		{
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
@@ -234,11 +239,11 @@ namespace Nebula.Pages
 			{
 				StateHasChanged();
 			});
-			Dispatcher.Dispatch(new WebWalletSwapAction ());
+			Dispatcher.Dispatch(new WebWalletSwapTLYRAction ());
 			_ = Task.Run(async () => { await UpdateSwapBalanceAsync(); });
 		}
 
-		private async Task SwapToken(MouseEventArgs e)
+		private async Task BeginSwapTLYR(MouseEventArgs e)
 		{
 			IsDisabled = true;
 			swapResultMessage = "Checking for configurations...";
@@ -309,7 +314,7 @@ namespace Nebula.Pages
 				StateHasChanged();
 			});
 
-			var arg = new WebWalletSwapTokenAction
+			var arg = new WebWalletBeginSwapTLYRAction
 			{
 				wallet = walletState.Value.wallet,
 

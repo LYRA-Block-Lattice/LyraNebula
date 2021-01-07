@@ -37,8 +37,11 @@
     <button class="btn btn-primary" @onclick="Transactions">
         Transactions
     </button>
-    <button class="btn btn-primary" @onclick="Swap">
-        Swap
+    <button class="btn btn-primary" @onclick="SwapToken">
+        Token Swap
+    </button>
+    <button class="btn btn-primary" @onclick="SwapTLYR">
+        TLYR Gateway
     </button>
     <button class="btn btn-primary" @onclick="Settings">
         Settings
@@ -116,7 +119,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
     </div>
     }
 }
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
+else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapTLYR)
 {
     <h3>Swap tokens between LYR and TLYR (ERC20 Tether of LYR)</h3>
     @if(Configuration["network"] == "testnet")
@@ -189,7 +192,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Swap)
         <p>Service fee: @swapFeeDesc</p>
         <hr />
         <div>
-            <button disabled="@IsDisabled" class="btn btn-primary" @onclick="SwapToken">Swap</button>
+            <button disabled="@IsDisabled" class="btn btn-primary" @onclick="BeginSwapTLYR">Swap</button>
         </div>
         <p>@swapResultMessage</p>
         <p>@walletState.Value.Message</p>

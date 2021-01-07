@@ -58,7 +58,7 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState ReduceOpenSettingsAction(WebWalletState state, WebWalletSettingsAction action) => state.With(new { stage = UIStage.Settings });
 
 		[ReducerMethod]
-		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapAction action) => state.With(new { stage = UIStage.Swap });
+		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapTLYRAction action) => state.With(new { stage = UIStage.SwapTLYR });
 
 		[ReducerMethod]
 		public static WebWalletState ReduceSaveSettingsAction(WebWalletState state, WebWalletSaveSettingsAction action)
@@ -111,13 +111,13 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[ReducerMethod]
-		public static WebWalletState SwapHandler(WebWalletState state, WebWalletSwapAction action) => state.With(new { stage = UIStage.Swap });
+		public static WebWalletState SwapHandler(WebWalletState state, WebWalletSwapTLYRAction action) => state.With(new { stage = UIStage.SwapTLYR });
 
 		[ReducerMethod]
-		public static WebWalletState SwapTokenHandler(WebWalletState state, WebWalletSwapTokenAction action) => state.With(new { IsLoading = true });
+		public static WebWalletState SwapTokenHandler(WebWalletState state, WebWalletBeginSwapTLYRAction action) => state.With(new { IsLoading = true });
 
 		[ReducerMethod]
-		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapResultAction action)
+		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapTLYRResultAction action)
 		{
 			var stt = state.With(new
 			{
