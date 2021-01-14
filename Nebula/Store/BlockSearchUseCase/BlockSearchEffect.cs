@@ -69,7 +69,8 @@ namespace Nebula.Store.BlockSearchUseCase
 
 			try
 			{
-				prevBlock = blockResult.PreviousHash == null ? null : (await client.GetBlock(blockResult.PreviousHash)).GetBlock();
+				if(blockResult != null)
+					prevBlock = blockResult.PreviousHash == null ? null : (await client.GetBlock(blockResult.PreviousHash)).GetBlock();
 			}
 			catch (Exception) { }
 

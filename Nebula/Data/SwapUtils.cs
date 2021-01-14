@@ -178,7 +178,8 @@ namespace Nebula.Data
             if (syncResult == APIResultCodes.Success)
             {
                 var block = wallet.GetLatestBlock();
-                return block.Balances["LYR"] / LyraGlobal.TOKENSTORAGERITO;
+                if(block.Balances?.ContainsKey("LYR") == true)
+                    return block.Balances["LYR"].ToBalanceDecimal();
             }
 
             return 0m;
