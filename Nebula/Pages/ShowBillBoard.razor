@@ -1,5 +1,7 @@
 ﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @page "/showbb"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
 
 <h1>Status of All Authorizer Nodes </h1>
 
@@ -35,6 +37,13 @@
         <tbody>
             @foreach (var nodeInfo in NodeState.Value.RankedList)
             {
+                string hostName = null;
+                string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
+                if(seedHosts.ContainsKey(ipaddr))
+                    hostName = seedHosts[ipaddr];
+                else
+                    hostName = ipaddr;
+
                 string style = null;
                 if(nodeInfo.ID == NodeState.Value.bb.CurrentLeader)
                 {
@@ -51,7 +60,7 @@
                 <td align="center">@(nodeInfo.IsPrimary ? "Yes" : "No")</td>
                 <td><a href="/showblock/@nodeInfo.ID">@nodeInfo.ID.Substring(0, 10)...</a></td>
                 <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
-                <td>@NodeState.Value.bb.NodeAddresses[nodeInfo.ID]</td>
+                <td><span title="@ipaddr">@hostName</span></td>
                 <td align="center">@nodeInfo.Votes</td>
                 @if(nodeInfo.Status != null)
                     {
