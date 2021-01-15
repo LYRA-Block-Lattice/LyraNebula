@@ -10,11 +10,24 @@
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
 }
-    <div style="padding-bottom: 5px"><button class="btn btn-primary" @onclick="Refresh">
-        Refresh
-    </button>&nbsp;
-    <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
-    </div>
+    <table style="padding-bottom: 5px" width="100%">
+        <tr>
+            <td><div><button class="btn btn-primary" @onclick="Refresh">
+                Refresh
+            </button>&nbsp;
+            <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
+            </div></td>
+            <td align="right">
+                    <select id="department" @bind="SelectedHistId">
+                        @foreach (var hi in BriefHist)
+                        {
+                            <option value="@hi.id">@hi.TimeStamp</option>
+                        }
+                    </select>
+            </td>
+        </tr>
+    </table>
+    
 @if (NodeState.Value.nodeStatus != null)
 {
     <div>

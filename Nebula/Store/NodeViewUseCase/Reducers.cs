@@ -25,7 +25,6 @@ namespace Nebula.Store.NodeViewUseCase
 					NodeStatus: action.nodeStatusResult,
 					ipdb: action.ipDbFn);
 
-			nvs.NetworkId = action.network;
 			nvs.Id = 0;     // create new for liteDB
 			nvs.TimeStamp = DateTime.UtcNow;
 			return nvs;

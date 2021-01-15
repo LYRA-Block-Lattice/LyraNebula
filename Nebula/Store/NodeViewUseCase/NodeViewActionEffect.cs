@@ -52,7 +52,7 @@ namespace Nebula.Store.NodeViewUseCase
 			});
 			await Task.WhenAll(tasks);
 
-			dispatcher.Dispatch(new NodeViewResultAction(config["network"], bb, bag, config["ipdb"]));
+			dispatcher.Dispatch(new NodeViewResultAction(bb, bag, config["ipdb"]));
 		}
 	}
 }

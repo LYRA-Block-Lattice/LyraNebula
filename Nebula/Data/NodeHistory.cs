@@ -12,7 +12,8 @@ namespace Nebula.Data
         bool Delete(int id);
         IEnumerable<NodeViewState> FindAll();
         NodeViewState FindOne(int id);
-        NodeViewState FindLatest(string networkId);
+        NodeViewState FindLatest();
+        IEnumerable<HistInfo> FindHistory(int maxCount);
         int Insert(NodeViewState record);
         bool Update(NodeViewState record);
     }
@@ -39,19 +40,30 @@ namespace Nebula.Data
                 .Find(x => x.Id == id).FirstOrDefault();
         }
 
-        public NodeViewState FindLatest(string networkId)
+        public NodeViewState FindLatest()
         {
             var data = _liteDb.GetCollection<NodeViewState>("NodeViewState");
             try
             {
                 var latestId = data
-                    .Find(x => x.NetworkId == networkId)
                     .Max(x => x.Id);
                 return FindOne(latestId);
             }
             catch {
                 return null;
             }
+        }
+
+        public IEnumerable<HistInfo> FindHistory(int maxCount)
+        {
+            var data = _liteDb.GetCollection<NodeViewState>("NodeViewState");
+            var q = data.Query()
+                .OrderByDescending(x => x.TimeStamp)
+                .Limit(maxCount)
+                .ToList()
+                .Select(x => new HistInfo { id = x.Id, TimeStamp = x.TimeStamp });
+
+            return q;
         }
 
         public int Insert(NodeViewState record)
@@ -71,5 +83,11 @@ namespace Nebula.Data
             return _liteDb.GetCollection<NodeViewState>("NodeViewState")
                 .Delete(id);
         }
+    }
+
+    public class HistInfo
+    {
+        public int id { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }
