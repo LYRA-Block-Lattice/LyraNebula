@@ -119,6 +119,14 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
     </div>
     }
 }
+else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapToken)
+{
+    <h3>Lyra Swap</h3>
+    <hr />
+    <div>
+        <button class="btn btn-primary" @onclick="Return">Return</button>
+    </div>
+}
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapTLYR)
 {
     <h3>Swap tokens between LYR and TLYR (ERC20 Tether of LYR)</h3>
@@ -197,10 +205,10 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
         <p>@swapResultMessage</p>
         <p>@walletState.Value.Message</p>
         }
-        <div>
-            <button class="btn btn-primary" @onclick="Return">Return</button>
-        </div>
     }
+    <div>
+        <button class="btn btn-primary" @onclick="Return">Return</button>
+    </div>
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)
 {

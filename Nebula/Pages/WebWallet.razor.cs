@@ -224,8 +224,8 @@ namespace Nebula.Pages
 
 		private async Task SwapToken(MouseEventArgs e)
         {
-
-        }
+			Dispatcher.Dispatch(new WebWalletSwapTokenAction());
+		}
 
 		// swap tlyr
 		private async Task SwapTLYR(MouseEventArgs e)
