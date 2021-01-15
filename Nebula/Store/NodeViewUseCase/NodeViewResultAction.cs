@@ -14,9 +14,11 @@ namespace Nebula.Store.NodeViewUseCase
 		public BillBoard billBoardResult { get; }
 		public ConcurrentDictionary<string, GetSyncStateAPIResult> nodeStatusResult { get; }
 		public string ipDbFn { get; }
+		public string network { get; }
 
-		public NodeViewResultAction(BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatusResult, string ipdb)
+		public NodeViewResultAction(string networkId, BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatusResult, string ipdb)
 		{
+			network = networkId;
 			billBoardResult = billBoard;
 			nodeStatusResult = NodeStatusResult;
 			ipDbFn = ipdb;

@@ -68,6 +68,11 @@ namespace Nebula
                 return client;
             });
 
+            // for database
+            services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
+            services.AddSingleton<ILiteDbContext, LiteDbContext>();
+            services.AddTransient<INodeHistory, NodeHistory>();
+
             var currentAssembly = typeof(Startup).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(currentAssembly));
         }

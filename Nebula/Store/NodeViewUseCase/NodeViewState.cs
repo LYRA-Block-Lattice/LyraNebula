@@ -16,11 +16,19 @@ namespace Nebula.Store.NodeViewUseCase
 {
 	public class NodeViewState
 	{
-		public bool IsLoading { get; }
-		public BillBoard bb { get; }
-		public ConcurrentDictionary<string, GetSyncStateAPIResult> nodeStatus { get; }
-		public string ipDbFn { get; }
+        public bool IsLoading { get; set; }
+		public BillBoard bb { get; set; }
+		public ConcurrentDictionary<string, GetSyncStateAPIResult> nodeStatus { get; set; }
+		public string ipDbFn { get; set; }
 
+        public int Id { get; set; }         // used by litedb
+        public DateTime TimeStamp { get; set; }     // history
+        public string NetworkId { get; set; }
+
+		public NodeViewState()
+        {
+			IsLoading = false;
+        }
 		public NodeViewState(bool isLoading, BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatus, string ipdb)
 		{
 			IsLoading = isLoading;
@@ -29,71 +37,68 @@ namespace Nebula.Store.NodeViewUseCase
 			ipDbFn = ipdb;
 		}
 
-		public List<NodeInfoSet> RankedList
+		public List<NodeInfoSet> GetRankedList()
         {
-			get
+            var list = new List<NodeInfoSet>();
+            foreach (var id in bb.PrimaryAuthorizers)
             {
-				var list = new List<NodeInfoSet>();
-				foreach(var id in bb.PrimaryAuthorizers)
+                if (bb.ActiveNodes.Any(a => a.AccountID == id) && nodeStatus.ContainsKey(id))       // bug in billboard. or error-proof
                 {
-					if(bb.ActiveNodes.Any(a => a.AccountID == id) && nodeStatus.ContainsKey(id))		// bug in billboard. or error-proof
+                    var x = bb.ActiveNodes.FirstOrDefault(a => a.AccountID == id);
+                    decimal vts = x == null ? 0 : x.Votes;
+                    list.Add(new NodeInfoSet
                     {
-						var x = bb.ActiveNodes.FirstOrDefault(a => a.AccountID == id);
-						decimal vts = x == null ? 0 : x.Votes;
-						list.Add(new NodeInfoSet
-						{
-							ID = id,
-							IsPrimary = true,
-							Votes = (long)vts,
-							Status = nodeStatus[id]
-						});
-					}
+                        ID = id,
+                        IsPrimary = true,
+                        Votes = (long)vts,
+                        Status = nodeStatus[id]
+                    });
                 }
+            }
 
-				var list2 = new List<NodeInfoSet>();
-				var nonPrimaryNodes = nodeStatus.Where(a => !bb.PrimaryAuthorizers.Contains(a.Key));
-				foreach(var node in nonPrimaryNodes)
+            var list2 = new List<NodeInfoSet>();
+            var nonPrimaryNodes = nodeStatus.Where(a => !bb.PrimaryAuthorizers.Contains(a.Key));
+            foreach (var node in nonPrimaryNodes)
+            {
+                var x = bb.ActiveNodes.FirstOrDefault(a => a.AccountID == node.Key);
+                decimal vts = x == null ? 0 : x.Votes;
+                list2.Add(new NodeInfoSet
                 {
-					var x = bb.ActiveNodes.FirstOrDefault(a => a.AccountID == node.Key);
-					decimal vts = x == null ? 0 : x.Votes; 
-					list2.Add(new NodeInfoSet
-					{
-						ID = node.Key,
-						IsPrimary = false,
-						Votes = (long)vts,
-						Status = node.Value
-					});
-				}
+                    ID = node.Key,
+                    IsPrimary = false,
+                    Votes = (long)vts,
+                    Status = node.Value
+                });
+            }
 
-				list.AddRange(list2);
+            list.AddRange(list2);
 
-				var result = list
-					.Where(a => bb.ActiveNodes.Any(b => b.AccountID == a.ID))
-					.OrderByDescending(a => a.Votes)
-					.ThenBy(b => b.ID)
-					.Zip(Enumerable.Range(1, int.MaxValue - 1),
-									  (o, i) => o.With(new { Index = i }))
-					.ToList();
+            var result = list
+                .Where(a => bb.ActiveNodes.Any(b => b.AccountID == a.ID))
+                .OrderByDescending(a => a.Votes)
+                .ThenBy(b => b.ID)
+                .Zip(Enumerable.Range(1, int.MaxValue - 1),
+                                  (o, i) => o.With(new { Index = i }))
+                .ToList();
 
-				// lookup IP geo location
-				var resolver = new IP2CountryBatchResolver(new IP2CountryResolver(
-					new MarkusGoCSVFileSource(ipDbFn)
-				));
+            // lookup IP geo location
+            var resolver = new IP2CountryBatchResolver(new IP2CountryResolver(
+                new MarkusGoCSVFileSource(ipDbFn)
+            ));
 
-				try
+            try
+            {
+                var iplist = result.Select(a => bb.NodeAddresses[a.ID]);
+                var geoList = resolver.Resolve(iplist);
+                for (int i = 0; i < result.Count; i++)
                 {
-					var iplist = result.Select(a => bb.NodeAddresses[a.ID]);
-					var geoList = resolver.Resolve(iplist);
-					for (int i = 0; i < result.Count; i++)
-					{
-						result[i].Country = geoList[i] == null ? "" : geoList[i].Country;
-					}
-				}
-				catch(Exception)
-				{ }
+                    result[i].Country = geoList[i] == null ? "" : geoList[i].Country;
+                }
+            }
+            catch (Exception)
+            { }
 
-				return result;
-			}
+            return result;
         }
 	}
 

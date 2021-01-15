@@ -10,6 +10,11 @@
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
 }
+    <div style="padding-bottom: 5px"><button class="btn btn-primary" @onclick="Refresh">
+        Refresh
+    </button>&nbsp;
+    <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
+    </div>
 @if (NodeState.Value.nodeStatus != null)
 {
     <div>
@@ -35,7 +40,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var nodeInfo in NodeState.Value.RankedList)
+            @foreach (var nodeInfo in NodeState.Value.GetRankedList())
             {
                 string hostName = null;
                 string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];

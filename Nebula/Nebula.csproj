@@ -18,8 +18,9 @@
     <PackageReference Include="IP-2-Country.Ludost" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MarkusGo" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MaxMind" Version="1.2.0" />
+    <PackageReference Include="LiteDB" Version="5.0.10" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
     <PackageReference Include="MongoDB.Bson" Version="2.11.5" />
     <PackageReference Include="Nethereum.StandardTokenEIP20" Version="3.8.0" />
@@ -31,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="LiteDb\" />
     <Folder Include="wwwroot\apps\" />
   </ItemGroup>
 

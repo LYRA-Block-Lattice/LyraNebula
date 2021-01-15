@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Nebula/LiteDb/NebulaData.db
+/Nebula/LiteDb/NebulaData-log.db

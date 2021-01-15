@@ -18,11 +18,13 @@ namespace Nebula.Store.NodeViewUseCase
 	{
 		private readonly ILyraAPI client;
 		private readonly IConfiguration config;
+		private readonly INodeHistory hist;
 
-		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration)
+		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history)
 		{
 			client = lyraClient;
 			config = configuration;
+			hist = history;
 		}
 
 		protected override async Task HandleAsync(NodeViewAction action, IDispatcher dispatcher)
@@ -50,7 +52,7 @@ namespace Nebula.Store.NodeViewUseCase
 			});
 			await Task.WhenAll(tasks);
 
-			dispatcher.Dispatch(new NodeViewResultAction(bb, bag, config["ipdb"]));
+			dispatcher.Dispatch(new NodeViewResultAction(config["network"], bb, bag, config["ipdb"]));
 		}
 	}
 }

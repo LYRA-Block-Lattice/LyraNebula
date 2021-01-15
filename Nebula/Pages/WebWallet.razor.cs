@@ -222,7 +222,7 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletFreeTokenAction { faucetPvk = Configuration["faucetPvk"] });
 		}
 
-		private async Task SwapToken(MouseEventArgs e)
+		private void SwapToken(MouseEventArgs e)
         {
 			Dispatcher.Dispatch(new WebWalletSwapTokenAction());
 		}
