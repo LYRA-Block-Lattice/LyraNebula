@@ -80,7 +80,11 @@ namespace Nebula.Pages
 
 		private void Refresh(MouseEventArgs e)
 		{
-			Dispatcher.Dispatch(new NodeViewAction());
+			var latest = History.FindLatest();
+			if (latest == null)
+				Dispatcher.Dispatch(new NodeViewAction());
+			else
+				Dispatcher.Dispatch(new NodeViewAction { historyState = latest });
 		}
 
 		private void NodeState_StateChanged(object sender, NodeViewState e)

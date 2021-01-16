@@ -7,6 +7,7 @@ namespace Nebula.Store.NodeViewUseCase
 {
     public class NodeViewAction
     {
+        public NodeViewState historyState { get; set; }
     }
 
     public class LoadHistoryAction
