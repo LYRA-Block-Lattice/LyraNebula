@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Nebula.Data;
+using Nebula.Store.NodeViewUseCase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +12,19 @@ namespace Nebula
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TokenController : ControllerBase
+    public class NebulaController : ControllerBase
     {
+        private INodeHistory History;
+        public NebulaController(INodeHistory nodeHistory)
+        {
+            History = nodeHistory;
+        }
         // GET: api/<TokenController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        [Route("history")]
+        public IEnumerable<NodeViewState> GetNodesHistory()
         {
-            return new string[] { "value1", "value2" };
+            return History.FindAll();
         }
 
         // GET api/<TokenController>/5

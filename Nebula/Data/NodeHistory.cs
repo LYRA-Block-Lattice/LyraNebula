@@ -27,10 +27,12 @@ namespace Nebula.Data
             _liteDb = liteDbContext.Database;
         }
 
+        // last 3 days
         public IEnumerable<NodeViewState> FindAll()
         {
             var result = _liteDb.GetCollection<NodeViewState>("NodeViewState")
-                .FindAll();
+                .FindAll()
+                .Where(x => x.TimeStamp > DateTime.UtcNow.AddDays(-3));
             return result;
         }
 
