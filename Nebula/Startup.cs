@@ -72,6 +72,7 @@ namespace Nebula
             services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<ILiteDbContext, LiteDbContext>();
             services.AddTransient<INodeHistory, NodeHistory>();
+            services.AddHostedService<IncentiveProgram>();
 
             var currentAssembly = typeof(Startup).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(currentAssembly));
