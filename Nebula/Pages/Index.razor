@@ -8,4 +8,45 @@
 <h3>Search by Hash or Account ID</h3>
 <p><input size="100" type="text" @oninput="oninput" /></p>
 
+@if(RichList != null)
+{
+    <hr />
+    <h1>Lyra Token Supply Chart</h1>
+    <p>Total Supply: 10,000,000,000 LYR</p>
+    <p>Team/Locked/Reserved: @TeamTotal LYR, @TeamRito % of Total Supply.</p>
+    <p>Circulating Supply: @Circulate LYR, @CirculateRito % of Total Supply.</p>
+    <hr />
+        <div>
+        <h1>Lyra Rich List</h1>
+        <p>For @Total.Network, Last updated (UTC): @Total.Updated</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Account ID</th>
+                <th>Balance</th>
+                <th>Unreceived Balance</th>
+                <th>Total Token</th>
+                <th>Total Rito</th>
+                <th>Tag</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rich in RichList)
+            {
+               <tr>
+                   <td>@rich.Order</td>
+                   <td><a href="/showblock/@rich.AccountId">@rich.AccountId</a></td>
+                   <td>@rich.Balance.Total</td>
+                   <td>@rich.Balance.UnRecv</td>
+                   <td>@rich.Sum</td>
+                   <td>@rich.SumRito %</td>
+                   <td>@rich.Tag</td>
+               </tr>
+            }
+            </tbody>
+            </table>
+            </div>
 
+
+}
