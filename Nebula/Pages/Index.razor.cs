@@ -30,10 +30,10 @@ namespace Nebula.Pages
 
         protected override void OnInitialized()
         {
-			LoadRichData();
-
 			base.OnInitialized();
-        }
+
+			LoadRichData();
+		}
 
 		public class RichItem
         {
