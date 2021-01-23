@@ -74,7 +74,7 @@ namespace Nebula.Pages
 					int order = 0;
 					decimal sum = 0;
 					decimal subRito = 0;
-					foreach (var e in Total.AllAccounts)
+					foreach (var e in Total.AllAccounts.Take(100))
                     {
 						sum += e.Value.Total;
 						subRito = Math.Round(sum / 100000000, 4);

@@ -77,12 +77,12 @@ namespace Nebula.Store.NodeViewUseCase
                 .ToList();
 
             // lookup IP geo location
-            var resolver = new IP2CountryBatchResolver(new IP2CountryResolver(
-                new MarkusGoCSVFileSource(ipDbFn)
-            ));
-
             try
             {
+                var resolver = new IP2CountryBatchResolver(new IP2CountryResolver(
+                    new MarkusGoCSVFileSource(ipDbFn)
+                ));
+
                 var iplist = result.Select(a => bb.NodeAddresses[a.ID]);
                 var geoList = resolver.Resolve(iplist);
                 for (int i = 0; i < result.Count; i++)

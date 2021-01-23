@@ -55,6 +55,9 @@
         <tbody>
             @foreach (var nodeInfo in NodeState.Value.GetRankedList())
             {
+           try{
+
+           
                 string hostName = null;
                 string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
                 if(seedHosts.ContainsKey(ipaddr))
@@ -121,6 +124,8 @@
                 <td></td>
                 }
             </tr>
+            }
+            catch {}
             }
         </tbody>
     </table>
