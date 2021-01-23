@@ -2,6 +2,36 @@
 @page "/asserts"
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
-@inject LyraRestClient Client
 
-<h1>Block Explorer for LYRA Block Lattice </h1>
+<h1>Assert Explorer for LYRA Block Lattice </h1>
+
+@if(LyraAsserts != null)
+{
+    <hr />
+    <p>Last updated (UTC): @Snap.Updated</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Assert Name</th>
+                <th>Total Supply</th>
+                <th>Create</th>
+                <th>Holders</th>
+                <th>Owner Account ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ast in LyraAsserts)
+            {
+               <tr>
+                   <td>@ast.Name</td>
+                   <td>@(ast.Supply.ToString("n"))</td>
+                   <td>@ast.Created</td>
+                   <td>@ast.Holders</td>
+                   <td><a href="/showblock/@ast.OwnerAccountId">@ast.OwnerAccountId.Substring(0, 10)...</a></td>
+               </tr>
+            }
+            </tbody>
+            </table>
+
+
+}

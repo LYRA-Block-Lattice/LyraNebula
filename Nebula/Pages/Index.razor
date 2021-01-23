@@ -8,7 +8,7 @@
 <h3>Search by Hash or Account ID</h3>
 <p><input size="100" type="text" @oninput="oninput" /></p>
 
-@if(RichList != null && Total.Network == Configuration["network"])
+@if(RichList != null && Snap.Network == Configuration["network"])
 {
     <hr />
     <h1>Lyra Token Supply Chart</h1>
@@ -18,7 +18,7 @@
     <hr />
         <div>
         <h1>Lyra Rich List</h1>
-        <p>Shows only top 100 accounts. Last updated (UTC): @Total.Updated</p>
+        <p>Shows only top 100 accounts. Last updated (UTC): @Snap.Updated</p>
     <table class="table">
         <thead>
             <tr>

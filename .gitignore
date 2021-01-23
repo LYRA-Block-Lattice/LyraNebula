@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /Nebula/LiteDb/NebulaData.db
 /Nebula/LiteDb/NebulaData-log.db
+/Nebula/LiteDb/RichList_testnet.db
+/Nebula/LiteDb/RichList.db

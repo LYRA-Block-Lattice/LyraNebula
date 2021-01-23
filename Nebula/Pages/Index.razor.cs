@@ -15,6 +15,7 @@ namespace Nebula.Pages
 		[Inject]
 		public NavigationManager navigationManager { get; set; }
 
+		private SnapInfo Snap { get; set; }
 		public TotalBalance Total { get; private set; }
 		public List<RichItem> RichList { get; private set; }
 
@@ -65,6 +66,12 @@ namespace Nebula.Pages
 			};
 			using (var db = new LiteDatabase(dbfn))
             {
+				if (db.CollectionExists("Meta"))
+				{
+					var coll = db.GetCollection<SnapInfo>("Meta");
+					Snap = coll.FindAll().FirstOrDefault();
+				}
+
 				if (db.CollectionExists("TotalBalance"))
 				{
 					var coll = db.GetCollection<TotalBalance>("TotalBalance");
@@ -104,19 +111,3 @@ namespace Nebula.Pages
 	}
 }
 
-namespace Lyra
-{
-	public class DualBalance
-	{
-		public decimal Normal { get; set; }
-		public decimal UnRecv { get; set; }
-
-		public decimal Total => Normal + UnRecv;
-	}
-	public class TotalBalance
-	{
-		public Dictionary<string, DualBalance> AllAccounts { get; set; }
-		public DateTime Updated { get; set; }
-		public string Network { get; set; }
-	}
-}
