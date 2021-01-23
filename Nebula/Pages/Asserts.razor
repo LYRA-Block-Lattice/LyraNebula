@@ -17,17 +17,31 @@
                 <th>Create</th>
                 <th>Holders</th>
                 <th>Owner Account ID</th>
+                <th>Liquidate Pool</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var ast in LyraAsserts)
+            @foreach (var tg in LyraAsserts)
             {
                <tr>
-                   <td>@ast.Name</td>
-                   <td>@(ast.Supply.ToString("n"))</td>
-                   <td>@ast.Created</td>
-                   <td>@ast.Holders</td>
-                   <td><a href="/showblock/@ast.OwnerAccountId">@ast.OwnerAccountId.Substring(0, 10)...</a></td>
+                   <td>@tg.Name</td>
+                   <td>@(tg.Supply.ToString("n"))</td>
+                   <td>@tg.Created</td>
+                   <td>@tg.Holders</td>
+                   <td><a href="/showblock/@tg.OwnerAccountId">@tg.OwnerAccountId.Substring(0, 10)...</a></td>
+
+                   @if(tg.Name == "LYR")
+                   {
+                       <td></td>
+                   }
+                   else if(tg.AssociatedPoolId != null)
+                   {
+                       <td>Swap Token (TBA)</td>
+                   }
+                   else
+                   {
+                       <td>Create Liquidate Pool (TBA)</td>
+                   }                   
                </tr>
             }
             </tbody>
