@@ -1,6 +1,8 @@
 ﻿using LiteDB;
-using Lyra;
 using Lyra.Core.API;
+using Microsoft.AspNetCore.Components;
+using Nebula.Data;
+using Nebula.Data.Lyra;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,10 @@ namespace Nebula.Pages
     {
 		private SnapInfo Snap { get; set; }
 		private List<Assert> LyraAsserts { get; set; }
-        protected override void OnInitialized()
+
+		[Inject]
+		private ILiteDbContext dbCtx { get; set; }
+		protected override void OnInitialized()
         {
             base.OnInitialized();
 
@@ -21,21 +26,19 @@ namespace Nebula.Pages
 
         private void LoadRichData()
         {
-			var dbfn = "LiteDb/RichList.db";
-			using (var db = new LiteDatabase(dbfn))
-			{
-				if(db.CollectionExists("Meta"))
-                {
-					var coll = db.GetCollection<SnapInfo>("Meta");
-					Snap = coll.FindAll().FirstOrDefault();
-				}
+			var db = dbCtx.Database;
 
-				if (db.CollectionExists("Asserts"))
-				{
-					var coll = db.GetCollection<Assert>("Asserts");
-					LyraAsserts = coll.FindAll().ToList();
-				}
-			}
-		}
+            if (db.CollectionExists("Meta"))
+            {
+                var coll = db.GetCollection<SnapInfo>("Meta");
+                Snap = coll.FindAll().FirstOrDefault();
+            }
+
+            if (db.CollectionExists("Asserts"))
+            {
+                var coll = db.GetCollection<Assert>("Asserts");
+                LyraAsserts = coll.FindAll().ToList();
+            }
+        }
     }
 }

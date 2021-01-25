@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
+using Nebula.Data.Lyra;
 
 namespace Nebula
 {
@@ -71,6 +72,11 @@ namespace Nebula
             // for database
             services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
             services.AddSingleton<ILiteDbContext, LiteDbContext>();
+
+            services.Configure<MongoDbOptions>(Configuration.GetSection("Lyra"));
+            services.AddSingleton<IMongoDbContext, MongoDbContext>();
+            services.AddSingleton<RichList>();
+
             services.AddTransient<INodeHistory, NodeHistory>();
             services.AddHostedService<IncentiveProgram>();
 

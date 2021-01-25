@@ -2,6 +2,7 @@
 using Lyra.Core.API;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Nebula.Data.Lyra;
 using Nebula.Store.NodeViewUseCase;
 using System;
 using System.Collections.Concurrent;
@@ -17,28 +18,39 @@ namespace Nebula.Data
         private IConfiguration config;
         private INodeHistory History;
         private LyraRestClient client;
-        public IncentiveProgram(IConfiguration configuration, INodeHistory history)
+
+        private RichList rich;
+        public IncentiveProgram(IConfiguration configuration, INodeHistory history, RichList richList)
         {
             config = configuration;
             History = history;
+            rich = richList;
 
             client = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while(!stoppingToken.IsCancellationRequested)
+            await Task.Delay(60 * 1000);
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(3 * 60 * 60 * 1000);
+                try
+                {
+                    await RefreshNodeStatusAsync();
+                }
+                catch { }
 
                 try
                 {
-                    await RefreshAsync();
+                    await rich.Run();
                 }
-                catch { }          
+                catch { }
+
+                await Task.Delay(3 * 60 * 60 * 1000);
             }
         }
 
-        private async Task RefreshAsync()
+        private async Task RefreshNodeStatusAsync()
         {
             int port = 4504;
             if (config["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
@@ -64,10 +76,10 @@ namespace Nebula.Data
             await Task.WhenAll(tasks);
 
             var nvs = new NodeViewState(
-        isLoading: false,
-        billBoard: bb,
-        NodeStatus: bag,
-        ipdb: config["ipdb"]);
+                isLoading: false,
+                billBoard: bb,
+                NodeStatus: bag,
+                ipdb: config["ipdb"]);
 
             nvs.Id = 0;     // create new for liteDB
             nvs.TimeStamp = DateTime.UtcNow;

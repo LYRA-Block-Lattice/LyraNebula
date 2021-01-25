@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Nebula.Data
@@ -18,7 +19,20 @@ namespace Nebula.Data
 
         public LiteDbContext(IOptions<LiteDbOptions> options)
         {
-            Database = new LiteDatabase(options.Value.DatabaseLocation);
+            // iis recycle, file lock.
+            for(var i = 0; i < 60; i++)
+            {
+                try
+                {
+                    Database = new LiteDatabase(options.Value.DatabaseLocation);
+                    break;
+                }
+                catch { }
+                {
+                    Thread.Sleep(2000);
+                }
+            }
+            
         }
     }
 

@@ -30,9 +30,15 @@ namespace Nebula.Data
         // last 3 days
         public IEnumerable<NodeViewState> FindAll()
         {
+            TimeSpan interval = new TimeSpan(0, 15, 0);
+
             var result = _liteDb.GetCollection<NodeViewState>("NodeViewState")
                 .FindAll()
-                .Where(x => x.TimeStamp > DateTime.UtcNow.AddDays(-3));
+                .Where(x => x.TimeStamp > DateTime.UtcNow.AddDays(-2))
+                .GroupBy(x => x.TimeStamp.Ticks / interval.Ticks)
+                                   .Select(x => x.First())
+                .OrderBy(x => x.TimeStamp);
+
             return result;
         }
 
