@@ -55,7 +55,7 @@ namespace Nebula.Data.Lyra
 
             // all asserts
             Console.WriteLine("Find all asserts...");
-            var asserts = allGens.ToList().Select(x => new Lyra.Assert
+            var asserts = allGens.ToList().Skip(1).Select(x => new Lyra.Assert
             {
                 Name = x.Ticker,
                 Created = x.TimeStamp,
