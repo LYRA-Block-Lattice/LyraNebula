@@ -267,7 +267,7 @@ namespace Nebula.Pages
 			swapResultMessage = "";
 			walletState.Value.Message = "";
 
-			Dispatcher.Dispatch(new WebWalletSwapTokenAction());
+			Dispatcher.Dispatch(new WebWalletSwapTokenAction { fromToken = swap });
 		}
 
 		// swap tlyr

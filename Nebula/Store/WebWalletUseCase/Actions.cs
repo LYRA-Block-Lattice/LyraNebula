@@ -57,7 +57,7 @@ namespace Nebula.Store.WebWalletUseCase
 
     public class WebWalletSwapTokenAction
     {
-
+        public string fromToken { get; set; }
     }
 
     public class WebWalletBeginTokenSwapAction
