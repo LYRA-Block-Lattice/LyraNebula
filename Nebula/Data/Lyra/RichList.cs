@@ -55,7 +55,10 @@ namespace Nebula.Data.Lyra
 
             // all asserts
             Console.WriteLine("Find all asserts...");
-            var asserts = allGens.ToList().Skip(1).Select(x => new Lyra.Assert
+            var asserts = allGens.ToList()
+                .Skip(1)
+                .Where(x => x.AccountID != "LJcP9ztmYqzjbSRsr2sKZ44pSkhqdtUp5g8YbgPQbxNPNf9FuQ93K1FQUSXYxcofZqgV8qgzWYXArjR9w9VPGBbENcS1Z3") // filter out trash token
+                .Select(x => new Lyra.Assert
             {
                 Name = x.Ticker,
                 Created = x.TimeStamp,
@@ -98,8 +101,6 @@ namespace Nebula.Data.Lyra
         private async Task SendRecvAsync()
         {
             AggregateUnwindOptions<ReceiveTransferBlock> unwindOptions = new AggregateUnwindOptions<ReceiveTransferBlock>() { PreserveNullAndEmptyArrays = true };
-
-
 
             var allSend = _dbContext.Blocks.OfType<SendTransferBlock>().AsQueryable();
             var allRecv = _dbContext.Blocks.OfType<ReceiveTransferBlock>().AsQueryable();

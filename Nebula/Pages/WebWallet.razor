@@ -1,5 +1,7 @@
 ﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @page "/webwallet"
+@page "/webwallet/swap/{swap?}"
+
 @using Nebula.Store.WebWalletUseCase
 @using Nebula.Data
 @using Microsoft.Extensions.Configuration
@@ -123,6 +125,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
 {
     <h3>Lyra Swap</h3>
     <hr />
+    <p>swap token for @swap</p>
     <div>
         <button class="btn btn-primary" @onclick="Return">Return</button>
     </div>
@@ -230,7 +233,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeT
         <button class="btn btn-primary" @onclick="Return">Return</button>
     </div>
 }
-else if (walletState.Value.stage == UIStage.Entry)
+else
 {
     <div>
     <button class="btn btn-primary" @onclick="CreateWallet">
@@ -246,7 +249,6 @@ else if (walletState.Value.stage == UIStage.Entry)
             Restore Wallet
         </button></p>
     </div>
-
 }
 
 @code {

@@ -1,8 +1,10 @@
-﻿using LiteDB;
+﻿using Fluxor;
+using LiteDB;
 using Lyra.Core.API;
 using Microsoft.AspNetCore.Components;
 using Nebula.Data;
 using Nebula.Data.Lyra;
+using Nebula.Store.WebWalletUseCase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,14 @@ namespace Nebula.Pages
 
 		[Inject]
 		private ILiteDbContext dbCtx { get; set; }
-		protected override void OnInitialized()
+
+        [Inject]
+        private IState<WebWalletState> walletState { get; set; }
+
+        [Inject]
+        public NavigationManager navigationManager { get; set; }
+
+        protected override void OnInitialized()
         {
             base.OnInitialized();
 
@@ -39,6 +48,12 @@ namespace Nebula.Pages
                 var coll = db.GetCollection<Assert>("Asserts");
                 LyraAsserts = coll.FindAll().ToList();
             }
+        }
+
+        public void SwapToken(string token)
+        {
+            walletState.Value.stage = UIStage.SwapToken;
+            navigationManager.NavigateTo("/webwallet/swap/" + token.Replace("/", "%2F"));
         }
     }
 }

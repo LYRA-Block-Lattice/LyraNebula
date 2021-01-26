@@ -104,7 +104,10 @@ namespace Nebula.Store.WebWalletUseCase
 			{
 				var accHeight = await client.GetAccountHeight(action.wallet.AccountId);
 				Dictionary<string, long> oldBalance = null;
-				for(long i = 1; i <= accHeight.Height; i++)
+				var start = accHeight.Height - 100;
+				if (start < 1)
+					start = 1;			// only show the last 100 tx
+				for (long i = start; i <= accHeight.Height; i++)
                 {
 					var blockResult = await client.GetBlockByIndex(action.wallet.AccountId, i);
 					var block = blockResult.GetBlock() as TransactionBlock;

@@ -36,6 +36,9 @@ namespace Nebula.Pages
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
 
+		[Microsoft.AspNetCore.Components.Parameter]
+		public string swap { get; set; }
+
 		[JSInvokable]
 		public void ethAccountsChanged(string[] accounts)
 		{

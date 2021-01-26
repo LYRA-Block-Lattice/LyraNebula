@@ -5,6 +5,8 @@
 
 <h1>Assert Explorer for LYRA Block Lattice </h1>
 
+<p>wallet is @walletState.Value.wallet?.AccountId</p>
+
 @if(LyraAsserts != null)
 {
     <hr />
@@ -36,7 +38,7 @@
                    }
                    else if(tg.AssociatedPoolId != null)
                    {
-                       <td>Swap Token (TBA)</td>
+                       <td><a href="" @onclick="(() => SwapToken(tg.Name))" @onclick:preventDefault>Swap Token</a></td>
                    }
                    else
                    {
@@ -47,5 +49,10 @@
             </tbody>
             </table>
 
+
+}
+
+@code
+{
 
 }
