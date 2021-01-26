@@ -30,7 +30,7 @@ namespace Nebula.Data
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await Task.Delay(60 * 1000);
+            await Task.Delay(5 * 60 * 1000);
 
             while (!stoppingToken.IsCancellationRequested)
             {

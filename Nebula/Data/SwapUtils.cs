@@ -64,15 +64,21 @@ namespace Nebula.Data
         }
 
         public static async Task<BigInteger> EstimateEthTransferFeeAsync(string ethApiUrl, string ethContract,
-            string fromEthAddress, string toEthAddress)
+            string fromEthAddress, string toEthAddress, BigInteger tokenAmount, int gasPriceOracle)
         {
+            //var web3 = new Web3(ethApiUrl);
+            //var latestBlockNumber = await web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+            //var latestBlock = await web3.Eth.Blocks.GetBlockWithTransactionsHashesByNumber.SendRequestAsync(latestBlockNumber);
+
+            //return latestBlock.GasLimit.Value / latestBlock.TransactionHashes.Length;
+
             var web3 = new Web3(ethApiUrl);
             var transactionMessage = new TransferFunction
             {
                 FromAddress = fromEthAddress,
                 To = toEthAddress,
-                TokenAmount = 100,
-                GasPrice = Web3.Convert.ToWei(36, UnitConversion.EthUnit.Gwei)
+                TokenAmount = tokenAmount,
+                GasPrice = Web3.Convert.ToWei(gasPriceOracle, UnitConversion.EthUnit.Gwei)
             };
 
             var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
@@ -80,8 +86,9 @@ namespace Nebula.Data
             return estimate.Value;
         }
 
-        public static async Task<string> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
+        public static async Task<(string hash, bool IsSuccess)> SendEthContractTokenAsync(string ethApiUrl, string ethContract, 
             string ethAddress, string ethPrivateKey, string targetEthAddress, BigInteger tokenCount,
+            int gasPrice, BigInteger gasLimit,
             MetamaskInterceptor metamask)
         {
             Web3 web3;
@@ -105,22 +112,27 @@ namespace Nebula.Data
                 FromAddress = ethAddress,
                 To = targetEthAddress,
                 TokenAmount = tokenCount,
-                GasPrice = Web3.Convert.ToWei(36, UnitConversion.EthUnit.Gwei)
+                GasPrice = Web3.Convert.ToWei(gasPrice, UnitConversion.EthUnit.Gwei),
+                Gas = gasLimit * 2
             };
 
             var transferHandler = web3.Eth.GetContractTransactionHandler<TransferFunction>();
             var transferReceipt = await transferHandler.SendRequestAndWaitForReceiptAsync(ethContract, transactionMessage);
 
+            if (transferReceipt.Status.Value == 0)
+                return (transferReceipt.TransactionHash, false);
+
             var txDetails = await GetTxDetailsAsync(ethApiUrl, transferReceipt.TransactionHash);
             if (txDetails.FromAddress.Equals(ethAddress, StringComparison.InvariantCultureIgnoreCase)
                 && txDetails.To.Equals(targetEthAddress, StringComparison.InvariantCultureIgnoreCase)
-                && txDetails.TokenAmount == tokenCount)
+                && txDetails.TokenAmount == tokenCount
+                )
             {
-                return transferReceipt.TransactionHash;
+                return (transferReceipt.TransactionHash, true);
             }
             else
             {
-                return null;
+                return (transferReceipt.TransactionHash, false);
             }
         }
 

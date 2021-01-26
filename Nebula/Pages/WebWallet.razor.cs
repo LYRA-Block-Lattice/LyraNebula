@@ -58,6 +58,10 @@ namespace Nebula.Pages
 		public decimal tlyrReserveBalance { get; set; }
 		public string[] SwapableTokens { get; set; }
 		private string _swapFromTokenName;
+
+		private int EthGasPrice;
+		private BigInteger EthGasLimit;
+
 		public string swapFromToken { 
 			get
 			{
@@ -232,7 +236,7 @@ namespace Nebula.Pages
 		{
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
-			IsDisabled = false;
+			IsDisabled = true;
 			swapResultMessage = "";
 			walletState.Value.Message = "";
 			await InvokeAsync(() =>
@@ -326,6 +330,9 @@ namespace Nebula.Pages
 				toAddress = swapToAddress,
 				toAmount = swapToCount,
 
+				gasPrice = EthGasPrice,
+				gasLimit = EthGasLimit,
+
 				options = swapOptions.CurrentValue,
 				metamask = metamaskInterceptor
 			};
@@ -416,18 +423,24 @@ namespace Nebula.Pages
 			_svcFeeCalculationTask = Task.Run(async () => {
 				try
 				{
-					if (_swapToTokenName == "TLYR")
+					ICoinGeckoClient _client;
+					_client = CoinGeckoClient.Instance;
+					const string vsCurrencies = "usd";
+					var priceTask = _client.SimpleClient.GetSimplePrice(new[] { "ethereum", "lyra" }, new[] { vsCurrencies });
+					var gasOracleTask = SwapUtils.GetGasOracle(swapOptions.CurrentValue.ethScanApiKey);
+
+					await Task.WhenAll(priceTask, gasOracleTask);
+
+					if(priceTask.IsCompletedSuccessfully && gasOracleTask.IsCompletedSuccessfully)
                     {
-						ICoinGeckoClient _client;
-						_client = CoinGeckoClient.Instance;
-						const string vsCurrencies = "usd";
-						var priceTask = _client.SimpleClient.GetSimplePrice(new[] { "ethereum", "lyra" }, new[] { vsCurrencies });
-						var gasOracleTask = SwapUtils.GetGasOracle(swapOptions.CurrentValue.ethScanApiKey);
+						var estFrom = _swapToTokenName == "TLYR" ? swapOptions.CurrentValue.ethPub : SelectedAccount;
+						var estTo = _swapToTokenName == "TLYR" ? SelectedAccount : swapOptions.CurrentValue.ethPub;
+
 						var estimateGasTask = SwapUtils.EstimateEthTransferFeeAsync(swapOptions.CurrentValue.ethUrl,
-							swapOptions.CurrentValue.ethContract,
-							swapOptions.CurrentValue.ethPub,
-							swapToAddress);
-						await Task.WhenAll(priceTask, estimateGasTask, gasOracleTask);
+								swapOptions.CurrentValue.ethContract,
+								estFrom, estTo, new BigInteger(swapFromCount), gasOracleTask.Result);
+
+						await Task.WhenAll(estimateGasTask);
 
 						if (priceTask.IsCompletedSuccessfully && estimateGasTask.IsCompletedSuccessfully && gasOracleTask.IsCompletedSuccessfully)
 						{
@@ -435,31 +448,41 @@ namespace Nebula.Pages
 							var gasOracle = gasOracleTask.Result;
 							var gasLimit = estimateGasTask.Result;
 
-							ethGasFee = (decimal)(gasOracle * (int)gasLimit * prices["ethereum"]["usd"] / 1000000000);
-							lyraPrice = (decimal)prices["lyra"]["usd"];
+							EthGasPrice = gasOracle;
+							EthGasLimit = gasLimit;
 
-							var totalFee = swapFromCount * 0.0001m + 1 + ethGasFee / lyraPrice;
-							var totalfeeInLyra = Math.Round(totalFee, 2);
+							if (_swapToTokenName == "TLYR")
+							{
+								ethGasFee = (decimal)(gasOracle * (int)gasLimit * prices["ethereum"]["usd"] / 1000000000);
+								lyraPrice = (decimal)prices["lyra"]["usd"];
 
-							//swapFeeDesc = $"Ethereum Gas price: {gasOracle} Gas limit: {gasLimit} ETH price: ${prices["ethereum"]["usd"]} Lyra price: ${prices["lyra"]["usd"].Value} Final fee ${ethGasFee} in LYR: {feeInLyra}";
-							swapFeeDesc = $"{totalfeeInLyra} LYR ($ {Math.Round(totalfeeInLyra * lyraPrice, 2)})";
-							swapToCount = swapFromCount - totalfeeInLyra;
+								var totalFee = swapFromCount * 0.0001m + 1 + ethGasFee / lyraPrice;
+								var totalfeeInLyra = Math.Round(totalFee, 2);
+
+								//swapFeeDesc = $"Ethereum Gas price: {gasOracle} Gas limit: {gasLimit} ETH price: ${prices["ethereum"]["usd"]} Lyra price: ${prices["lyra"]["usd"].Value} Final fee ${ethGasFee} in LYR: {feeInLyra}";
+								swapFeeDesc = $"{totalfeeInLyra} LYR ($ {Math.Round(totalfeeInLyra * lyraPrice, 2)})";
+								swapToCount = swapFromCount - totalfeeInLyra;
+							}
+							else
+							{
+								var totalFee = swapFromCount * 0.0001m + 1;
+								var totalfeeInLyra = Math.Round(totalFee, 2);
+
+								swapFeeDesc = $"{totalfeeInLyra} LYR ($ {Math.Round(totalfeeInLyra * lyraPrice, 2)})";
+								swapToCount = swapFromCount - totalfeeInLyra;
+							}
+
+							IsDisabled = false;
+
+							swapFeeDesc = "Estimated OK.";
 						}
 						else
 							throw new Exception("Can't query fee. Network error.");
 					}
 					else
-					{
-						var totalFee = swapFromCount * 0.0001m + 1;
-						var totalfeeInLyra = Math.Round(totalFee, 2);
-
-						swapFeeDesc = $"{totalfeeInLyra} LYR ($ {Math.Round(totalfeeInLyra * lyraPrice, 2)})";
-						swapToCount = swapFromCount - totalfeeInLyra;
-					}
-
-					IsDisabled = false;
+						throw new Exception("Can't query fee. Network error.");
 				}
-				catch(Exception ex)
+				catch (Exception ex)
                 {
 					swapFeeDesc = $"Error: {ex.Message}";
                 }

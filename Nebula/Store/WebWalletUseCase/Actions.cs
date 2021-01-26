@@ -4,6 +4,7 @@ using Nethereum.Metamask.Blazor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Nebula.Store.WebWalletUseCase
@@ -80,6 +81,9 @@ namespace Nebula.Store.WebWalletUseCase
         // eth contract, metamask, etc.
         public SwapOptions options { get; set; }
         public MetamaskInterceptor metamask { get; set; }
+
+        public int gasPrice { get; set; }
+        public BigInteger gasLimit { get; set; }
     }
 
     public class WebWalletSwapTLYRResultAction

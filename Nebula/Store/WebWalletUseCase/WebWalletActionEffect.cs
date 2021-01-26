@@ -207,15 +207,16 @@ namespace Nebula.Store.WebWalletUseCase
 						if (sendResult.ResultCode == APIResultCodes.Success)
 						{
 							logger.LogInformation($"TokenSwap: first stage is ok for {action.fromAddress}");
-							var result = await SwapUtils.SendEthContractTokenAsync(
+							var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
 								action.options.ethUrl, action.options.ethContract, action.options.ethPub,
 								action.options.ethPvk, 
 								action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
+								action.gasPrice, action.gasLimit,
 								null);
 
-							logger.LogInformation($"TokenSwap: second stage for {action.fromAddress} eth tx hash is {result}");
+							logger.LogInformation($"TokenSwap: second stage for {action.fromAddress} eth tx hash is {txHash} IsSuccess: {result}");
 
-							if (string.IsNullOrEmpty(result))
+							if (!result)
 								throw new Exception("Eth sending failed.");
 
 							IsSuccess = true;
@@ -229,15 +230,16 @@ namespace Nebula.Store.WebWalletUseCase
 
 				if (action.fromToken == "TLYR" && action.toToken == "LYR")
 				{
-					var result = await SwapUtils.SendEthContractTokenAsync(
+					var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
 						action.options.ethUrl, action.options.ethContract, action.fromAddress,
 						null,
 						action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
+						action.gasPrice, action.gasLimit,
 						action.metamask);
 
-					logger.LogInformation($"TokenSwap: first stage for {action.fromAddress} eth tx hash {result}");
+					logger.LogInformation($"TokenSwap: first stage for {action.fromAddress} eth tx hash {result} IsSuccess: {result}");
 
-					if (!string.IsNullOrEmpty(result)) // test if success transfer
+					if (result) // test if success transfer
 					{
 						var store = new AccountInMemoryStorage();
 						var wallet = Wallet.Create(store, "default", "", config["network"],
