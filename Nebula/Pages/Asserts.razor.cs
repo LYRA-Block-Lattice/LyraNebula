@@ -46,7 +46,7 @@ namespace Nebula.Pages
             if (db.CollectionExists("Asserts"))
             {
                 var coll = db.GetCollection<Assert>("Asserts");
-                LyraAsserts = coll.FindAll().ToList();
+                LyraAsserts = coll.FindAll().Skip(1).ToList();  // don't display LYR
             }
         }
 

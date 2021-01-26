@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using Nebula.Data;
+using Nebula.Data.Lyra;
 using Nebula.Store.BlockSearchUseCase;
 using Nebula.Store.WebWalletUseCase;
 using Nethereum.ABI.FunctionEncoding.Attributes;
@@ -36,8 +37,13 @@ namespace Nebula.Pages
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
 
+		[Inject]
+		private ILiteDbContext dbCtx { get; set; }		// for asserts
+
 		[Microsoft.AspNetCore.Components.Parameter]
 		public string swap { get; set; }
+
+		private List<Assert> LyraAsserts { get; set; }
 
 		[JSInvokable]
 		public void ethAccountsChanged(string[] accounts)
@@ -74,7 +80,13 @@ namespace Nebula.Pages
 			{
 				_swapFromTokenName = value;
 				swapFromCount = 0;
-				_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });				
+
+				UpdateSwapToBalance();
+
+				if(walletState.Value.stage == UIStage.SwapTLYR)
+                {
+					_ = Task.Run(async () => { await UpdateSwapFromBalanceAsync(); });
+				}								
 			} 
 		}
 		private string _swapToTokenName;
@@ -108,6 +120,7 @@ namespace Nebula.Pages
 			}
 		}
 		public decimal swapToCount { get; set; }
+		public decimal expectedRito { get; set; }
 
 		[Required]
 		[StringLength(120, ErrorMessage = "Name is too long.")]
@@ -133,9 +146,21 @@ namespace Nebula.Pages
 
 			tokenName = "LYR";
 			altDisplay = "************";
-        }
+		}
 
-		private void ToggleKey(MouseEventArgs e)
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+
+			var db = dbCtx.Database;
+
+			if (db.CollectionExists("Asserts"))
+			{
+				var coll = db.GetCollection<Assert>("Asserts");
+				LyraAsserts = coll.FindAll().ToList();
+			}
+		}
+        private void ToggleKey(MouseEventArgs e)
 		{
 			if (altDisplay == "************")
 				altDisplay = walletState?.Value?.wallet?.PrivateKey;
@@ -231,6 +256,17 @@ namespace Nebula.Pages
 
 		private void SwapToken(MouseEventArgs e)
         {
+			swapFromToken = swap ?? "LYR";
+			swapToToken = "LYR";
+			swapFromCount = 0;
+			swapToCount = 0;
+
+			swapToAddress = "";
+
+			IsDisabled = true;
+			swapResultMessage = "";
+			walletState.Value.Message = "";
+
 			Dispatcher.Dispatch(new WebWalletSwapTokenAction());
 		}
 
@@ -239,6 +275,11 @@ namespace Nebula.Pages
 		{
 			swapFromToken = "LYR";
 			swapToToken = "TLYR";
+			swapFromCount = 0;
+			swapToCount = 0;
+
+			swapToAddress = "";
+
 			IsDisabled = true;
 			swapResultMessage = "";
 			walletState.Value.Message = "";
@@ -248,6 +289,34 @@ namespace Nebula.Pages
 			});
 			Dispatcher.Dispatch(new WebWalletSwapTLYRAction ());
 			_ = Task.Run(async () => { await UpdateSwapBalanceAsync(); });
+		}
+
+		private async Task DoSwapLyraToken(MouseEventArgs e)
+        {
+			var pool = await lyraClient.GetPool(swapFromToken, swapToToken);
+			if (pool.Successful() && pool.PoolAccountId != null)
+            {
+				var result = await walletState.Value.wallet.SwapToken(pool.Token0, pool.Token1,
+					swapFromToken, swapFromCount, expectedRito, 0);
+
+				if(result.ResultCode == APIResultCodes.Success)
+                {
+					swapResultMessage = "Success!";
+                }
+				else
+                {
+					swapResultMessage = $"Failed to swap token: {result.ResultCode}";
+                }
+			}	
+			else
+            {
+				swapResultMessage = $"Unable to get the liquidate pool: {pool.ResultCode}";
+            }
+
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
 		}
 
 		private async Task BeginSwapTLYR(MouseEventArgs e)
@@ -397,9 +466,88 @@ namespace Nebula.Pages
 			});
 		}
 
+		private string PoolInfo { get; set; }
+		private async Task UpdateSwapToBalanceForLyraSwapAsync()
+        {
+			if(walletState.Value.wallet?.GetLatestBlock()?.Balances?.ContainsKey(swapFromToken) == true)
+            {
+				fromTokenBalance = walletState.Value.wallet?.GetLatestBlock()?.Balances?[swapFromToken].ToBalanceDecimal() ?? 0m;
+			}
+			else
+            {
+				fromTokenBalance = 0m;
+            }
+
+			// check if pool exists.
+			var pool = await lyraClient.GetPool(swapFromToken, swapToToken);
+			if (pool.Successful() && pool.PoolAccountId != null)
+            {
+				IsDisabled = false;
+
+				var token0 = pool.Token0;
+				var token1 = pool.Token1;
+				var swapRito = 0m;
+				var poolLatestBlock = pool.GetBlock() as TransactionBlock;
+				if (poolLatestBlock.Balances.ContainsKey(token0) && !poolLatestBlock.Balances.Any(a => a.Value == 0))
+					swapRito = poolLatestBlock.Balances[token0].ToBalanceDecimal() / poolLatestBlock.Balances[token1].ToBalanceDecimal();
+
+				var sb = new StringBuilder();
+				sb.AppendLine($"Liquidate pool for {token0} and {token1}: \n Pool account ID is {pool.PoolAccountId}\n");
+				if (swapRito > 0)
+				{
+					expectedRito = swapRito;
+					sb.AppendLine($" Pool liquidate of {token0}: {poolLatestBlock.Balances[token0].ToBalanceDecimal()}");
+					sb.AppendLine($" Pool liquidate of {token1}: {poolLatestBlock.Balances[token1].ToBalanceDecimal()}");
+					sb.AppendLine($" Swap rito is {Math.Round(swapRito, LyraGlobal.RITOPRECISION)}.");
+					sb.AppendLine($"\n 1 {token0} = {Math.Round(1 / swapRito, 8)} {token1}\n 1 {token1} = {Math.Round(swapRito, 8)} {token0}\n");
+				
+					// calculate it
+					if(swapFromCount > 0)
+                    {
+						if(swapFromToken == token0)
+                        {
+							swapToCount = Math.Round(swapFromCount / swapRito, 8);
+                        }
+						else
+                        {
+							swapToCount = Math.Round(swapFromCount * swapRito, 8);
+						}
+                    }
+					else
+                    {
+						swapToCount = 0;
+					}
+				}
+				else
+				{
+					expectedRito = 0;
+					sb.AppendLine($" Pool doesn't have liquidate yet.");
+				}
+				PoolInfo = sb.ToString();
+			}				
+			else
+            {
+				IsDisabled = true;
+				PoolInfo = $"No liquidate pool for {swapFromToken} and {swapToToken}.";
+			}
+
+			await InvokeAsync(() =>
+			{
+				StateHasChanged();
+			});
+		}
+
 		Task _svcFeeCalculationTask;
 		private void UpdateSwapToBalance()
 		{
+			if(walletState.Value.stage == UIStage.SwapToken)
+            {
+				_ = Task.Run(async () => { 
+					await UpdateSwapToBalanceForLyraSwapAsync();
+				});
+				return;
+            }
+
 			if (_swapToTokenName == "TLYR")
 			{
 				swapToAddress = SelectedAccount;

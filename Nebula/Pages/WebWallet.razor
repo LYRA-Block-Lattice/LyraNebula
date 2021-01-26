@@ -124,8 +124,41 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapToken)
 {
     <h3>Lyra Swap</h3>
-    <hr />
-    <p>swap token for @swap</p>
+    <hr />        
+    <h5>Swap from:</h5>
+    <div>
+        <span>    
+            <select style="height: 40px; width: 380px" @bind="swapFromToken">
+            @foreach (var tkn in LyraAsserts)
+            {
+                <option value="@tkn.Name">@tkn.Name</option>
+            }
+            </select>
+        </span>
+        <span>
+            <input size="60" placeholder="Count" type="text" @bind="@swapFromCount" />
+        </span>
+    </div>
+    <p>@fromTokenBalance @swapFromToken available to swap</p>
+    <h5>Swap to:</h5>
+    <div>
+        <span>
+            <select style="height: 40px; width: 380px" @bind="swapToToken">
+            @foreach (var tkn in LyraAsserts)
+            {
+                <option value="@tkn.Name">@tkn.Name</option>
+            }
+            </select>
+        </span>
+    </div>
+    <p>You will get @swapToCount @swapToToken.</p>
+    <p><pre>@PoolInfo</pre></p>
+    <hr style="color: white" />
+    <div>
+        <button disabled="@IsDisabled" class="btn btn-primary" @onclick="DoSwapLyraToken">Swap</button>
+    </div>
+    <p>@swapResultMessage</p>
+    <hr style="color: white" />
     <div>
         <button class="btn btn-primary" @onclick="Return">Return</button>
     </div>
@@ -160,7 +193,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
         }
         else
         {
-            <h3>Swap Tokens</h3>
+            <h3>Swap between LYR and TLYR</h3>
             <p>My Lyra Account @walletState.Value.wallet.AccountId on @Configuration["network"]</p>
             <p>My Etnereum Account @SelectedAccount on @CurrentChainName</p>
         
@@ -171,15 +204,6 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
                     <option selected>LYR</option>
                     <option>TLYR</option>
                 </select>
-    @*             <InputSelect ValueExpression="@(()=>comment.Country)" 
-                                               Value="@comment.Country" 
-                     ValueChanged="@((string value) => OnValueChanged(value ))">
-                    <option value="">Select country...</option>
-                    <option value="USA">USA</option>
-                    <option value="Britain">Britain</option>
-                    <option value="Germany">Germany</option>
-                    <option value="Israel">Israel</option>
-             </InputSelect>*@
             </span>
             <span>
                 <input size="30" placeholder="Count" type="text" @bind="@swapFromCount" />

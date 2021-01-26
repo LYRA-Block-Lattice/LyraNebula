@@ -56,7 +56,6 @@ namespace Nebula.Data.Lyra
             // all asserts
             Console.WriteLine("Find all asserts...");
             var asserts = allGens.ToList()
-                .Skip(1)
                 .Where(x => x.AccountID != "LJcP9ztmYqzjbSRsr2sKZ44pSkhqdtUp5g8YbgPQbxNPNf9FuQ93K1FQUSXYxcofZqgV8qgzWYXArjR9w9VPGBbENcS1Z3") // filter out trash token
                 .Select(x => new Lyra.Assert
             {
@@ -166,7 +165,7 @@ namespace Nebula.Data.Lyra
             foreach (var kvp in dict.OrderByDescending(x => x.Value.Total))
             {
                 total += kvp.Value.Normal + kvp.Value.UnRecv;
-                Console.WriteLine($"{kvp.Key}: {Math.Round(kvp.Value.Normal + kvp.Value.UnRecv)}, Total {Math.Round(total)}");
+                //Console.WriteLine($"{kvp.Key}: {Math.Round(kvp.Value.Normal + kvp.Value.UnRecv)}, Total {Math.Round(total)}");
             }
 
             var latest = await FindLatestBlockAsync();
