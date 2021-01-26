@@ -58,11 +58,6 @@ namespace Nebula.Store.WebWalletUseCase
 		public static WebWalletState ReduceOpenSettingsAction(WebWalletState state, WebWalletSettingsAction action) => state.With(new { stage = UIStage.Settings });
 
 		[ReducerMethod]
-		public static WebWalletState ReduceSwapTokenAction(WebWalletState state, WebWalletSwapTokenAction action) => state.With(new { stage = UIStage.SwapToken });
-
-
-
-		[ReducerMethod]
 		public static WebWalletState ReduceSaveSettingsAction(WebWalletState state, WebWalletSaveSettingsAction action)
 		{
             var state2 = state.With(new
@@ -113,19 +108,42 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[ReducerMethod]
-		public static WebWalletState ReduceSwapTLYRAction(WebWalletState state, WebWalletSwapTLYRAction action) => state.With(new { stage = UIStage.SwapTLYR });
+		public static WebWalletState ReduceLyraSwapAction(WebWalletState state, WebWalletSwapTokenAction action) => state.With(new 
+		{ 
+			stage = UIStage.SwapToken,
+			Message = ""
+		});
 
 		[ReducerMethod]
-		public static WebWalletState ReductSwapTLYRHandler(WebWalletState state, WebWalletBeginSwapTLYRAction action) => state.With(new { IsLoading = true });
+		public static WebWalletState ReductLyraSwapHandler(WebWalletState state, WebWalletBeginTokenSwapAction action) => state.With(new { IsLoading = true });
 
 		[ReducerMethod]
-		public static WebWalletState ReduceSwapAction(WebWalletState state, WebWalletSwapTLYRResultAction action)
+		public static WebWalletState ReduceLyraSwapResultAction(WebWalletState state, WebWalletTokenSwapResultAction action)
 		{
 			var stt = state.With(new
 			{
 				IsLoading = false,
 				LastOperationIsSuccess = action.Success,
 				Message = action.Success ? "Swapping is succeed!" : "Swapping is failed."
+			});
+
+			return stt;
+		}
+
+		[ReducerMethod]
+		public static WebWalletState ReduceSwapTLYRAction(WebWalletState state, WebWalletSwapTLYRAction action) => state.With(new { stage = UIStage.SwapTLYR, Message = "" });
+
+		[ReducerMethod]
+		public static WebWalletState ReductSwapTLYRHandler(WebWalletState state, WebWalletBeginSwapTLYRAction action) => state.With(new { IsLoading = true });
+
+		[ReducerMethod]
+		public static WebWalletState ReduceSwapTLYRResultAction(WebWalletState state, WebWalletSwapTLYRResultAction action)
+		{
+			var stt = state.With(new
+			{
+				IsLoading = false,
+				LastOperationIsSuccess = action.Success,
+				Message = action.errMessage
 			});
 
 			return stt;

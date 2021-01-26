@@ -293,25 +293,20 @@ namespace Nebula.Pages
 
 		private async Task DoSwapLyraToken(MouseEventArgs e)
         {
-			var pool = await lyraClient.GetPool(swapFromToken, swapToToken);
-			if (pool.Successful() && pool.PoolAccountId != null)
-            {
-				var result = await walletState.Value.wallet.SwapToken(pool.Token0, pool.Token1,
-					swapFromToken, swapFromCount, expectedRito, 0);
+			var arg = new WebWalletBeginTokenSwapAction
+			{
+				wallet = walletState.Value.wallet,
 
-				if(result.ResultCode == APIResultCodes.Success)
-                {
-					swapResultMessage = "Success!";
-                }
-				else
-                {
-					swapResultMessage = $"Failed to swap token: {result.ResultCode}";
-                }
-			}	
-			else
-            {
-				swapResultMessage = $"Unable to get the liquidate pool: {pool.ResultCode}";
-            }
+				fromToken = swapFromToken,
+				fromAmount = swapFromCount,
+
+				toToken = swapToToken,
+				expectedRito = expectedRito,
+				slippage = 0m
+			};
+
+			Dispatcher.Dispatch(arg);
+			IsDisabled = true;
 
 			await InvokeAsync(() =>
 			{

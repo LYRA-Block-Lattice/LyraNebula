@@ -194,6 +194,43 @@ namespace Nebula.Store.WebWalletUseCase
 		}
 
 		[EffectMethod]
+		public async Task HandleLyraSwap(WebWalletBeginTokenSwapAction action, IDispatcher dispatcher)
+        {
+			bool IsSuccess = false;
+			string swapResultMessage = "";
+
+			try
+            {
+				var pool = await client.GetPool(action.fromToken, action.toToken);
+				if (pool.Successful() && pool.PoolAccountId != null)
+				{
+					var result = await action.wallet.SwapToken(pool.Token0, pool.Token1,
+						action.fromToken, action.fromAmount, action.expectedRito, action.slippage);
+
+					if (result.ResultCode == APIResultCodes.Success)
+					{
+						IsSuccess = true;
+						swapResultMessage = "Success!";
+					}
+					else
+					{
+						swapResultMessage = $"Failed to swap token: {result.ResultCode}";
+					}
+				}
+				else
+				{
+					swapResultMessage = $"Unable to get the liquidate pool: {pool.ResultCode}";
+				}
+			}
+			catch(Exception ex)
+            {
+				swapResultMessage = "In Token Swap: " + ex.Message;
+            }
+
+			dispatcher.Dispatch(new WebWalletTokenSwapResultAction { Success = IsSuccess, errMessage = swapResultMessage });
+		}
+
+		[EffectMethod]
 		public async Task HandleSwap(WebWalletBeginSwapTLYRAction action, IDispatcher dispatcher)
 		{
 			bool IsSuccess = false;

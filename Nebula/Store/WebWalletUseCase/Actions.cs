@@ -60,6 +60,25 @@ namespace Nebula.Store.WebWalletUseCase
 
     }
 
+    public class WebWalletBeginTokenSwapAction
+    {
+        // lyra specified
+        public Wallet wallet { get; set; }
+
+        // swap specified
+        public string fromToken { get; set; }
+        public string toToken { get; set; }
+        public decimal fromAmount { get; set; }
+        public decimal expectedRito { get; set; }
+        public decimal slippage { get; set; }
+    }
+
+    public class WebWalletTokenSwapResultAction
+    {
+        public bool Success { get; set; }
+        public string errMessage { get; set; }
+    }
+
     public class WebWalletSwapTLYRAction
     {
 
