@@ -319,7 +319,8 @@ namespace Nebula.Pages
 
 				toToken = swapToToken,
 				expectedRito = expectedRito,
-				slippage = 0m
+				minReceived = swapCalculator.MinimumReceived,
+				slippage = Math.Round(this.slippage / 100, 16)
 			};
 
 			Dispatcher.Dispatch(arg);

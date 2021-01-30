@@ -205,7 +205,7 @@ namespace Nebula.Store.WebWalletUseCase
 				if (pool.Successful() && pool.PoolAccountId != null)
 				{
 					var result = await action.wallet.SwapToken(pool.Token0, pool.Token1,
-						action.fromToken, action.fromAmount, 0); // HACK
+						action.fromToken, action.fromAmount, action.minReceived);
 
 					if (result.ResultCode == APIResultCodes.Success)
 					{

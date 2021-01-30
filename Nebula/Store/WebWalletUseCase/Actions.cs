@@ -70,6 +70,7 @@ namespace Nebula.Store.WebWalletUseCase
         public string toToken { get; set; }
         public decimal fromAmount { get; set; }
         public decimal expectedRito { get; set; }
+        public decimal minReceived { get; set; }
         public decimal slippage { get; set; }
     }
 
