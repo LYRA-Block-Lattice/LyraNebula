@@ -136,7 +136,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
             </select>
         </span>
         <span>
-            <input size="60" placeholder="Count" type="text" @bind="@swapFromCount" />
+            <input style="height: 40px; " size="20" placeholder="Count" type="text" @bind="@swapFromCount" />
         </span>
     </div>
     <p>@fromTokenBalance @swapFromToken available to swap</p>
@@ -151,7 +151,19 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
             </select>
         </span>
     </div>
-    <p>You will get @swapToCount @swapToToken.</p>
+    <br />
+    <div>
+         Slippage: <input size="5" type="text" @bind="@slippage" /> %
+    </div>
+    <hr />
+    <p>
+        <div>Minimum Received: @swapToCount @swapToToken.</div>
+    @if(swapCalculator != null)
+    {
+        <div>Price: @swapCalculator.Price @swapToToken per @swapFromToken</div>
+        <div>Price Impact: @(Math.Round(swapCalculator.PriceImpact * 100, 4))%</div>
+    }
+    </p>
     <p><pre>@PoolInfo</pre></p>
     <hr style="color: white" />
     <div>

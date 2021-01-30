@@ -71,6 +71,7 @@ namespace Nebula.Pages
 		private int EthGasPrice;
 		private BigInteger EthGasLimit;
 
+		public SwapCalculator swapCalculator { get; set; }
 		public string swapFromToken { 
 			get
 			{
@@ -119,6 +120,21 @@ namespace Nebula.Pages
 				UpdateSwapToBalance();
 			}
 		}
+
+		private decimal _slippage;
+		public decimal slippage
+		{
+			get
+			{
+				return _slippage;
+			}
+			set
+			{
+				_slippage = value;
+				UpdateSwapToBalance();
+			}
+		}
+
 		public decimal swapToCount { get; set; }
 		public decimal expectedRito { get; set; }
 
@@ -260,6 +276,7 @@ namespace Nebula.Pages
 			swapToToken = "LYR";
 			swapFromCount = 0;
 			swapToCount = 0;
+			slippage = 0.1m;
 
 			swapToAddress = "";
 
@@ -493,21 +510,21 @@ namespace Nebula.Pages
 					expectedRito = swapRito;
 					sb.AppendLine($" Pool liquidate of {token0}: {poolLatestBlock.Balances[token0].ToBalanceDecimal()}");
 					sb.AppendLine($" Pool liquidate of {token1}: {poolLatestBlock.Balances[token1].ToBalanceDecimal()}");
-					sb.AppendLine($" Swap rito is {Math.Round(swapRito, LyraGlobal.RITOPRECISION)}.");
-					sb.AppendLine($"\n 1 {token0} = {Math.Round(1 / swapRito, 8)} {token1}\n 1 {token1} = {Math.Round(swapRito, 8)} {token0}\n");
-				
+
 					// calculate it
-					if(swapFromCount > 0)
+					if (swapFromCount > 0)
                     {
 						if(swapFromToken == token0)
                         {
-							swapToCount = Math.Round(swapFromCount / swapRito, 8);
-                        }
+							swapCalculator = new SwapCalculator(token0, token1, poolLatestBlock, token0, swapFromCount, slippage / 100);		// default %
+						}
 						else
                         {
-							swapToCount = Math.Round(swapFromCount * swapRito, 8);
+							swapCalculator = new SwapCalculator(token0, token1, poolLatestBlock, token1, swapFromCount, slippage / 100);
 						}
-                    }
+
+						swapToCount = swapCalculator.MinimumReceived;
+					}
 					else
                     {
 						swapToCount = 0;
