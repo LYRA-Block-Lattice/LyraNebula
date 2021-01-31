@@ -191,12 +191,16 @@ namespace Nebula.Pages
 
 		private void CreateWallet(MouseEventArgs e)
         {
+			altDisplay = "************";
+
 			Dispatcher.Dispatch(new WebWalletCreateAction());
 		}
 
 		private async void RestoreWallet(MouseEventArgs e)
 		{
-			if(string.IsNullOrWhiteSpace(prvKey))
+			altDisplay = "************";
+
+			if (string.IsNullOrWhiteSpace(prvKey))
             {
 				await JS.InvokeAsync<object>("alert", "Private Key can't be empty.");
 				return;
