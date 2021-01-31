@@ -310,21 +310,25 @@ namespace Nebula.Pages
 
 		private async Task DoSwapLyraToken(MouseEventArgs e)
         {
-			var arg = new WebWalletBeginTokenSwapAction
-			{
-				wallet = walletState.Value.wallet,
+			// detect if token can be swapped.
+			if(swapCalculator.MinimumReceived > 0)
+            {
+				var arg = new WebWalletBeginTokenSwapAction
+				{
+					wallet = walletState.Value.wallet,
 
-				fromToken = swapFromToken,
-				fromAmount = swapFromCount,
+					fromToken = swapFromToken,
+					fromAmount = swapFromCount,
 
-				toToken = swapToToken,
-				expectedRito = expectedRito,
-				minReceived = swapCalculator.MinimumReceived,
-				slippage = Math.Round(this.slippage / 100, 16)
-			};
+					toToken = swapToToken,
+					expectedRito = expectedRito,
+					minReceived = swapCalculator.MinimumReceived,
+					slippage = Math.Round(this.slippage / 100, 16)
+				};
 
-			Dispatcher.Dispatch(arg);
-			IsDisabled = true;
+				Dispatcher.Dispatch(arg);
+				IsDisabled = true;
+			}			
 
 			await InvokeAsync(() =>
 			{
@@ -482,6 +486,8 @@ namespace Nebula.Pages
 		private string PoolInfo { get; set; }
 		private async Task UpdateSwapToBalanceForLyraSwapAsync()
         {
+			swapCalculator = null;
+
 			if(walletState.Value.wallet?.GetLatestBlock()?.Balances?.ContainsKey(swapFromToken) == true)
             {
 				fromTokenBalance = walletState.Value.wallet?.GetLatestBlock()?.Balances?[swapFromToken].ToBalanceDecimal() ?? 0m;
@@ -543,6 +549,9 @@ namespace Nebula.Pages
 				IsDisabled = true;
 				PoolInfo = $"No liquidate pool for {swapFromToken} and {swapToToken}.";
 			}
+
+			if (swapCalculator == null || swapCalculator.MinimumReceived <= 0)
+				IsDisabled = true;
 
 			await InvokeAsync(() =>
 			{

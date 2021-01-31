@@ -162,6 +162,8 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
     {
         <div>Price: @swapCalculator.Price @swapToToken per @swapFromToken</div>
         <div>Price Impact: @(Math.Round(swapCalculator.PriceImpact * 100, 4))%</div>
+        <div>Liquidate pool provider fee: @swapCalculator.PayToProvider @swapFromToken</div>
+        <div>Lyra protocol fee: @swapCalculator.PayToAuthorizer LYR</div>
     }
     </p>
     <p><pre>@PoolInfo</pre></p>
