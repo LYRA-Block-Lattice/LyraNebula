@@ -1,5 +1,6 @@
 ﻿using Fluxor;
 using LiteDB;
+using Lyra.Core.API;
 using Microsoft.AspNetCore.Components;
 using Nebula.Data;
 using Nebula.Data.Lyra;
@@ -27,6 +28,7 @@ namespace Nebula.Pages
         private decimal TeamRito { get; set; }
         private decimal Circulate { get; set; }
         private decimal CirculateRito { get; set; }
+        private decimal Burned { get; set; }
 
         public void oninput(ChangeEventArgs args)
         {
@@ -88,11 +90,25 @@ namespace Nebula.Pages
                 int order = 0;
                 decimal sum = 0;
                 decimal subRito = 0;
+                var burningAccount = Total.AllAccounts
+                    .Where(x => x.Key == LyraGlobal.BURNINGACCOUNTID)
+                    .Select(p => new { Key = p.Key, Value = p.Value })
+                    .FirstOrDefault();
+                if (burningAccount != null)
+                    Burned = burningAccount.Value.UnRecv;
+
                 foreach (var e in Total.AllAccounts.Take(100))
                 {
-                    sum += e.Value.Total;
+                    if (e.Key != LyraGlobal.BURNINGACCOUNTID)
+                        sum += e.Value.Total;
+
                     subRito = Math.Round(sum / 100000000, 4);
                     order++;
+                    var tag = "";
+                    if (teamAddresses.Contains(e.Key))
+                        tag = "Lyra Team";
+                    else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
+                        tag = "Burning";
                     RichList.Add(new RichItem
                     {
                         AccountId = e.Key,
@@ -100,7 +116,7 @@ namespace Nebula.Pages
                         Order = order,
                         Sum = sum,
                         SumRito = subRito,
-                        Tag = teamAddresses.Contains(e.Key) ? "Lyra Team" : ""
+                        Tag = tag
                     });
                 }
             }
@@ -114,7 +130,7 @@ namespace Nebula.Pages
 
             TeamRito = Math.Round(TeamTotal / 10000000000 * 100, 4);
 
-            Circulate = 10000000000 - TeamTotal;
+            Circulate = 10000000000 - Burned - TeamTotal;
             CirculateRito = 100 - TeamRito;
         }
     }
