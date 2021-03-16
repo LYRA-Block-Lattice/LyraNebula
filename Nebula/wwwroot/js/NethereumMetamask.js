@@ -47,7 +47,8 @@
                 console.log(result);
                 resolve(JSON.stringify(result));
 
-
+                // TODO: handle reject
+                // maybe use the dotNetObjRef callback
             });
         });
     }
