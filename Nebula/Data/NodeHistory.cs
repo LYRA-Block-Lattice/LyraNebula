@@ -1,9 +1,11 @@
 ﻿using LiteDB;
+using Nebula.Data.Lyra;
 using Nebula.Store.NodeViewUseCase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using static Nebula.Data.Lyra.Supply;
 
 namespace Nebula.Data
 {
@@ -16,15 +18,24 @@ namespace Nebula.Data
         IEnumerable<HistInfo> FindHistory(int maxCount);
         int Insert(NodeViewState record);
         bool Update(NodeViewState record);
+        SupplyInfo GetCurrentSupply();
     }
 
     public class NodeHistory : INodeHistory
     {
+        private ILiteDbContext _ctx;
         private LiteDatabase _liteDb;
 
         public NodeHistory(ILiteDbContext liteDbContext)
         {
+            _ctx = liteDbContext;
             _liteDb = liteDbContext.Database;
+        }
+
+        public SupplyInfo GetCurrentSupply()
+        {
+            var supply = new Supply(_ctx);
+            return supply.Current;
         }
 
         // last 3 days

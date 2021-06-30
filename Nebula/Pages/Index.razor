@@ -8,18 +8,18 @@
 <h3>Search by Hash or Account ID</h3>
 <p><input size="100" type="text" @oninput="oninput" /></p>
 
-@if(RichList != null && Snap?.Network == Configuration["network"])
+@if(CurrentSupply.RichList != null && CurrentSupply.Snap?.Network == Configuration["network"])
 {
     <hr />
     <h1>Lyra Token Supply Chart</h1>
     <p>Total Supply: 10,000,000,000 LYR</p>
-    <p>Burned: @Burned.ToString("n0") LYR</p>
-    <p>Team/Locked/Reserved: @TeamTotal.ToString("n0") LYR, @TeamRito % of Total Supply.</p>
-    <p>Circulating Supply: @Circulate.ToString("n0") LYR, @CirculateRito % of Total Supply.</p>
+    <p>Burned: @CurrentSupply.Current.Burned.ToString("n0") LYR</p>
+    <p>Team/Locked/Reserved: @CurrentSupply.Current.TeamTotal.ToString("n0") LYR, @CurrentSupply.Current.TeamRito % of Total Supply.</p>
+    <p>Circulating Supply: @CurrentSupply.Current.Circulate.ToString("n0") LYR, @CurrentSupply.Current.CirculateRito % of Total Supply.</p>
     <hr />
         <div>
         <h1>Lyra Rich List</h1>
-        <p>Shows only top 100 accounts. Last updated (UTC): @Snap.Updated</p>
+        <p>Shows only top 100 accounts. Last updated (UTC): @CurrentSupply.Snap.Updated</p>
     <table class="table">
         <thead>
             <tr>
@@ -33,7 +33,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var rich in RichList)
+            @foreach (var rich in CurrentSupply.RichList)
             {
                <tr>
                    <td>@rich.Order</td>
