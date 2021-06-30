@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AntDesign" Version="0.8.2" />
+    <PackageReference Include="AntDesign.Charts" Version="0.2.1" />
     <PackageReference Include="Blazored.LocalStorage" Version="3.0.0" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.3.5" />
     <PackageReference Include="Converto" Version="2.1.0" />
