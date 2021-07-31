@@ -22,7 +22,7 @@ namespace Nebula.Store.BlockSearchUseCase
 			client = lyraClient;
 		}
 
-		protected override async Task HandleAsync(BlockSearchAction action, IDispatcher dispatcher)
+		public override async Task HandleAsync(BlockSearchAction action, IDispatcher dispatcher)
 		{
 			var hashToSearch = action.hash;
 			Block blockResult = null;

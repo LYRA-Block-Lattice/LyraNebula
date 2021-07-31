@@ -19,7 +19,7 @@ namespace Nebula.Store.WeatherUseCase
 			Http = http;
 		}
 
-		protected override async Task HandleAsync(FetchDataAction action, IDispatcher dispatcher)
+		public override async Task HandleAsync(FetchDataAction action, IDispatcher dispatcher)
 		{
 			//var forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
 			var forecasts = await (new WeatherForecastService()).GetForecastAsync(DateTime.Now);

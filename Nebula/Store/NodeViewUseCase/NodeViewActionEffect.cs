@@ -27,7 +27,7 @@ namespace Nebula.Store.NodeViewUseCase
 			hist = history;
 		}
 
-		protected override async Task HandleAsync(NodeViewAction action, IDispatcher dispatcher)
+		public override async Task HandleAsync(NodeViewAction action, IDispatcher dispatcher)
 		{
 			int port = 4504;
 			if (config["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))

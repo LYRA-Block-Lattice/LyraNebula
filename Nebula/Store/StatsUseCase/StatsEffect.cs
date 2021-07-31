@@ -22,7 +22,7 @@ namespace Nebula.Store.StatsUseCase
 			client = lyraClient;
 		}
 
-		protected override async Task HandleAsync(StatsAction action, IDispatcher dispatcher)
+		public override async Task HandleAsync(StatsAction action, IDispatcher dispatcher)
 		{
 			var stats = await client.GetTransStatsAsync();
 			

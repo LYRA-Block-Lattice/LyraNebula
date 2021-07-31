@@ -22,7 +22,7 @@ namespace Nebula.Store.FeesUserCase
 			client = lyraClient;
 		}
 
-		protected override async Task HandleAsync(FeesAction action, IDispatcher dispatcher)
+		public override async Task HandleAsync(FeesAction action, IDispatcher dispatcher)
 		{
 			var stats = client.GetFeeStats();// .GetFeeStatsAsync();
 			var sbResult = await client.GetLastServiceBlock();
