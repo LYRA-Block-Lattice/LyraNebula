@@ -2,8 +2,25 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+# use nginx as proxy
+EXPOSE 5100
+
+ARG LYRA_NETWORK
+ARG LYRA_CAPCHA_SECRET
+ARG LYRA_DB_NAME
+ARG LYRA_DB_USER
+ARG LYRA_DB_PASSWORD
+ARG LYRA_IPDB_FN
+
+ENV NEBULA_network $LYRA_NETWORK
+ENV NEBULA_reCAPTCHA__Secret $LYRA_CAPCHA_SECRET
+ENV NEBULA_Lyra__Mongodb "mongodb://${LYRA_DB_USER}:${LYRA_DB_PASSWORD}@127.0.0.1/${LYRA_DB_NAME}"
+ENV NEBULA_ipdb $LYRA_IPDB_FN
+ENV ASPNETCORE_ENVIRONMENT "Production"
+# ENV DOTNET_PRINT_TELEMETRY_MESSAGE "false"
+
+# store ip2country.zip to ~/.lyra/res
+ADD ~/.lyra/res /root/.lyra/res
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
@@ -19,4 +36,4 @@ RUN dotnet publish "Nebula.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Nebula.dll"]
+ENTRYPOINT ["dotnet", "Nebula.dll", "--urls", "http://*:5100"]
