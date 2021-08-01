@@ -21,6 +21,7 @@
     <PackageReference Include="IP-2-Country.MarkusGo" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MaxMind" Version="1.2.0" />
     <PackageReference Include="LiteDB" Version="5.0.11" />
+    <PackageReference Include="Lyra.Data" Version="2.2.4.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
@@ -38,12 +39,6 @@
   <ItemGroup>
     <Folder Include="LiteDb\" />
     <Folder Include="wwwroot\apps\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Lyra.Data">
-      <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\netstandard2.1\Lyra.Data.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

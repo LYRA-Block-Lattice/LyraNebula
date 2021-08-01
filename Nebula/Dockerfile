@@ -19,9 +19,6 @@ ENV NEBULA_ipdb $LYRA_IPDB_FN
 ENV ASPNETCORE_ENVIRONMENT "Production"
 # ENV DOTNET_PRINT_TELEMETRY_MESSAGE "false"
 
-# store ip2country.zip to ~/.lyra/res
-ADD ~/.lyra/res /root/.lyra/res
-
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
 COPY ["Nebula/Nebula.csproj", "Nebula/"]
