@@ -14,6 +14,8 @@ namespace Nebula.Pages
 {
 	public partial class ShowBillBoard
 	{
+		protected bool IsDisabled { get; set; }
+
 		[Inject]
 		private IState<NodeViewState> NodeState { get; set; }
 
@@ -44,6 +46,8 @@ namespace Nebula.Pages
 
 		protected override void OnInitialized()
 		{
+			IsDisabled = true;
+
 			BriefHist = Enumerable.Empty<HistInfo>();
 			base.OnInitialized();
 
@@ -81,6 +85,9 @@ namespace Nebula.Pages
 
 		private void Refresh(MouseEventArgs e)
 		{
+			IsDisabled = true;
+			StateHasChanged();
+
 			var latest = History.FindLatest();
 			if (latest == null)
 				Dispatcher.Dispatch(new NodeViewAction());
@@ -98,9 +105,19 @@ namespace Nebula.Pages
 				if (BriefHist.Any())
 					selId = BriefHist.First().id;
 
+				IsDisabled = false;
 				StateHasChanged();
 			}				
         }
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+			if(firstRender)
+            {
+				IsDisabled = false;
+				StateHasChanged();
+			}
+		}
     }
 
 }
