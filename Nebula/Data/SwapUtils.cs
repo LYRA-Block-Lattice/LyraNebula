@@ -186,7 +186,7 @@ namespace Nebula.Data
             var lyraClient = LyraRestClient.Create(lyraNetwork, Environment.OSVersion.ToString(),
                 "Nebula Swap", "1.0");
 
-            var syncResult = await wallet.Sync(lyraClient);
+            var syncResult = await wallet.SyncAsync(lyraClient);
             if (syncResult == APIResultCodes.Success)
             {
                 var block = wallet.GetLatestBlock();

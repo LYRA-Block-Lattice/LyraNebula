@@ -42,7 +42,7 @@ namespace Nebula.Store.NodeViewUseCase
 				var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
 				try
                 {
-					var syncState = await lcx.GetSyncState();
+					var syncState = await lcx.GetSyncStateAsync();
 					bag.TryAdd(node.Key, syncState);
 				}
 				catch(Exception ex)

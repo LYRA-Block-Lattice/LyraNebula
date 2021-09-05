@@ -36,10 +36,10 @@ namespace Nebula.Store.WebWalletUseCase
         [EffectMethod]
         public async Task HandleSend(WebWalletSendTokenAction action, IDispatcher dispatcher)
         {
-			var result = await action.wallet.Sync(null);
+			var result = await action.wallet.SyncAsync(null);
 			if (result == Lyra.Core.Blocks.APIResultCodes.Success)
 			{
-				var result2 = await action.wallet.Send(action.Amount, action.DstAddr, action.TokenName);
+				var result2 = await action.wallet.SendAsync(action.Amount, action.DstAddr, action.TokenName);
 				if (result2.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
 				{
 
@@ -56,7 +56,7 @@ namespace Nebula.Store.WebWalletUseCase
 			Wallet.Create(store, name, "", config["network"]);
 
 			var wallet = Wallet.Open(store, name, "");
-			await wallet.Sync(client);
+			await wallet.SyncAsync(client);
 
 			dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
 		}
@@ -72,9 +72,9 @@ namespace Nebula.Store.WebWalletUseCase
 
 				var wallet = Wallet.Open(store, name, "");
 				if (action.selfVote)
-					wallet.VoteFor = wallet.AccountId;
+					wallet.SetVoteFor(wallet.AccountId);
 
-				await wallet.Sync(client);
+				await wallet.SyncAsync(client);
 
 				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
 			}
@@ -87,7 +87,7 @@ namespace Nebula.Store.WebWalletUseCase
 		[EffectMethod]
 		public async Task HandleRefresh(WebWalletRefreshBalanceAction action, IDispatcher dispatcher)
 		{
-			var result = await action.wallet.Sync(null);
+			var result = await action.wallet.SyncAsync(null);
 			if (result == Lyra.Core.Blocks.APIResultCodes.Success)
 			{
 
@@ -98,18 +98,18 @@ namespace Nebula.Store.WebWalletUseCase
 		[EffectMethod]
 		public async Task HandleTransactions(WebWalletTransactionsAction action, IDispatcher dispatcher)
 		{
-			var result = await action.wallet.Sync(null);
+			var result = await action.wallet.SyncAsync(null);
 			List<string> txs = new List<string>();
 			if (result == Lyra.Core.Blocks.APIResultCodes.Success)
 			{
-				var accHeight = await client.GetAccountHeight(action.wallet.AccountId);
+				var accHeight = await client.GetAccountHeightAsync(action.wallet.AccountId);
 				Dictionary<string, long> oldBalance = null;
 				var start = accHeight.Height - 100;
 				if (start < 1)
 					start = 1;			// only show the last 100 tx
 				for (long i = start; i <= accHeight.Height; i++)
                 {
-					var blockResult = await client.GetBlockByIndex(action.wallet.AccountId, i);
+					var blockResult = await client.GetBlockByIndexAsync(action.wallet.AccountId, i);
 					var block = blockResult.GetBlock() as TransactionBlock;
 					if (block == null)
 						txs.Add("Null");
@@ -126,7 +126,7 @@ namespace Nebula.Store.WebWalletUseCase
                             }
 							else
                             {
-								var srcBlockResult = await client.GetBlock(rb.SourceHash);
+								var srcBlockResult = await client.GetBlockAsync(rb.SourceHash);
 								var srcBlock = srcBlockResult.GetBlock() as TransactionBlock;
 								str += $"Receive from {srcBlock.AccountID}";
 							}
@@ -163,7 +163,7 @@ namespace Nebula.Store.WebWalletUseCase
 			var name = Guid.NewGuid().ToString();
 			Wallet.Create(store, name, "", config["network"], action.faucetPvk);
 			var wallet = Wallet.Open(store, name, "");
-			await wallet.Sync(client);
+			await wallet.SyncAsync(client);
 
 			dispatcher.Dispatch(new WebWalletFreeTokenResultAction { faucetBalance = (decimal)wallet.GetLatestBlock().Balances[LyraGlobal.OFFICIALTICKERCODE] / LyraGlobal.TOKENSTORAGERITO });
 		}
@@ -175,16 +175,16 @@ namespace Nebula.Store.WebWalletUseCase
 			var name = Guid.NewGuid().ToString();
 			Wallet.Create(store, name, "", config["network"], action.faucetPvk);
 			var faucetWallet = Wallet.Open(store, name, "");
-			await faucetWallet.Sync(client);
+			await faucetWallet.SyncAsync(client);
 
 			// random amount
 			var random = new Random();
 			var randAmount = random.Next(300, 3000);
 
-			var result = await faucetWallet.Send(randAmount, action.wallet.AccountId);
+			var result = await faucetWallet.SendAsync(randAmount, action.wallet.AccountId);
 			if (result.ResultCode == APIResultCodes.Success)
 			{
-				await action.wallet.Sync(client);
+				await action.wallet.SyncAsync(client);
 				dispatcher.Dispatch(new WebWalletSendMeFreeTokenResultAction { Success = true, FreeAmount = randAmount });
 			}
 			else
@@ -201,10 +201,10 @@ namespace Nebula.Store.WebWalletUseCase
 
 			try
             {
-				var pool = await client.GetPool(action.fromToken, action.toToken);
+				var pool = await client.GetPoolAsync(action.fromToken, action.toToken);
 				if (pool.Successful() && pool.PoolAccountId != null)
 				{
-					var result = await action.wallet.SwapToken(pool.Token0, pool.Token1,
+					var result = await action.wallet.SwapTokenAsync(pool.Token0, pool.Token1,
 						action.fromToken, action.fromAmount, action.minReceived);
 
 					if (result.ResultCode == APIResultCodes.Success)
@@ -238,10 +238,10 @@ namespace Nebula.Store.WebWalletUseCase
             {
 				if (action.fromToken == "LYR" && action.toToken == "TLYR")
 				{
-					var syncResult = await action.wallet.Sync(null);
+					var syncResult = await action.wallet.SyncAsync(null);
 					if (syncResult == APIResultCodes.Success)
 					{
-						var sendResult = await action.wallet.Send(action.fromAmount,
+						var sendResult = await action.wallet.SendAsync(action.fromAmount,
 							action.options.lyrPub, "LYR");
 
 						if (sendResult.ResultCode == APIResultCodes.Success)
@@ -285,10 +285,10 @@ namespace Nebula.Store.WebWalletUseCase
 						var wallet = Wallet.Create(store, "default", "", config["network"],
 							action.options.lyrPvk);
 
-						var syncResult = await wallet.Sync(client);
+						var syncResult = await wallet.SyncAsync(client);
 						if (syncResult == APIResultCodes.Success)
 						{
-							var sendResult = await wallet.Send(action.toAmount,
+							var sendResult = await wallet.SendAsync(action.toAmount,
 								action.toAddress, "LYR");
 
 							if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)

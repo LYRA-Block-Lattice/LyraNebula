@@ -25,7 +25,7 @@ namespace Nebula.Store.FeesUserCase
 		public override async Task HandleAsync(FeesAction action, IDispatcher dispatcher)
 		{
 			var stats = client.GetFeeStats();// .GetFeeStatsAsync();
-			var sbResult = await client.GetLastServiceBlock();
+			var sbResult = await client.GetLastServiceBlockAsync();
 			var sb = sbResult.GetBlock() as ServiceBlock;
 			var voters = client.GetVoters(new VoteQueryModel
 			{

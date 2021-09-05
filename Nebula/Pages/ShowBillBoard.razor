@@ -54,10 +54,7 @@
         </thead>
         <tbody>
             @foreach (var nodeInfo in NodeState.Value.GetRankedList())
-            {
-           try{
-
-           
+            {          
                 string hostName = null;
                 string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
                 if(seedHosts.ContainsKey(ipaddr))
@@ -83,8 +80,8 @@
                 <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
                 <td><span title="@ipaddr">@hostName</span></td>
                 <td align="center">@nodeInfo.Votes</td>
-                @if(nodeInfo.Status != null)
-                    {
+                @if(nodeInfo.Status != null && nodeInfo.Status.Status != null)
+                 {
                 <td>Connected OK.</td>
                 <td>@nodeInfo.Status.Status.now</td>
                         @if(nodeInfo.Status.LastConsolidationHash==null || nodeInfo.Status.LastConsolidationHash.Length < 11)
@@ -109,7 +106,7 @@
                         }
                 <td align="center">@nodeInfo.Status.Status.activePeers</td>
                 <td align="center">@nodeInfo.Status.Status.connectedPeers</td>
-                    }
+                }
                 else
                 {
                 <td>Failed to connect</td>
@@ -124,8 +121,6 @@
                 <td></td>
                 }
             </tr>
-            }
-            catch {}
             }
         </tbody>
     </table>

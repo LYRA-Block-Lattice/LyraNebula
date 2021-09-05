@@ -50,7 +50,8 @@ namespace Nebula.Store.WebWalletUseCase
 				stage = action.stage,
 				IsOpening = action.IsOpening,
 				wallet = action.wallet,
-				balanceString = bs
+				balanceString = bs,
+				VoteFor = action.wallet.VoteFor
 			});
 		}			
 
@@ -64,7 +65,7 @@ namespace Nebula.Store.WebWalletUseCase
             {
                 stage = UIStage.Main,
             });
-			state2.wallet.VoteFor = action.VoteFor;
+			state2.wallet.SetVoteFor(action.VoteFor);
 			return state2;
         }
 

@@ -46,41 +46,45 @@ namespace Nebula.Pages
 
 		protected override void OnInitialized()
 		{
-			IsDisabled = true;
-
-			BriefHist = Enumerable.Empty<HistInfo>();
-			base.OnInitialized();
-
-			// load history first
-			var latest = History.FindLatest();
-			if(latest == null)
-				Dispatcher.Dispatch(new NodeViewAction());
-			else
+			try
             {
-				BriefHist = History.FindHistory(100);
-				if (BriefHist.Any())
-					selId = BriefHist.First().id;
+				IsDisabled = true;
 
-				Dispatcher.Dispatch(new LoadHistoryAction { historyState = latest });
-				StateHasChanged();
-			}				
+				BriefHist = Enumerable.Empty<HistInfo>();
+				base.OnInitialized();
 
-			NodeState.StateChanged += NodeState_StateChanged;			
+				// load history first
+				var latest = History.FindLatest();
+				if (latest == null)
+					Dispatcher.Dispatch(new NodeViewAction());
+				else
+				{
+					BriefHist = History.FindHistory(100);
+					if (BriefHist.Any())
+						selId = BriefHist.First().id;
 
-			seedHosts = new Dictionary<string, string>();
-			_ = Task.Run(() => {
-				var aggClient = new LyraAggregatedClient(Configuration["network"], true);
-				var seeds = aggClient.GetSeedNodes();
-				foreach(var seed in seeds)
-                {
-					try
+					Dispatcher.Dispatch(new LoadHistoryAction { historyState = latest });
+					StateHasChanged();
+				}
+
+				NodeState.StateChanged += NodeState_StateChanged;
+
+				seedHosts = new Dictionary<string, string>();
+				_ = Task.Run(() => {
+					var aggClient = new LyraAggregatedClient(Configuration["network"], true);
+					var seeds = aggClient.GetSeedNodes();
+					foreach (var seed in seeds)
 					{
-						var ip = Dns.GetHostEntry(seed);
-						seedHosts.Add($"{ip.AddressList[0]}", seed);
+						try
+						{
+							var ip = Dns.GetHostEntry(seed);
+							seedHosts.Add($"{ip.AddressList[0]}", seed);
+						}
+						catch { }
 					}
-					catch { }
-                }					
-			});
+				});
+			}
+            catch { }
 		}
 
 		private void Refresh(MouseEventArgs e)
@@ -99,14 +103,18 @@ namespace Nebula.Pages
         {
 			if(e.Id == 0 && e.TimeStamp != default(DateTime))
             {
-				History.Insert(e);
+				try
+                {
+					History.Insert(e);
 
-				BriefHist = History.FindHistory(100);
-				if (BriefHist.Any())
-					selId = BriefHist.First().id;
+					BriefHist = History.FindHistory(100);
+					if (BriefHist.Any())
+						selId = BriefHist.First().id;
 
-				IsDisabled = false;
-				StateHasChanged();
+					IsDisabled = false;
+					StateHasChanged();
+				}
+                catch { }
 			}				
         }
 

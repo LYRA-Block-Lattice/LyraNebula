@@ -31,7 +31,7 @@ namespace Nebula.Store.BlockSearchUseCase
 			string key = null;
 			if(string.IsNullOrWhiteSpace(hashToSearch))
             {
-				var genSvcRet = await client.GetLastConsolidationBlock();
+				var genSvcRet = await client.GetLastConsolidationBlockAsync();
 				if(genSvcRet.ResultCode == APIResultCodes.Success)
                 {
 					blockResult = genSvcRet.GetBlock();
@@ -42,20 +42,20 @@ namespace Nebula.Store.BlockSearchUseCase
 				BlockAPIResult ret = null;
 				if(hashToSearch.Length < 40)
                 {
-					ret = await client.GetServiceBlockByIndex(action.hash, action.height);
+					ret = await client.GetServiceBlockByIndexAsync(action.hash, action.height);
                 }
 				else if(hashToSearch.Length == 44 || hashToSearch.Length == 43)	// hash
                 {
-					ret = await client.GetBlock(action.hash);
+					ret = await client.GetBlockAsync(action.hash);
 				}
 				else
                 {
-					var exists = await client.GetAccountHeight(action.hash);
+					var exists = await client.GetAccountHeightAsync(action.hash);
 					if(exists.ResultCode == APIResultCodes.Success)
                     {
 						maxHeight = exists.Height;
 						key = action.hash;
-						ret = await client.GetBlockByIndex(action.hash, action.height == 0 ? exists.Height : action.height);
+						ret = await client.GetBlockByIndexAsync(action.hash, action.height == 0 ? exists.Height : action.height);
                     }
                 }
 				
@@ -70,7 +70,7 @@ namespace Nebula.Store.BlockSearchUseCase
 			try
 			{
 				if(blockResult != null)
-					prevBlock = blockResult.PreviousHash == null ? null : (await client.GetBlock(blockResult.PreviousHash)).GetBlock();
+					prevBlock = blockResult.PreviousHash == null ? null : (await client.GetBlockAsync(blockResult.PreviousHash)).GetBlock();
 			}
 			catch (Exception) { }
 
@@ -83,13 +83,13 @@ namespace Nebula.Store.BlockSearchUseCase
 			switch(block)
             {
 				case ServiceBlock sb:
-					lastBlockResult = await client.GetLastServiceBlock();
+					lastBlockResult = await client.GetLastServiceBlockAsync();
 					break;
 				case ConsolidationBlock cb:
-					lastBlockResult = await client.GetLastConsolidationBlock();
+					lastBlockResult = await client.GetLastConsolidationBlockAsync();
 					break;
 				case TransactionBlock tb:
-					var tbLastResult = await client.GetAccountHeight(tb.AccountID);
+					var tbLastResult = await client.GetAccountHeightAsync(tb.AccountID);
 					if (tbLastResult.ResultCode == APIResultCodes.Success)
 						return (tb.AccountID, tbLastResult.Height);
 					break;

@@ -27,7 +27,7 @@
 
             var t = new Task(async () =>
             {
-                var ret = await client.GetBlock(_hash);
+                var ret = await client.GetBlockAsync(_hash);
                 if (ret.ResultCode == APIResultCodes.Success)
                     block = ret.GetBlock();
             });

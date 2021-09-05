@@ -502,7 +502,7 @@ namespace Nebula.Pages
             }
 
 			// check if pool exists.
-			var pool = await lyraClient.GetPool(swapFromToken, swapToToken);
+			var pool = await lyraClient.GetPoolAsync(swapFromToken, swapToToken);
 			if (pool.Successful() && pool.PoolAccountId != null)
             {
 				IsDisabled = false;
