@@ -38,7 +38,6 @@
 
   <ItemGroup>
     <Folder Include="LiteDb\" />
-    <Folder Include="wwwroot\apps\" />
   </ItemGroup>
 
 </Project>
