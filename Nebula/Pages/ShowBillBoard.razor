@@ -10,7 +10,7 @@
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
 }
-    <table style="padding-bottom: 5px" width="100%">
+    <table style="padding: 5px" width="100%">
         <tr>
             <td><div><button class="btn btn-primary" @onclick="Refresh" disabled="@IsDisabled">
                 Refresh
@@ -26,6 +26,11 @@
                     </select>
             </td>
         </tr>
+        <tr>
+            <td colspan="2">
+                <h3>Total Staking: @NodeState?.Value?.TotalStaking LYR</h3>
+            </td>
+        </tr>
     </table>
     
 @if (NodeState.Value.nodeStatus != null)
@@ -37,6 +42,8 @@
                 <th>Rank</th>
                 <th>Primary</th>
                 <th>PoS Wallet</th>
+                <th>Profiting</th>
+                <th>Staking</th>
                 <th></th>
                 <th>IP Address</th>
                 <th>Votes</th>
@@ -77,6 +84,8 @@
                 <td align="center">@nodeInfo.Index</td>
                 <td align="center">@(nodeInfo.IsPrimary ? "Yes" : "No")</td>
                 <td><a href="/showblock/@nodeInfo.ID">@nodeInfo.ID.Substring(0, 10)...</a></td>
+                <td><a href="/showblock/@GetProfitingAccount(nodeInfo.ID)">@GetProfitingAccount(nodeInfo.ID)?.Substring(0, 10)...</a></td>
+                <td>@GetStakingAmount(nodeInfo.ID)</td>
                 <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
                 <td><span title="@ipaddr">@hostName</span></td>
                 <td align="center">@nodeInfo.Votes</td>

@@ -126,6 +126,24 @@ namespace Nebula.Pages
 				StateHasChanged();
 			}
 		}
-    }
+
+		private string GetProfitingAccount(string posAccount)
+        {
+			var target = NodeState.Value.bb?.ActiveNodes.FirstOrDefault(a => a.AccountID == posAccount);
+			if (target == null)
+				return "";
+			else
+				return target.ProfitingAccountId;
+		}
+
+		private decimal GetStakingAmount(string posAccount)
+		{
+			var target = NodeState.Value.bb.ActiveNodes.FirstOrDefault(a => a.AccountID == posAccount);
+			if (target == null)
+				return 0;
+			else
+				return target.Votes;
+		}
+	}
 
 }

@@ -20,6 +20,8 @@ namespace Nebula.Store.NodeViewUseCase
         public int Id { get; set; }         // used by litedb
         public DateTime TimeStamp { get; set; }     // history
 
+        public decimal TotalStaking => bb == null ? 0 : bb.ActiveNodes.Sum(a => a.Votes);
+
 		public NodeViewState()
         {
 			IsLoading = false;
