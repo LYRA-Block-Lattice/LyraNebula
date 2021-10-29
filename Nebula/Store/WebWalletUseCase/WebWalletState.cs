@@ -1,4 +1,5 @@
 ﻿using Lyra.Core.Accounts;
+using Lyra.Core.Blocks;
 using Nebula.Data;
 using System;
 using System.Collections.Generic;
@@ -7,13 +8,18 @@ using System.Threading.Tasks;
 
 namespace Nebula.Store.WebWalletUseCase
 {
-	public enum UIStage { Entry, Main, Send, Settings, Transactions, FreeToken, SwapToken, SwapTLYR };
+	public enum UIStage { Entry, Main, Send, Settings, Transactions, FreeToken, SwapToken, SwapTLYR, Staking };
 
 	public class WebWalletState
 	{
 		private const string faucetKey = "freeLyraToken";
 		// for faucet
 		public int? freeTokenTimes { get; set; }
+
+		// staking
+		public List<Block> brokerAccounts { get; set; }
+		public Dictionary<string, decimal> stkBalances { get; set; }
+		public Dictionary<string, decimal> stkRewards { get; set; }
 
 		public bool IsLoading { get; set; }
 		public UIStage stage { get; set; } = UIStage.Entry;

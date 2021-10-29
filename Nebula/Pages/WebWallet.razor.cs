@@ -56,6 +56,15 @@ namespace Nebula.Pages
 			});
 		}
 
+		public string stkName { get; set; }
+		public string stkVoting { get; set; }
+		public string stkDays { get; set; }
+
+		public string pftName { get; set; }
+		public string pftType { get; set; }
+		public string pftShare { get; set; }
+		public string pftSeats { get; set; }
+
 		// swap
 		protected string swapFeeDesc { get; set; }
 		protected decimal ethGasFee { get; set; }
@@ -162,6 +171,8 @@ namespace Nebula.Pages
 
 			tokenName = "LYR";
 			altDisplay = "************";
+
+			pftType = "Node";
 		}
 
         protected override void OnInitialized()
@@ -224,6 +235,52 @@ namespace Nebula.Pages
         {
 			Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
         }
+
+		private void Staking(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
+		}
+
+		private void StakingCreate(MouseEventArgs e)
+        {
+			Dispatcher.Dispatch(new WebWalletCreateStakingAction { 
+				wallet = walletState.Value.wallet,
+				name = stkName,
+				voting = stkVoting,
+				days = int.Parse(stkDays)
+			});
+		}
+
+		private void ProfitingCreate(MouseEventArgs e)
+		{
+			if (pftType != "Node")
+				return;
+
+			Dispatcher.Dispatch(new WebWalletCreateProfitingAction
+			{
+				wallet = walletState.Value.wallet,
+				name = pftName,
+				type = ProfitingType.Node,
+				share = decimal.Parse(pftShare) / 100m,
+				seats = int.Parse(pftSeats)
+			});
+		}
+
+		private async Task AddStkAsync(MouseEventArgs e, string stkid)
+		{
+			var amt = await GetAmountInput();
+			Dispatcher.Dispatch(new WebWalletAddStakingAction
+			{
+				wallet = walletState.Value.wallet,
+				stkid = stkid,
+				amount = amt
+			});
+		}
+
+		private void RmStk(MouseEventArgs e, string owner)
+		{
+			//Dispatcher.Dispatch(new GetProfitAction { owner = owner });
+		}
 
 		private async void Send(MouseEventArgs e)
 		{

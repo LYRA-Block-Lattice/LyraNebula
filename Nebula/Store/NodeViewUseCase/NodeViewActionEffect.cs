@@ -89,7 +89,7 @@ namespace Nebula.Store.NodeViewUseCase
 					if(result.pft is TransactionBlock tb)
                     {
 						result.stks = await lcx.FindAllStakingsAsync(tb.AccountID, DateTime.UtcNow);
-						result.stats = await lcx.GetProfitingStatsAsync(tb.AccountID, DateTime.MinValue, DateTime.MaxValue);
+						result.stats = await lcx.GetAccountStatsAsync(tb.AccountID, DateTime.MinValue, DateTime.MaxValue);
 					}	
 				}
 			}

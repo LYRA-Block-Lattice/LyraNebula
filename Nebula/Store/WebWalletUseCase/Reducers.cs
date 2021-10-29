@@ -24,7 +24,20 @@ namespace Nebula.Store.WebWalletUseCase
 		[ReducerMethod]
 		public static WebWalletState SendAction(WebWalletState state, WebWalletSendAction action) => state.With(new { stage = UIStage.Send });
 
-		[ReducerMethod]
+        [ReducerMethod]
+        public static WebWalletState StakingAction(WebWalletState state, StakingResultAction action)
+        {
+			return state.With(new
+			{
+				IsLoading = false,
+				stage = UIStage.Staking,
+				brokerAccounts = action.brokers,
+				stkBalances = action.balances,
+				stkRewards = action.rewards
+			});
+		}
+
+        [ReducerMethod]
 		public static WebWalletState SendTokenActionHandler(WebWalletState state, WebWalletSendTokenAction action) => state.With(new { IsLoading = true });
 
 		[ReducerMethod]

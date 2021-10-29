@@ -1,4 +1,5 @@
 ﻿using Lyra.Core.Accounts;
+using Lyra.Core.Blocks;
 using Nebula.Data;
 using Nethereum.Metamask.Blazor;
 using System;
@@ -140,5 +141,36 @@ namespace Nebula.Store.WebWalletUseCase
     public class WebWalletReCAPTCHAServerAction
     {
         public bool ServerVerificatiing { get; set; }
+    }
+
+    public class WebWalletStakingAction
+    {
+        public Wallet wallet { get; set; }
+    }
+
+    public class WebWalletCreateStakingAction
+    {
+        public Wallet wallet { get; set; }
+
+        public string name { get; set; }
+        public string voting { get; set; }
+        public int days { get; set; }
+    }
+
+    public class WebWalletCreateProfitingAction
+    {
+        public Wallet wallet { get; set; }
+
+        public string name { get; set; }
+        public ProfitingType type { get; set; }
+        public decimal share { get; set; }
+        public int seats { get; set; }
+    }
+
+    public class WebWalletAddStakingAction
+    {
+        public Wallet wallet { get; set; }
+        public string stkid { get; set; }
+        public decimal amount { get; set; }
     }
 }

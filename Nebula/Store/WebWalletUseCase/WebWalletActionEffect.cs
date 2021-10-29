@@ -33,7 +33,91 @@ namespace Nebula.Store.WebWalletUseCase
 			this.logger = logger;
 		}
 
-        [EffectMethod]
+		[EffectMethod]
+		public async Task HandleStaking(WebWalletStakingAction action, IDispatcher dispatcher)
+		{
+			await RefreshStakingAsync(action.wallet, dispatcher);
+		}
+
+		[EffectMethod]
+		public async Task HandleProfitingCreate(WebWalletCreateProfitingAction action, IDispatcher dispatcher)
+		{
+			var crpftret = await action.wallet.CreateProfitingAccountAsync(
+				action.name, action.type, action.share, action.seats
+				);
+
+			if(crpftret.Successful())
+            {
+				await RefreshStakingAsync(action.wallet, dispatcher);
+			}
+		}
+
+		[EffectMethod]
+		public async Task HandleStakingCreate(WebWalletCreateStakingAction action, IDispatcher dispatcher)
+		{
+			var crpftret = await action.wallet.CreateStakingAccountAsync(
+				action.name, action.voting, action.days
+				);
+
+			if (crpftret.Successful())
+			{
+				await RefreshStakingAsync(action.wallet, dispatcher);
+			}
+		}
+
+		[EffectMethod]
+		public async Task HandleStakingAdd(WebWalletAddStakingAction action, IDispatcher dispatcher)
+		{
+			var crpftret = await action.wallet.AddStakingAsync(
+				action.stkid, action.amount
+				);
+
+			if (crpftret.Successful())
+			{
+				await RefreshStakingAsync(action.wallet, dispatcher);
+			}
+		}
+
+		private async Task RefreshStakingAsync(Wallet wallet, IDispatcher dispatcher)
+        {
+			var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+
+			var result = await lcx.GetAllBrokerAccountsForOwnerAsync(wallet.AccountId);
+			if (result.ResultCode == APIResultCodes.Success)
+			{
+				var blks = result.GetBlocks();
+
+				var allStks = blks.Where(a => a is StakingGenesis)
+					  .Cast<StakingGenesis>();
+
+				var dict = new Dictionary<string, decimal>();
+				var rwds = new Dictionary<string, decimal>();
+				foreach (var stk in allStks)
+                {
+					var ret = await lcx.GetLastBlockAsync(stk.AccountID);
+					if(ret.Successful())
+                    {
+						var stkblk = ret.GetBlock() as TransactionBlock;
+						decimal amt = 0;
+						if (stkblk.Balances.ContainsKey(LyraGlobal.OFFICIALTICKERCODE))
+							amt = stkblk.Balances[LyraGlobal.OFFICIALTICKERCODE].ToBalanceDecimal();
+						dict.Add(stk.AccountID, amt);
+                    }
+
+					var stats = await lcx.GetBenefitStatsAsync(stk.Voting, stk.AccountID, DateTime.MinValue, DateTime.MaxValue);
+					rwds.Add(stk.AccountID, stats.Total);
+				}
+
+				dispatcher.Dispatch(new StakingResultAction
+				{
+					brokers = blks.ToList(),
+					balances = dict,
+					rewards = rwds
+				});
+            }
+		}
+
+		[EffectMethod]
         public async Task HandleSend(WebWalletSendTokenAction action, IDispatcher dispatcher)
         {
 			var result = await action.wallet.SyncAsync(null);

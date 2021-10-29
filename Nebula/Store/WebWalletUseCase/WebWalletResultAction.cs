@@ -1,4 +1,5 @@
 ﻿using Lyra.Core.Accounts;
+using Lyra.Core.Blocks;
 using Nebula.Data;
 using System;
 using System.Collections.Generic;
@@ -19,5 +20,12 @@ namespace Nebula.Store.WebWalletUseCase
 			this.wallet = wallet;
 			this.stage = Stage;
 		}
+	}
+
+	public class StakingResultAction
+    {
+		public List<Block> brokers { get; set; }
+		public Dictionary<string, decimal> balances { get; set; }
+		public Dictionary<string, decimal> rewards { get; set; }
 	}
 }
