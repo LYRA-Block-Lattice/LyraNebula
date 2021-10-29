@@ -3,136 +3,210 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-<h1>Status of All Authorizer Nodes </h1>
-
 @if (NodeState.Value.IsLoading)
 {
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
 }
-    <table style="padding: 5px" width="100%">
-        <tr>
-            <td><div><button class="btn btn-primary" @onclick="Refresh" disabled="@IsDisabled">
-                Refresh
-            </button>&nbsp;
-            <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
-            </div></td>
-            <td align="right">
+
+
+@if (NodeState.Value.UI == Store.NodeViewUseCase.NodeViewState.UIStage.Profiting)
+{
+    <div>
+        <button class="btn btn-primary" @onclick="Return">Return to node view</button>
+    </div>
+    <hr />
+    @if (NodeState.Value.pft == null)
+    {
+        <p>No profiting account for node.</p>
+    }
+    else
+    {
+        <h1>Profiting Account for Node</h1>
+        <p>
+            Node Owner Account ID: <a href="/showblock/@NodeState.Value.pft?.OwnerAccountId">@NodeState.Value.pft?.OwnerAccountId</a>
+        </p>
+        <p>
+            Profiting Account ID:
+            <a href="/showblock/@GetPftID()">@GetPftID()</a>
+        </p>
+        <p>Total Earn: @NodeState.Value.pftStats.Total LYR</p>
+        <p>Profit sharing ratio: @FormatShare() </p>
+        <p>Pay to stakers: @GetToStakers() LYR</p>
+        <p>Pay to owner: @GetToOwner() LYR</p>
+        <p>
+
+        </p>
+        <p>
+            <div><h4>All Stakings</h4></div>
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>Start Time</th>
+                            <th>Staking Days</th>
+                            <th>Staking Account</th>
+                            <th>Owner Account</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stk in NodeState.Value.stks)
+                        {
+                            <tr>
+                                <td>@stk.Amount LYR</td>
+                                <td>@stk.Time</td>
+                                <td>@stk.Days</td>
+                                <td>
+                                    <a href="/showblock/@stk.StkAccount">@stk.StkAccount.Shorten()</a>
+                                </td>
+                                <td>
+                                    <a href="/showblock/@stk.OwnerAccount">@stk.OwnerAccount.Shorten()</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </p>
+        <p style="font-size:xx-small">Note: Statistics data may not be updated in time. Only for reference.</p>
+    }
+    <hr />
+    <div>
+        <button class="btn btn-primary" @onclick="Return">Return to node view</button>
+    </div>
+}
+
+@if (NodeState.Value.UI == Store.NodeViewUseCase.NodeViewState.UIStage.Main && NodeState.Value.nodeStatus != null)
+{
+    <h1>Status of All Authorizer Nodes </h1>
+
+    <div>
+        <table style="padding: 5px" width="100%">
+            <tr>
+                <td>
+                    <div>
+                        <button class="btn btn-primary" @onclick="Refresh" disabled="@IsDisabled">
+                            Refresh
+                        </button>&nbsp;
+                        <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
+                    </div>
+                </td>
+                <td align="right">
                     <select id="department" @bind="SelectedHistId">
                         @foreach (var hi in BriefHist)
                         {
                             <option value="@hi.id">@hi.TimeStamp</option>
                         }
                     </select>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <h3>Total Staking: @NodeState?.Value?.TotalStaking LYR</h3>
-            </td>
-        </tr>
-    </table>
-    
-@if (NodeState.Value.nodeStatus != null)
-{
-    <div>
-    <table class="table">
-        <thead>
+                </td>
+            </tr>
             <tr>
-                <th>Rank</th>
-                <th>Primary</th>
-                <th>PoS Wallet</th>
-                <th>Profiting</th>
-                <th>Staking</th>
-                <th></th>
-                <th>IP Address</th>
-                <th>Votes</th>
-                <th>API Status</th>
-                <th>UTC Now</th>
-                <th>Last Cons Block</th>
-                <th>In Sync</th>
-                <th>Version</th>
-                <th>Status</th>
-                <th>Total Block Count</th>
-                <th>Last Float Hash</th>
-                <th>Candidates</th>
-                <th>Connected Peers</th>
+                <td colspan="2">
+                    <h3>Total Staking: @NodeState?.Value?.TotalStaking LYR</h3>
+                </td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var nodeInfo in NodeState.Value.GetRankedList())
-            {          
-                string hostName = null;
-                string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
-                if(seedHosts.ContainsKey(ipaddr))
-                    hostName = seedHosts[ipaddr];
-                else
-                    hostName = ipaddr;
+        </table>
+    </div>
 
-                string style = null;
-                if(nodeInfo.ID == NodeState.Value.bb.CurrentLeader)
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Primary</th>
+                    <th>Node ID</th>
+                    <th>Profiting</th>
+                    <th>Staking LYR</th>
+                    <th></th>
+                    <th>IP Address</th>
+                    <th>API Status</th>
+                    <th>UTC Now</th>
+                    <th>Last Cons Block</th>
+                    <th>In Sync</th>
+                    <th>Version</th>
+                    <th>Status</th>
+                    <th>Total Block Count</th>
+                    <th>Last Float Hash</th>
+                    <th>Candidates</th>
+                    <th>Connected Peers</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var nodeInfo in NodeState.Value.GetRankedList())
                 {
-                    style = "color: gold; background-color:black; font-weight: bold;";
-                }
-                else if(nodeInfo.IsPrimary)
-                {
-                    style = "background-color:#e0f4ff; ";
-                }
-                var imgSrc = $"/images/country/{nodeInfo.Country.ToLower()}.png";
+                    string hostName = null;
+                    string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
+                    if (seedHosts.ContainsKey(ipaddr))
+                        hostName = seedHosts[ipaddr];
+                    else
+                        hostName = ipaddr;
 
-                <tr style=@style>
-                <td align="center">@nodeInfo.Index</td>
-                <td align="center">@(nodeInfo.IsPrimary ? "Yes" : "No")</td>
-                <td><a href="/showblock/@nodeInfo.ID">@nodeInfo.ID.Substring(0, 10)...</a></td>
-                <td><a href="/showblock/@GetProfitingAccount(nodeInfo.ID)">@GetProfitingAccount(nodeInfo.ID)?.Substring(0, 10)...</a></td>
-                <td>@GetStakingAmount(nodeInfo.ID)</td>
-                <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
-                <td><span title="@ipaddr">@hostName</span></td>
-                <td align="center">@nodeInfo.Votes</td>
-                @if(nodeInfo.Status != null && nodeInfo.Status.Status != null)
-                 {
-                <td>Connected OK.</td>
-                <td>@nodeInfo.Status.Status.now</td>
-                        @if(nodeInfo.Status.LastConsolidationHash==null || nodeInfo.Status.LastConsolidationHash.Length < 11)
+                    string style = null;
+                    if (nodeInfo.ID == NodeState.Value.bb.CurrentLeader)
+                    {
+                        style = "color: gold; background-color:black; font-weight: bold;";
+                    }
+                    else if (nodeInfo.IsPrimary)
+                    {
+                        style = "background-color:#e0f4ff; ";
+                    }
+                    var imgSrc = $"/images/country/{nodeInfo.Country.ToLower()}.png";
+
+                    <tr style=@style>
+                        <td align="center">@nodeInfo.Index</td>
+                        <td align="center">@(nodeInfo.IsPrimary ? "Yes" : "No")</td>
+                        <td><a href="/showblock/@nodeInfo.ID">@nodeInfo.ID?.Substring(0, 10)...</a></td>
+                        <td>
+                            <a href="" @onclick="@(e => ShowPft(e, nodeInfo.ID))" @onclick:preventDefault>@GetProfitingAccountShort(nodeInfo.ID)...</a>
+                        </td>
+                        <td>@GetStakingAmount(nodeInfo.ID)</td>
+                        <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
+                        <td><span title="@ipaddr">@hostName</span></td>
+                        @if (nodeInfo.Status != null && nodeInfo.Status.Status != null)
                         {
-                            <td></td>
+                            <td>Connected OK.</td>
+                            <td>@nodeInfo.Status.Status.now</td>
+                            @if (nodeInfo.Status.LastConsolidationHash == null || nodeInfo.Status.LastConsolidationHash.Length < 11)
+                            {
+                                <td></td>
+                            }
+                            else
+                            {
+                                <td><a href="/showblock/@nodeInfo.Status.LastConsolidationHash">@nodeInfo.Status.LastConsolidationHash.Substring(0, 10)...</a></td>
+                            }
+                            <td>@nodeInfo.Status.SyncState</td>
+                            <td>@nodeInfo.Status.Status.version</td>
+                            <td>@nodeInfo.Status.Status.state</td>
+                            <td>@nodeInfo.Status.Status.totalBlockCount</td>
+                            @if (nodeInfo.Status.Status.lastUnSolidationHash == null || nodeInfo.Status.Status.lastUnSolidationHash.Length < 11)
+                            {
+                                <td></td>
+                            }
+                            else
+                            {
+                                <td>@nodeInfo.Status.Status.lastUnSolidationHash.Substring(0, 10)...</td>
+                            }
+                            <td align="center">@nodeInfo.Status.Status.activePeers</td>
+                            <td align="center">@nodeInfo.Status.Status.connectedPeers</td>
                         }
                         else
                         {
-                            <td><a href="/showblock/@nodeInfo.Status.LastConsolidationHash">@nodeInfo.Status.LastConsolidationHash.Substring(0, 10)...</a></td>
-                        }
-                <td>@nodeInfo.Status.SyncState</td>
-                <td>@nodeInfo.Status.Status.version</td>
-                <td>@nodeInfo.Status.Status.state</td>
-                <td>@nodeInfo.Status.Status.totalBlockCount</td>
-                        @if(nodeInfo.Status.Status.lastUnSolidationHash==null || nodeInfo.Status.Status.lastUnSolidationHash.Length < 11)
-                        {
+                            <td>Failed to connect</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                             <td></td>
                         }
-                        else
-                        {
-                            <td>@nodeInfo.Status.Status.lastUnSolidationHash.Substring(0, 10)...</td>
-                        }
-                <td align="center">@nodeInfo.Status.Status.activePeers</td>
-                <td align="center">@nodeInfo.Status.Status.connectedPeers</td>
+                    </tr>
                 }
-                else
-                {
-                <td>Failed to connect</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                }
-            </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     </div>
     <div style="font-family:verdana;font-size:70%;">
         <h5>Note:</h5>

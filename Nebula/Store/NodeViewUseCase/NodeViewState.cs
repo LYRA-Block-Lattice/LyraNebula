@@ -2,7 +2,9 @@
 using IP2Country;
 using IP2Country.MarkusGo;
 using Lyra.Core.API;
+using Lyra.Core.Blocks;
 using Lyra.Data.API;
+using Lyra.Data.Blocks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,8 +12,16 @@ using System.Linq;
 
 namespace Nebula.Store.NodeViewUseCase
 {
-	public class NodeViewState
-	{
+    public class NodeViewState
+    {
+        public enum UIStage { Main, Profiting };
+
+        public UIStage UI { get; set; }
+
+        public IProfiting pft { get; set; }
+        public List<Staker> stks { get; set; }
+        public ProfitingStats pftStats { get; set; }
+
         public bool IsLoading { get; set; }
 		public BillBoard bb { get; set; }
 		public ConcurrentDictionary<string, GetSyncStateAPIResult> nodeStatus { get; set; }
@@ -26,6 +36,7 @@ namespace Nebula.Store.NodeViewUseCase
         {
 			IsLoading = false;
         }
+
 		public NodeViewState(bool isLoading, BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatus, string ipdb)
 		{
 			IsLoading = isLoading;

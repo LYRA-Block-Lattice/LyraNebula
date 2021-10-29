@@ -14,4 +14,14 @@ namespace Nebula.Store.NodeViewUseCase
     {
         public NodeViewState historyState { get; set; }
     }
+
+    public class GetProfitAction
+    {
+        public string owner { get; set; }
+    }
+
+    public class ReturnToMainAction
+    {
+        
+    }
 }

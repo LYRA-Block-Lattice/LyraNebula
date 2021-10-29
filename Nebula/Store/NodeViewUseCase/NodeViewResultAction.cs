@@ -1,5 +1,7 @@
 ﻿using Lyra.Core.API;
+using Lyra.Core.Blocks;
 using Lyra.Data.API;
+using Lyra.Data.Blocks;
 using Nebula.Data;
 using System;
 using System.Collections.Concurrent;
@@ -22,4 +24,11 @@ namespace Nebula.Store.NodeViewUseCase
 			ipDbFn = ipdb;
 		}
 	}
+
+	public class PftResultAction
+    {
+		public IProfiting pft { get; set; }
+		public List<Staker> stks { get; set; }
+		public ProfitingStats stats { get; set; }
+    }
 }

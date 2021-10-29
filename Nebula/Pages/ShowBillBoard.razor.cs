@@ -1,4 +1,5 @@
 ﻿using Fluxor;
+using Lyra.Core.Blocks;
 using Lyra.Data.API;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -135,6 +136,14 @@ namespace Nebula.Pages
 			else
 				return target.ProfitingAccountId;
 		}
+		private string GetProfitingAccountShort(string posAccount)
+		{
+			var acct = GetProfitingAccount(posAccount);
+			if (acct?.Length > 10)
+				return acct.Substring(0, 10);
+			else
+				return acct;
+		}
 
 		private decimal GetStakingAmount(string posAccount)
 		{
@@ -144,6 +153,38 @@ namespace Nebula.Pages
 			else
 				return target.Votes;
 		}
+
+		private void ShowPft(MouseEventArgs e, string owner)
+		{
+			Dispatcher.Dispatch(new GetProfitAction { owner = owner });
+		}
+
+		private string GetPftID()
+        {
+			if (NodeState.Value.pft == null)
+				return "";
+
+			return ((TransactionBlock)NodeState.Value.pft).AccountID;
+        }
+
+		private void Return(MouseEventArgs e)
+		{
+			Dispatcher.Dispatch(new ReturnToMainAction { });
+		}
+
+		private decimal GetToOwner()
+        {
+			return Math.Round(NodeState.Value.pftStats.Total * (1 - NodeState.Value.pft.ShareRito), 8);
+        }
+		private decimal GetToStakers()
+		{
+			return Math.Round(NodeState.Value.pftStats.Total * NodeState.Value.pft.ShareRito, 8);
+		}
+
+		private string FormatShare()
+        {
+			return $"{NodeState.Value.pft.ShareRito * 100} %";
+        }
 	}
 
 }

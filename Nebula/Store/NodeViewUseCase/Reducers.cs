@@ -1,4 +1,5 @@
-﻿using Fluxor;
+﻿using Converto;
+using Fluxor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,29 @@ namespace Nebula.Store.NodeViewUseCase
 			nvs.Id = action.historyState.Id;
 			nvs.TimeStamp = action.historyState.TimeStamp;
 			return nvs;
+		}
+
+		[ReducerMethod]
+		public static NodeViewState ReducePftInfoResultAction(NodeViewState state, PftResultAction action)
+		{
+			var state2 = state.With(new
+			{
+				UI = NodeViewState.UIStage.Profiting,
+				pft = action.pft,
+				stks = action.stks,
+				pftStats = action.stats
+			});
+			return state2;
+		}
+
+		[ReducerMethod]
+		public static NodeViewState ReduceReturnAction(NodeViewState state, ReturnToMainAction action)
+		{
+			var state2 = state.With(new
+			{
+				UI = NodeViewState.UIStage.Main,
+			});
+			return state2;
 		}
 	}
 }

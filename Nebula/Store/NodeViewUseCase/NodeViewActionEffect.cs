@@ -11,6 +11,8 @@ using Lyra.Core.API;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Configuration;
 using Lyra.Data.API;
+using Lyra.Data.Blocks;
+using Lyra.Core.Blocks;
 
 namespace Nebula.Store.NodeViewUseCase
 {
@@ -53,6 +55,50 @@ namespace Nebula.Store.NodeViewUseCase
 			await Task.WhenAll(tasks);
 
 			dispatcher.Dispatch(new NodeViewResultAction(bb, bag, config["ipdb"]));
+		}
+	}
+
+	public class PftActionEffect : Effect<GetProfitAction>
+	{
+		private readonly ILyraAPI client;
+		private readonly IConfiguration config;
+		private readonly INodeHistory hist;
+
+		public PftActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history)
+		{
+			client = lyraClient;
+			config = configuration;
+			hist = history;
+		}
+
+		public override async Task HandleAsync(GetProfitAction action, IDispatcher dispatcher)
+		{
+			var result = new PftResultAction();
+
+			var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+			try
+			{
+				var allbrksResult = await lcx.GetAllBrokerAccountsForOwnerAsync(action.owner);
+				if(allbrksResult.Successful())
+                {
+					var allbrks = allbrksResult.GetBlocks();
+
+					result.pft = allbrks.Where(a => a is ProfitingGenesis)
+						.FirstOrDefault() as IProfiting;
+
+					if(result.pft is TransactionBlock tb)
+                    {
+						result.stks = await lcx.FindAllStakingsAsync(tb.AccountID, DateTime.UtcNow);
+						result.stats = await lcx.GetProfitingStatsAsync(tb.AccountID, DateTime.MinValue, DateTime.MaxValue);
+					}	
+				}
+			}
+			catch (Exception ex)
+			{
+
+			}
+
+			dispatcher.Dispatch(result);
 		}
 	}
 }
