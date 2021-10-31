@@ -8,7 +8,7 @@
 <h3>Search by Hash or Account ID</h3>
 <p><input size="100" type="text" @oninput="oninput" /></p>
 
-@if(CurrentSupply.RichList != null && CurrentSupply.Snap?.Network == Configuration["network"])
+@if (CurrentSupply.RichList != null && CurrentSupply.Snap?.Network == Configuration["network"])
 {
     <hr />
     <h1>Lyra Token Supply Chart</h1>
@@ -17,37 +17,37 @@
     <p>Team/Locked/Reserved: @CurrentSupply.Current.TeamTotal.ToString("n0") LYR, @CurrentSupply.Current.TeamRito % of Total Supply.</p>
     <p>Circulating Supply: @CurrentSupply.Current.Circulate.ToString("n0") LYR, @CurrentSupply.Current.CirculateRito % of Total Supply.</p>
     <hr />
-        <div>
+    <div>
         <h1>Lyra Rich List</h1>
         <p>Shows only top 100 accounts. Last updated (UTC): @CurrentSupply.Snap.Updated</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Account ID</th>
-                <th>Balance</th>
-                <th>Unreceived Balance</th>
-                <th>Total Token</th>
-                <th>Total Rito</th>
-                <th>Tag</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var rich in CurrentSupply.RichList)
-            {
-               <tr>
-                   <td>@rich.Order</td>
-                   <td><a href="/showblock/@rich.AccountId">@rich.AccountId</a></td>
-                   <td>@rich.Balance.Total</td>
-                   <td>@rich.Balance.UnRecv</td>
-                   <td>@rich.Sum</td>
-                   <td>@rich.SumRito %</td>
-                   <td>@rich.Tag</td>
-               </tr>
-            }
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Account ID</th>
+                    <th>Balance</th>
+                    <th>Unreceived Balance</th>
+                    <th>Total Token</th>
+                    <th>Total Rito</th>
+                    <th>Tag</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rich in CurrentSupply.RichList)
+                {
+                    <tr>
+                        <td>@rich.Order</td>
+                        <td><a href="/showblock/@rich.AccountId">@rich.AccountId</a></td>
+                        <td>@rich.Balance.Total</td>
+                        <td>@rich.Balance.UnRecv</td>
+                        <td>@rich.Sum</td>
+                        <td>@rich.SumRito %</td>
+                        <td>@rich.Tag</td>
+                    </tr>
+                }
             </tbody>
-            </table>
-            </div>
+        </table>
+    </div>
 
 
 }

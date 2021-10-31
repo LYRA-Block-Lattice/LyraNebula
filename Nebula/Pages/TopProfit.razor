@@ -1,0 +1,190 @@
+﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@page "/profit"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<h1>All profiting accounts</h1>
+
+@if (pfts == null)
+{
+    <p><i>Loading...</i></p>
+}
+else if(ui == UI.Main)
+{
+    <div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Share Ratio</th>
+                    <th>Seats</th>
+                    <th>Total Profit</th>
+                    <th>Profiting Account ID</th>
+                    <th>Owner</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pft in pfts.OrderByDescending(a => a.totalprofit).ThenBy(x => x.gens.Name))
+                {
+                    <tr @onclick="@(async () => await GetDetails(pft.gens.AccountID))">
+                        <td>@pft.gens.Name</td>
+                        <td>@pft.gens.PType</td>
+                        <td>@(pft.gens.ShareRito*100) %</td>
+                        <td>@pft.gens.Seats</td>
+                        <td>@pft.totalprofit</td>
+                        <td>
+                            <a href="/showblock/@pft.gens.AccountID">@pft.gens.AccountID</a>
+                        </td>
+                        <td>
+                            <a href="/showblock/@pft.gens.OwnerAccountId">@pft.gens.OwnerAccountId.Substring(0, 10)...</a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@if (ui == UI.Details)
+{
+    <div>
+        <button class="btn btn-primary" @onclick="Back">Return</button>
+    </div>
+    <hr />
+    @if (pft == null)
+    {
+        <p>No profiting account for node.</p>
+    }
+    else
+    {
+        <h1>Profiting Account for Node</h1>
+        <p>
+            Node Owner Account ID: <a href="/showblock/@pft?.OwnerAccountId">@pft?.OwnerAccountId.Substring(0, 10)...</a>
+        </p>
+        <p>
+            Profiting Account ID:
+            <a href="/showblock/@GetPftID()">@GetPftID()</a>
+        </p>
+        <p>Total Earn: @pftStats.Total LYR</p>
+        <p>Profit sharing ratio: @FormatShare() </p>
+        <p>Pay to stakers: @GetToStakers() LYR</p>
+        <p>Pay to owner: @GetToOwner() LYR</p>
+        <p>
+
+        </p>
+        <p>
+            <div><h4>All Stakings</h4></div>
+            <div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Staking Amount</th>
+                            <th>Start Time</th>
+                            <th>Staking Days</th>
+                            <th>Earns</th>
+                            <th>Staking Account</th>
+                            <th>Owner Account</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var stk in stks)
+                        {
+                            <tr>
+                                <td>@stk.Amount LYR</td>
+                                <td>@stk.Time</td>
+                                <td>@stk.Days</td>
+                                <td>@stkRewards[stk.StkAccount] LYR</td>
+                                <td>
+                                    <a href="/showblock/@stk.StkAccount">@stk.StkAccount.Shorten()</a>
+                                </td>
+                                <td>
+                                    <a href="/showblock/@stk.OwnerAccount">@stk.OwnerAccount.Shorten()</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </p>
+        <p style="font-size:xx-small">Note: Statistics data may not be updated in time. Only for reference.</p>
+    }
+    <hr />
+    <div>
+        <button class="btn btn-primary" @onclick="Back">Return</button>
+    </div>
+}
+
+
+@code {
+
+    List<Profiting> pfts;
+
+    enum UI { Main, Details };
+    UI ui;
+
+    // for details
+    public IProfiting pft { get; set; }
+    public List<Staker> stks { get; set; }
+    public ProfitingStats pftStats { get; set; }
+    public Dictionary<string, decimal> stkRewards { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+        pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+        ui = UI.Main;
+    }
+
+    async Task GetDetails(string pftid)
+    {
+        var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+
+        var ret = await lcx.GetBlockByIndexAsync(pftid, 1);
+        if(ret.Successful())
+        {
+            pft = ret.GetBlock() as ProfitingGenesis;
+
+            stks = await lcx.FindAllStakingsAsync(pftid, DateTime.UtcNow);
+            pftStats = await lcx.GetAccountStatsAsync(pftid, DateTime.MinValue, DateTime.MaxValue);
+
+            var rwds = new Dictionary<string, decimal>();
+            foreach (var stk in stks)
+            {
+                var stats = await lcx.GetBenefitStatsAsync(pftid, stk.StkAccount, DateTime.MinValue, DateTime.MaxValue);
+                rwds.Add(stk.StkAccount, stats.Total);
+            }
+            stkRewards = rwds;
+        }
+
+        ui = UI.Details;
+    }
+
+    private string GetPftID()
+    {
+        if (pft == null)
+            return "";
+
+        return ((TransactionBlock)pft).AccountID;
+    }
+
+    private decimal GetToOwner()
+    {
+        return Math.Round(pftStats.Total * (1 - pft.ShareRito), 8);
+    }
+    private decimal GetToStakers()
+    {
+        return Math.Round(pftStats.Total * pft.ShareRito, 8);
+    }
+
+    private string FormatShare()
+    {
+        return $"{pft.ShareRito * 100} %";
+    }
+
+    void Back(MouseEventArgs e)
+    {
+        ui = UI.Main;
+    }
+}
