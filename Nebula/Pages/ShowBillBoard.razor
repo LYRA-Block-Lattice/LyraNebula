@@ -24,7 +24,7 @@
     {
         <h1>Profiting Account for Node</h1>
         <p>
-            Node Owner Account ID: <a href="/showblock/@NodeState.Value.pft?.OwnerAccountId">@NodeState.Value.pft?.OwnerAccountId</a>
+            Node Owner Account ID: <a href="/showblock/@NodeState.Value.pft?.OwnerAccountId">@NodeState.Value.pft?.OwnerAccountId.Substring(0, 10)...</a>
         </p>
         <p>
             Profiting Account ID:
@@ -43,9 +43,10 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Amount</th>
+                            <th>Staking Amount</th>
                             <th>Start Time</th>
                             <th>Staking Days</th>
+                            <th>Earns</th>
                             <th>Staking Account</th>
                             <th>Owner Account</th>
                         </tr>
@@ -57,6 +58,7 @@
                                 <td>@stk.Amount LYR</td>
                                 <td>@stk.Time</td>
                                 <td>@stk.Days</td>
+                                <td>@NodeState.Value.stkRewards[stk.StkAccount] LYR</td>
                                 <td>
                                     <a href="/showblock/@stk.StkAccount">@stk.StkAccount.Shorten()</a>
                                 </td>

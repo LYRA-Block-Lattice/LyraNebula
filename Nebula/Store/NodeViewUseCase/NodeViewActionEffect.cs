@@ -90,6 +90,15 @@ namespace Nebula.Store.NodeViewUseCase
                     {
 						result.stks = await lcx.FindAllStakingsAsync(tb.AccountID, DateTime.UtcNow);
 						result.stats = await lcx.GetAccountStatsAsync(tb.AccountID, DateTime.MinValue, DateTime.MaxValue);
+
+						var rwds = new Dictionary<string, decimal>();
+						foreach (var stk in result.stks)
+						{
+							var pftid = (result.pft as TransactionBlock).AccountID;
+							var stats = await lcx.GetBenefitStatsAsync(pftid, stk.StkAccount, DateTime.MinValue, DateTime.MaxValue);
+							rwds.Add(stk.StkAccount, stats.Total);
+						}
+						result.rewards = rwds;
 					}	
 				}
 			}

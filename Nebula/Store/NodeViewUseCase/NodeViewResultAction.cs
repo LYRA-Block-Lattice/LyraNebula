@@ -30,5 +30,6 @@ namespace Nebula.Store.NodeViewUseCase
 		public IProfiting pft { get; set; }
 		public List<Staker> stks { get; set; }
 		public ProfitingStats stats { get; set; }
-    }
+		public Dictionary<string, decimal> rewards { get; set; }
+	}
 }

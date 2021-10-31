@@ -53,7 +53,8 @@ namespace Nebula.Store.NodeViewUseCase
 				UI = NodeViewState.UIStage.Profiting,
 				pft = action.pft,
 				stks = action.stks,
-				pftStats = action.stats
+				pftStats = action.stats,
+				stkRewards = action.rewards
 			});
 			return state2;
 		}
