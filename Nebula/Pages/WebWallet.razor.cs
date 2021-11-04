@@ -253,14 +253,16 @@ namespace Nebula.Pages
 
 		private void ProfitingCreate(MouseEventArgs e)
 		{
-			if (pftType != "Node")
+			if (pftType != "Node" || pftType != "Yield")
 				return;
+
+			var type = (ProfitingType) Enum.Parse(typeof(ProfitingType), pftType);
 
 			Dispatcher.Dispatch(new WebWalletCreateProfitingAction
 			{
 				wallet = walletState.Value.wallet,
 				name = pftName,
-				type = ProfitingType.Node,
+				type = type,
 				share = decimal.Parse(pftShare) / 100m,
 				seats = int.Parse(pftSeats)
 			});

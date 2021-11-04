@@ -116,12 +116,18 @@ else if(ui == UI.Main)
     </div>
 }
 
+@if(ui == UI.Error)
+{
+    <p>@error</p>
+}
+
 
 @code {
+    string error;
 
     List<Profiting> pfts;
 
-    enum UI { Main, Details };
+    enum UI { Main, Error, Details };
     UI ui;
 
     // for details
@@ -132,9 +138,17 @@ else if(ui == UI.Main)
 
     protected override async Task OnInitializedAsync()
     {
-        var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-        pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
-        ui = UI.Main;
+        try
+        {
+            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+            pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+            ui = UI.Main;
+        }
+        catch(Exception ex)
+        {
+            error = ex.ToString();
+            ui = UI.Error;
+        }
     }
 
     async Task GetDetails(string pftid)
