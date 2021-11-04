@@ -50,6 +50,13 @@ namespace Nebula.Store.WebWalletUseCase
             {
 				await RefreshStakingAsync(action.wallet, dispatcher);
 			}
+			else
+            {
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = crpftret.ResultCode.ToString()
+				});
+			}
 		}
 
 		[EffectMethod]
@@ -63,6 +70,13 @@ namespace Nebula.Store.WebWalletUseCase
 			{
 				await RefreshStakingAsync(action.wallet, dispatcher);
 			}
+			else
+			{
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = crpftret.ResultCode.ToString()
+				});
+			}
 		}
 
 		[EffectMethod]
@@ -74,7 +88,36 @@ namespace Nebula.Store.WebWalletUseCase
 
 			if (crpftret.Successful())
 			{
+				await Task.Delay(2000);
 				await RefreshStakingAsync(action.wallet, dispatcher);
+			}
+			else
+			{
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = crpftret.ResultCode.ToString()
+				});
+			}
+		}
+
+		[EffectMethod]
+		public async Task HandleUnStakingAdd(WebWalletRemoveStakingAction action, IDispatcher dispatcher)
+		{
+			var crpftret = await action.wallet.UnStakingAsync(
+				action.stkid
+				);
+
+			if (crpftret.Successful())
+			{
+				await Task.Delay(2000);
+				await RefreshStakingAsync(action.wallet, dispatcher);
+			}
+			else
+			{
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = crpftret.ResultCode.ToString()
+				});
 			}
 		}
 
@@ -115,6 +158,13 @@ namespace Nebula.Store.WebWalletUseCase
 					rewards = rwds
 				});
             }
+			else
+			{
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = result.ResultCode.ToString()
+				});
+			}
 		}
 
 		[EffectMethod]

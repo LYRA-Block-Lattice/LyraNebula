@@ -28,4 +28,11 @@ namespace Nebula.Store.WebWalletUseCase
 		public Dictionary<string, decimal> balances { get; set; }
 		public Dictionary<string, decimal> rewards { get; set; }
 	}
+
+	public class WalletErrorResultAction
+    {
+		public string error { get; set; }
+    }
+
+	public class WalletErrorResetAction { }
 }

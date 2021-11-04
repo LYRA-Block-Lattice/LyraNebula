@@ -16,6 +16,8 @@ namespace Nebula.Store.WebWalletUseCase
 		// for faucet
 		public int? freeTokenTimes { get; set; }
 
+		public string error { get; set; }
+
 		// staking
 		public List<Block> brokerAccounts { get; set; }
 		public Dictionary<string, decimal> stkBalances { get; set; }

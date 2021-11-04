@@ -173,4 +173,10 @@ namespace Nebula.Store.WebWalletUseCase
         public string stkid { get; set; }
         public decimal amount { get; set; }
     }
+
+    public class WebWalletRemoveStakingAction
+    {
+        public Wallet wallet { get; set; }
+        public string stkid { get; set; }
+    }
 }

@@ -241,47 +241,85 @@ namespace Nebula.Pages
 			Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
 		}
 
+		private void ClearError()
+		{
+			Dispatcher.Dispatch(new WalletErrorResetAction());
+		}
+
 		private void StakingCreate(MouseEventArgs e)
         {
-			Dispatcher.Dispatch(new WebWalletCreateStakingAction { 
-				wallet = walletState.Value.wallet,
-				name = stkName,
-				voting = stkVoting,
-				days = int.Parse(stkDays)
-			});
+			try
+            {
+				Dispatcher.Dispatch(new WebWalletCreateStakingAction
+				{
+					wallet = walletState.Value.wallet,
+					name = stkName,
+					voting = stkVoting,
+					days = int.Parse(stkDays)
+				});
+			}
+			catch (Exception ex)
+			{
+				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+			}
 		}
 
 		private void ProfitingCreate(MouseEventArgs e)
 		{
-			if (pftType != "Node" && pftType != "Yield")
-				return;
+			try
+            {
+				if (pftType != "Node" && pftType != "Yield")
+					return;
 
-			var type = (ProfitingType) Enum.Parse(typeof(ProfitingType), pftType);
+				var type = (ProfitingType)Enum.Parse(typeof(ProfitingType), pftType);
 
-			Dispatcher.Dispatch(new WebWalletCreateProfitingAction
-			{
-				wallet = walletState.Value.wallet,
-				name = pftName,
-				type = type,
-				share = decimal.Parse(pftShare) / 100m,
-				seats = int.Parse(pftSeats)
-			});
+				Dispatcher.Dispatch(new WebWalletCreateProfitingAction
+				{
+					wallet = walletState.Value.wallet,
+					name = pftName,
+					type = type,
+					share = decimal.Parse(pftShare) / 100m,
+					seats = int.Parse(pftSeats)
+				});
+			}
+			catch(Exception ex)
+            {
+				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+            }
 		}
 
 		private async Task AddStkAsync(MouseEventArgs e, string stkid)
 		{
-			var amt = await GetAmountInput();
-			Dispatcher.Dispatch(new WebWalletAddStakingAction
+			try
+            {
+				var amt = await GetAmountInput();
+				Dispatcher.Dispatch(new WebWalletAddStakingAction
+				{
+					wallet = walletState.Value.wallet,
+					stkid = stkid,
+					amount = amt
+				});
+			}
+			catch (Exception ex)
 			{
-				wallet = walletState.Value.wallet,
-				stkid = stkid,
-				amount = amt
-			});
+				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+			}
 		}
 
-		private void RmStk(MouseEventArgs e, string owner)
+		private void RmStk(MouseEventArgs e, string stkid)
 		{
-			//Dispatcher.Dispatch(new GetProfitAction { owner = owner });
+			try
+			{
+				Dispatcher.Dispatch(new WebWalletRemoveStakingAction
+				{
+					wallet = walletState.Value.wallet,
+					stkid = stkid
+				});
+			}
+			catch (Exception ex)
+			{
+				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+			}
 		}
 
 		private async void Send(MouseEventArgs e)

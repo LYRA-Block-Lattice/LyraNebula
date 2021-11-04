@@ -171,7 +171,7 @@ else if (ui == UI.Main)
         {
             pft = ret.GetBlock() as ProfitingGenesis;
 
-            stks = await lcx.FindAllStakingsAsync(pftid, DateTime.UtcNow);
+            stks = await lcx.FindAllStakingsAsync(pftid, DateTime.UtcNow.AddDays(1));
             pftStats = await lcx.GetAccountStatsAsync(pftid, DateTime.MinValue, DateTime.MaxValue);
 
             var rwds = new Dictionary<string, decimal>();

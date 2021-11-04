@@ -37,7 +37,27 @@ namespace Nebula.Store.WebWalletUseCase
 			});
 		}
 
-        [ReducerMethod]
+		[ReducerMethod]
+		public static WebWalletState ErrorAction(WebWalletState state, WalletErrorResultAction action)
+		{
+			return state.With(new
+			{
+				IsLoading = false,
+				error = action.error
+			});
+		}
+
+		[ReducerMethod]
+		public static WebWalletState ErrorResetAction(WebWalletState state, WalletErrorResetAction action)
+		{
+			return state.With(new
+			{
+				IsLoading = false,
+				error = ""
+			});
+		}
+
+		[ReducerMethod]
 		public static WebWalletState SendTokenActionHandler(WebWalletState state, WebWalletSendTokenAction action) => state.With(new { IsLoading = true });
 
 		[ReducerMethod]
