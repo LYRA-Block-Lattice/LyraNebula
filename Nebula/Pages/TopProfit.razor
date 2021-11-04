@@ -1,5 +1,6 @@
 ﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @page "/profit"
+@page "/profit/{pftid}"
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
@@ -9,7 +10,7 @@
 {
     <p><i>Loading...</i></p>
 }
-else if(ui == UI.Main)
+else if (ui == UI.Main)
 {
     <div>
         <table class="table">
@@ -55,11 +56,13 @@ else if(ui == UI.Main)
     <hr />
     @if (pft == null)
     {
-        <p>No profiting account for node.</p>
+        <p>No profiting account.</p>
     }
     else
     {
-        <h1>Profiting Account for Node</h1>
+        <h1>Profiting Account</h1>
+        <p>Name: <b>@pft.Name</b></p>
+        <p>Type: <b>@pft.PType</b></p>
         <p>
             Node Owner Account ID: <a href="/showblock/@pft?.OwnerAccountId">@pft?.OwnerAccountId.Substring(0, 10)...</a>
         </p>
@@ -116,13 +119,16 @@ else if(ui == UI.Main)
     </div>
 }
 
-@if(ui == UI.Error)
+@if (ui == UI.Error)
 {
     <p>@error</p>
 }
 
 
 @code {
+    [Parameter]
+    public string pftid { get; set; }
+
     string error;
 
     List<Profiting> pfts;
@@ -143,8 +149,13 @@ else if(ui == UI.Main)
             var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
             pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
             ui = UI.Main;
+
+            if(pftid != null)
+            {
+                await GetDetails(pftid);
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             error = ex.ToString();
             ui = UI.Error;
@@ -156,7 +167,7 @@ else if(ui == UI.Main)
         var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
         var ret = await lcx.GetBlockByIndexAsync(pftid, 1);
-        if(ret.Successful())
+        if (ret.Successful())
         {
             pft = ret.GetBlock() as ProfitingGenesis;
 
