@@ -253,7 +253,7 @@ namespace Nebula.Pages
 
 		private void ProfitingCreate(MouseEventArgs e)
 		{
-			if (pftType != "Node" || pftType != "Yield")
+			if (pftType != "Node" && pftType != "Yield")
 				return;
 
 			var type = (ProfitingType) Enum.Parse(typeof(ProfitingType), pftType);
