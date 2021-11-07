@@ -63,7 +63,7 @@ namespace Nebula.Store.WebWalletUseCase
 		public async Task HandleStakingCreate(WebWalletCreateStakingAction action, IDispatcher dispatcher)
 		{
 			var crpftret = await action.wallet.CreateStakingAccountAsync(
-				action.name, action.voting, action.days
+				action.name, action.voting, action.days, action.compound
 				);
 
 			if (crpftret.Successful())

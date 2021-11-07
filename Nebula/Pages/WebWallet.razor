@@ -105,6 +105,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staki
                 <tr>
                     <th>Name</th>
                     <th>Staking Amount</th>
+                    <th>Compound Mode</th>
                     <th>Total Reward</th>
                     <th>Start Time</th>
                     <th>Staking Days</th>
@@ -126,14 +127,15 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staki
                             {
                     <td>0</td>
                             }
+                    <td>@stk.CompoundMode</td>
                     <td>@walletState.Value.stkRewards[stk.AccountID]</td>
                     <td>@stk.TimeStamp</td>
                     <td>@stk.Days</td>
                     <td>@stk.Voting</td>
                     <td>
-                        <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault>Deposit</a>
+                        <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault>Add Staking Funds</a>
                         &nbsp;
-                        <a href="" @onclick="@(e => RmStk(e, stk.AccountID))" @onclick:preventDefault>Withdraw</a>
+                        <a href="" @onclick="@(e => RmStk(e, stk.AccountID))" @onclick:preventDefault>Unstaking</a>
                     </td>
                 </tr>
                     }
@@ -186,6 +188,10 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staki
     <p>
         Days of staking:
         <input size="10" type="text" @bind="@stkDays" />
+    </p>
+    <p>
+        Compound staking mode:
+        <input size="10" type="checkbox" @bind="@stkCompound" />
     </p>
     <div>
         <button class="btn btn-primary" @onclick="StakingCreate">Create Staking</button>

@@ -155,6 +155,7 @@ namespace Nebula.Store.WebWalletUseCase
         public string name { get; set; }
         public string voting { get; set; }
         public int days { get; set; }
+        public bool compound { get; set; }
     }
 
     public class WebWalletCreateProfitingAction

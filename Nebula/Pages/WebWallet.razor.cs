@@ -59,6 +59,7 @@ namespace Nebula.Pages
 		public string stkName { get; set; }
 		public string stkVoting { get; set; }
 		public string stkDays { get; set; }
+		public bool stkCompound { get; set; }
 
 		public string pftName { get; set; }
 		public string pftType { get; set; }
@@ -255,7 +256,8 @@ namespace Nebula.Pages
 					wallet = walletState.Value.wallet,
 					name = stkName,
 					voting = stkVoting,
-					days = int.Parse(stkDays)
+					days = int.Parse(stkDays),
+					compound = stkCompound
 				});
 			}
 			catch (Exception ex)
