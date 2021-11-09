@@ -72,7 +72,7 @@ namespace Nebula.Pages
 
 				seedHosts = new Dictionary<string, string>();
 				_ = Task.Run(() => {
-					var aggClient = new LyraAggregatedClient(Configuration["network"], true);
+					var aggClient = new LyraAggregatedClient(Configuration["network"], true, null);
 					var seeds = aggClient.GetSeedNodes();
 					foreach (var seed in seeds)
 					{

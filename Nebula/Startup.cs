@@ -63,7 +63,7 @@ namespace Nebula
 
             services.AddScoped<ILyraAPI>(provider =>
             {
-                var client = new LyraAggregatedClient(networkid, true);
+                var client = new LyraAggregatedClient(networkid, true, null);
                 var t = Task.Run(async () => { await client.InitAsync(); });
                 Task.WaitAll(t);
                 return client;
