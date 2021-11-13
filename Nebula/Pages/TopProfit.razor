@@ -3,21 +3,24 @@
 @page "/profit/{pftid}"
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
+@inject NavigationManager UriHelper
 
-<h1>All profiting accounts</h1>
-
-@if (pfts == null)
+@if (ui == UI.Loading)
 {
     <p><i>Loading...</i></p>
 }
-else if (ui == UI.Main)
+
+@if (ui == UI.Main)
 {
+    <h1>All Profiting Accounts</h1>
+
     <div>
         <table class="table">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Type</th>
+                    <th>Created Time</th>
                     <th>Share Ratio</th>
                     <th>Seats</th>
                     <th>Total Profit</th>
@@ -28,9 +31,10 @@ else if (ui == UI.Main)
             <tbody>
                 @foreach (var pft in pfts.OrderByDescending(a => a.totalprofit).ThenBy(x => x.gens.Name))
                 {
-                    <tr @onclick="@(async () => await GetDetails(pft.gens.AccountID))">
-                        <td>@pft.gens.Name</td>
+                    <tr style="cursor:pointer" @onclick="@(async () => await NavToPft(pft.gens.AccountID))">
+                        <td style="color: blue">@pft.gens.Name</td>
                         <td>@pft.gens.PType</td>
+                        <td>@pft.gens.TimeStamp</td>
                         <td>@(pft.gens.ShareRito*100) %</td>
                         <td>@pft.gens.Seats</td>
                         <td>@pft.totalprofit</td>
@@ -48,19 +52,20 @@ else if (ui == UI.Main)
     </div>
 }
 
-@if (ui == UI.Details)
+@if(ui == UI.Details)
 {
-    <div>
-        <button class="btn btn-primary" @onclick="Back">Return</button>
-    </div>
-    <hr />
+    <h1>Details of profiting account</h1>
     @if (pft == null)
     {
         <p>No profiting account.</p>
     }
     else
     {
-        <h1>Profiting Account</h1>
+        <div>
+            <button class="btn btn-primary" @onclick="Back">Return</button>
+        </div>
+        <hr />
+
         <p>Name: <b>@pft.Name</b></p>
         <p>Type: <b>@pft.PType</b></p>
         <p>
@@ -133,7 +138,7 @@ else if (ui == UI.Main)
 
     List<Profiting> pfts;
 
-    enum UI { Main, Error, Details };
+    enum UI { Loading, Main, Error, Details };
     UI ui;
 
     // for details
@@ -146,20 +151,33 @@ else if (ui == UI.Main)
     {
         try
         {
+            ui = UI.Loading;
             var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
             pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+
             ui = UI.Main;
 
             if(pftid != null)
             {
                 await GetDetails(pftid);
+                ui = UI.Details;
             }
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             error = ex.ToString();
             ui = UI.Error;
         }
+    }
+
+    async Task NavToPft(string pftid)
+    {
+        UriHelper.NavigateTo("/profit/" + pftid);
+        await GetDetails(pftid);
+        ui = UI.Details;
+        StateHasChanged();
     }
 
     async Task GetDetails(string pftid)
@@ -211,5 +229,6 @@ else if (ui == UI.Main)
     void Back(MouseEventArgs e)
     {
         ui = UI.Main;
+        UriHelper.NavigateTo("/profit");
     }
 }

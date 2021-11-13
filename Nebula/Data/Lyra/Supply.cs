@@ -59,6 +59,10 @@ namespace Nebula.Data.Lyra
                 "LVFhxi6f89bzoa7vGM5aizhGWutLXYu3YqaxtfeYpvBbLQvfSJLokxiumt5ryHZWrWWgQXHXLjt6HTZDj7F4PU9vtgNwhJ",
                 "L4BsJXEb7zB7PMd1tg3VV594y2KwksrbooaghiqbWQ5hFFcy5gLiDbsH1Htvc8KxiXhH6soxAUubGQiWgeAgfgDkH2VJy2"
             };
+            var latoken = new[]
+            {
+                "LRiVki9Z587UsK2e3qyipERXjBza497xC77NNHmDsuuKD2Ay5mHVfc7EEmvoQEifv1UDVvCY2QNmpKqjCuWpzjzoR3VUVV"
+            };
 
             var db = dbCtx.Database;
 
@@ -101,6 +105,9 @@ namespace Nebula.Data.Lyra
                         tag = "Lyra Team";
                     else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
                         tag = "Burning";
+                    else if (latoken.Contains(e.Key))
+                        tag = "Latoken";
+
                     RichList.Add(new RichItem
                     {
                         AccountId = e.Key,

@@ -23,6 +23,9 @@ namespace Nebula.Store.WebWalletUseCase
 		public Dictionary<string, decimal> stkBalances { get; set; }
 		public Dictionary<string, decimal> stkRewards { get; set; }
 
+		public decimal pendingFunds { get; set; }
+		public decimal pendingFees { get; set; }
+
 		public bool IsLoading { get; set; }
 		public UIStage stage { get; set; } = UIStage.Entry;
 		public bool IsOpening { get; set; } = false;
