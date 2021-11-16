@@ -90,8 +90,9 @@
                         <tr>
                             <th>Staking Amount</th>
                             <th>Start Time</th>
-                            <th>Staking Days</th>
-                            <th>Earns</th>
+                            <th>End Time</th>
+                            <th>Staking Days</th>                            
+                            <th>Earns</th>                            
                             <th>Staking Account</th>
                             <th>Owner Account</th>
                         </tr>
@@ -102,8 +103,9 @@
                             <tr>
                                 <td>@stk.Amount LYR</td>
                                 <td>@stk.Time</td>
-                                <td>@stk.Days</td>
-                                <td>@stkRewards[stk.StkAccount] LYR</td>
+                                <td>@(stk.Time.AddDays(stk.Days))</td>
+                                <td>@stk.Days</td>                                
+                                <td>@stkRewards[stk.StkAccount] LYR</td>                                
                                 <td>
                                     <a href="/showblock/@stk.StkAccount">@stk.StkAccount.Shorten()</a>
                                 </td>
@@ -133,6 +135,9 @@
 @code {
     [Parameter]
     public string pftid { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? src { get; set; }
 
     string error;
 
@@ -227,8 +232,13 @@
     }
 
     void Back(MouseEventArgs e)
-    {
-        ui = UI.Main;
-        UriHelper.NavigateTo("/profit");
+    {        
+        if(src == "ne")
+            UriHelper.NavigateTo("/showbb");
+        else
+        {
+            ui = UI.Main;
+            UriHelper.NavigateTo("/profit");
+        }            
     }
 }
