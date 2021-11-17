@@ -51,15 +51,22 @@
         <button class="btn btn-primary" @onclick="Staking">
             Staking
         </button>
-        <button class="btn btn-primary" @onclick="Transactions">
-            Transactions
-        </button>
+
         <button class="btn btn-primary" @onclick="SwapToken">
             Token Swap
+        </button>
+        <button class="btn btn-primary" @onclick="StartDex">
+            DEX
         </button>
         @*    <button class="btn btn-primary" @onclick="SwapTLYR">
                 TLYR Gateway
             </button>*@
+
+                &nbsp;
+        <button class="btn btn-primary" @onclick="Transactions">
+            Transactions
+        </button>
+
         <button class="btn btn-primary" @onclick="Settings">
             Settings
         </button>
@@ -87,6 +94,26 @@
 </div>
 <div>
     <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
+    </div>
+}
+else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.DEX)
+{
+<div>
+    <button class="btn btn-primary" @onclick="CancelSave">Return</button>
+</div>
+<hr />
+<h3>Lyra DEX</h3>
+<hr />
+<div>
+    @*  
+        list supported blockchain
+        on
+
+    *@
+</div>
+<hr />
+<div>
+    <button class="btn btn-primary" @onclick="CancelSave">Return</button>
 </div>
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staking)
@@ -133,9 +160,14 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staki
                     <td>@stk.Days</td>
                     <td>@stk.Voting</td>
                     <td>
-                        <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault>Add Staking Funds</a>
+                        <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
                         &nbsp;
-                        <a href="" @onclick="@(e => RmStk(e, stk.AccountID))" @onclick:preventDefault>Unstaking</a>
+                                <Popconfirm Title="Unstaking within the promised staking period will pay 0.8% panalise fee. "
+                                    OnConfirm="@(e => RmStk(e, stk.AccountID))"
+                                    OkText="Yes, I know."
+                                    CancelText="No, cancel unstaking">
+                                    <a style="color:blue"><u>Unstaking</u></a>
+                                </Popconfirm>
                     </td>
                 </tr>
                     }
@@ -467,6 +499,8 @@ else
     private async Task<decimal> GetAmountInput()
     {
         string prompted = await JS.InvokeAsync<string>("prompt", "How many LYR do you want to stake?"); // Prompt
+        if (prompted == null)
+            return 0;
         return decimal.Parse(prompted);
     }
 

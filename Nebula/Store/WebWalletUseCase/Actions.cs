@@ -180,4 +180,8 @@ namespace Nebula.Store.WebWalletUseCase
         public Wallet wallet { get; set; }
         public string stkid { get; set; }
     }
+
+    // DEX
+    public class WebWalletStartDexAction
+    { }
 }

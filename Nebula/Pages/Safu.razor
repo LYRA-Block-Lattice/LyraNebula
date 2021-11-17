@@ -1,0 +1,61 @@
+﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@page "/safu"
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@inject NavigationManager UriHelper
+
+@if (ui == UI.Loading)
+{
+    <p><i>Loading...</i></p>
+}
+
+<h1>Lyra Is SAFU</h1>
+
+<p>Following the example of all serious crypto projects Lyra founded Insurance Fund - Secure Asset Fund for Users in the amount of 1.000.000.000 Lyra.</p>
+
+<p>We will allocate 10% of total circulation into SAFU to offer protection to our users, hodlers and their funds in extreme cases, like system bugs, hacking attacked etc… This fund will be stored in a separate cold wallet and can be accessed only in cases of extreme emergency.</p>
+
+<p>These actions take root because we value our users’ security first and foremost. We want our community to feel safe.</p>
+
+<p>With that being said, from a security standpoint, our goal every day is to never use SAFU, and we hope to achieve this by doing our part in providing the most secure crypto platforms possible for all of our Lyrians.</p>
+
+<h3>History of SAFU</h3>
+
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>From</th>
+                <th>Accident Description</th>
+                <th>Lost</th>
+                <th>Recovery</th>
+                <th>Link</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>17 Nov. 2021</td>
+                <td>ChabG</td>
+                <td>"i just lost nearly 80k LYR unstaking when i was expecting no fee charge"</td>
+                <td>77600 LYR</td>
+                <td></td>
+                <td>
+                    <a href="https://github.com/LYRA-Block-Lattice/Lyra-Core/issues/16">Github Issue</a>
+                </td>
+                <td>Unprocessed</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@code {
+    enum UI { Loading, Main, Error, Details };
+    UI ui;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ui = UI.Main;
+    }
+}

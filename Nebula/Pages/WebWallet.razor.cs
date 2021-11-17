@@ -295,12 +295,15 @@ namespace Nebula.Pages
 			try
             {
 				var amt = await GetAmountInput();
-				Dispatcher.Dispatch(new WebWalletAddStakingAction
-				{
-					wallet = walletState.Value.wallet,
-					stkid = stkid,
-					amount = amt
-				});
+				if(amt > 0)
+                {
+					Dispatcher.Dispatch(new WebWalletAddStakingAction
+					{
+						wallet = walletState.Value.wallet,
+						stkid = stkid,
+						amount = amt
+					});
+				}
 			}
 			catch (Exception ex)
 			{
@@ -770,6 +773,11 @@ namespace Nebula.Pages
 					_svcFeeCalculationTask = null;
 				});
 			});
+		}
+
+		private void StartDex(MouseEventArgs e)
+		{		
+			Dispatcher.Dispatch(new WebWalletStartDexAction());
 		}
 	}
 }

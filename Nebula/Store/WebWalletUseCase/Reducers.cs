@@ -188,5 +188,9 @@ namespace Nebula.Store.WebWalletUseCase
 
 		[ReducerMethod]
 		public static WebWalletState ReduceRCServerAction(WebWalletState state, WebWalletReCAPTCHAServerAction action) => state.With(new { ServerVerificatiing = action.ServerVerificatiing });
+	
+		// DEX
+		[ReducerMethod]
+		public static WebWalletState ReduceStartDEXAction(WebWalletState state, WebWalletStartDexAction action) => state.With(new { stage = UIStage.DEX, Message = "" });
 	}
 }
