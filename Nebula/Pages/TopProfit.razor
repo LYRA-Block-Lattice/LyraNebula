@@ -83,7 +83,7 @@
 
         </p>
         <p>
-            <div><h4>All Stakings</h4></div>
+            <div><h4>All Current Stakings</h4></div>
             <div>
                 <table class="table">
                     <thead>
@@ -100,7 +100,17 @@
                     <tbody>
                         @foreach (var stk in stks)
                         {
-                            <tr>
+                            string style = "";
+                            if (stk.Time <= DateTime.UtcNow && stk.Time.AddDays(stk.Days) >= DateTime.UtcNow)
+                            {
+                                style = "background-color:light-green;";
+                            }
+                            else
+                            {
+                                style = "background-color:light-grey;";
+                            }
+
+                            <tr style="@style">
                                 <td>@stk.Amount LYR</td>
                                 <td>@stk.Time</td>
                                 <td>@(stk.Time.AddDays(stk.Days))</td>
@@ -194,7 +204,7 @@
         {
             pft = ret.GetBlock() as ProfitingGenesis;
 
-            stks = await lcx.FindAllStakingsAsync(pftid, DateTime.UtcNow.AddDays(1));
+            stks = await lcx.FindAllStakingsAsync(pftid, DateTime.UtcNow);
             pftStats = await lcx.GetAccountStatsAsync(pftid, DateTime.MinValue, DateTime.MaxValue);
 
             var rwds = new Dictionary<string, decimal>();
