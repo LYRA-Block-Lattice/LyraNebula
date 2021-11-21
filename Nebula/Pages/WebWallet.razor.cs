@@ -26,15 +26,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using TronNet;
 
 namespace Nebula.Pages
 {
 	public partial class WebWallet
 	{
-		[Inject]
-		private IWalletClient tronClient { get; set; }
-
 		[Inject]
 		private IState<WebWalletState> walletState { get; set; }
 

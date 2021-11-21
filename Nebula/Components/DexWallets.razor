@@ -1,0 +1,101 @@
+﻿@namespace Nebula.Components
+
+@using DexServer.Ext
+@using System.ComponentModel
+@using AntDesign.TableModels
+@using Lyra.Core.Accounts
+@using Microsoft.Extensions.Configuration
+@using Nebula.Data
+@inject IConfiguration Configuration
+
+<h3>Dex Wallets</h3>
+
+@if(tokens == null)
+{
+    <p><em>Loading wallets... This may take a while.</em></p>
+    <div class="spinner"></div>
+}
+else
+{
+    <Table TItem="WalletView" DataSource="@tokens" OnRowClick="OnRowClick">
+    <Column @bind-Field="@context.assertName">
+        <a href="">@context.assertName</a>
+    </Column>
+    <Column @bind-Field="@context.assertSymbol">
+    </Column>
+    <Column @bind-Field="@context.assertNetworkProvider">
+    </Column>
+    <Column @bind-Field="@context.assertContract">
+    </Column>
+    <Column @bind-Field="@context.balance"></Column>
+    <ActionColumn Title="Action">
+        <Space Size=@("middle")>
+            <SpaceItem>
+                <Button Type="@ButtonType.Primary">Deposit</Button>
+            </SpaceItem>
+            <SpaceItem>
+                <Button Type="@ButtonType.Primary">Withdraw</Button>
+            </SpaceItem>
+        </Space>
+    </ActionColumn>
+</Table>
+
+}
+
+
+@code {
+    [Parameter]
+    public Wallet wallet { get; set; }
+
+    List<WalletView> tokens;
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            var t = Task.Run(async () =>
+            {
+                var dc = new DexClient();
+                var ext = await dc.GetSupportedExtTokenAsync();
+            //_tokens = ext.Asserts;
+
+            //var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+            var brks = await wallet.GetAllDexWalletsAsync();
+
+                tokens = new List<WalletView>();
+                foreach (var ast in ext.Asserts)
+                {
+                    var wv = new WalletView
+                    {
+                        assertName = ast.Name,
+                        assertSymbol = ast.Symbol,
+                        assertNetworkProvider  = ast.NetworkProvider,
+                        assertContract = ast.Contract
+                    };
+                    var bt = brks.FirstOrDefault(a => a.ExtSymbol == ast.Symbol) as TransactionBlock;
+                    var key = $"tether/{ast.Symbol}";
+                    if (bt != null && bt.Balances.ContainsKey(key))
+                    {
+                        wv.balance = bt.Balances[key].ToBalanceDecimal();
+                    }
+                    else
+                        wv.balance = 0;
+
+                    tokens.Add(wv);
+                }
+            });
+            Task.WaitAll(t);
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine("Error DexWallet OnInitializedAsync " + e.ToString());
+        }
+
+        //StateHasChanged();
+    }
+
+    void OnRowClick(RowData<WalletView> row)
+    {
+        Console.WriteLine($"row {row.Data.assertSymbol} was clicked.");
+    }
+}
