@@ -7,6 +7,7 @@
 @using Microsoft.Extensions.Configuration
 @using Nebula.Data
 @inject IConfiguration Configuration
+@inject NotificationService _notice
 
 <h3>Dex Wallets</h3>
 
@@ -17,21 +18,32 @@
 }
 else
 {
-    <Table TItem="WalletView" DataSource="@tokens" OnRowClick="OnRowClick">
-    <Column @bind-Field="@context.assertName">
-        <a href="">@context.assertName</a>
+    <Table TItem="WalletView" DataSource="@tokens">
+    <Column @bind-Field="@context.Name">
+        <a href="">@context.Name</a>
     </Column>
-    <Column @bind-Field="@context.assertSymbol">
+    <Column @bind-Field="@context.Symbol">
     </Column>
-    <Column @bind-Field="@context.assertNetworkProvider">
+    <Column Title="Network Provider" @bind-Field="@context.NetworkProvider">
     </Column>
-    <Column @bind-Field="@context.assertContract">
-    </Column>
-    <Column @bind-Field="@context.balance"></Column>
+    <Column Title="My Balance" @bind-Field="@context.MyBalance"></Column>
+        <ActionColumn Align="ColumnAlign.Center" Title="Transfer">
+            <Space Size=@("middle")>
+                <SpaceItem>
+                    <Button Icon="@IconType.Outline.ArrowLeft" Type="@ButtonType.Primary"
+                         OnClick="@(async ()=>{ await OnTransferClick(context, false); })"></Button>
+                </SpaceItem>
+                <SpaceItem>
+                    <Button Icon="@IconType.Outline.ArrowRight" Type="@ButtonType.Primary"
+                        OnClick="@(async ()=>{ await OnTransferClick(context, true); })"></Button>
+                </SpaceItem>
+            </Space>
+        </ActionColumn>
+    <Column Title="DEX Balance" @bind-Field="@context.DexBalance"></Column>
     <ActionColumn Title="Action">
         <Space Size=@("middle")>
             <SpaceItem>
-                <Button Type="@ButtonType.Primary">Deposit</Button>
+                <Button Type="@ButtonType.Primary" OnClick="@(()=>{ OnDepositClick(context); })">Deposit</Button>
             </SpaceItem>
             <SpaceItem>
                 <Button Type="@ButtonType.Primary">Withdraw</Button>
@@ -40,7 +52,33 @@ else
     </ActionColumn>
 </Table>
 
+<Modal Title="@title"
+       Visible="@visible"
+       Draggable="@(true)"
+       OnOk="@HandleOk"
+       OnCancel="@HandleCancel">
+    <h3><b>@symbol</b></h3>
+    <p>Provider: @provider</p>
+    <p>Contract: @contract</p>
+    <p>Address: <b>@address</b></p>
+    <p>&nbsp;</p>
+    <p>Minimal Deposit: @mindep @symbol</p>
+    <p>Deposition Fee: 0 %</p>
+    <p>Confirmation: @token.ConfirmationInfo</p>
+</Modal>
+
+
+<Modal Title="@transferTitle"
+       Visible="@transferVisible"
+       ConfirmLoading="@_confirmLoading"
+       OnOk="@HandleOk2"
+       OnCancel="@HandleCancel2">
+    
+       <h3>Amount you want to transfer:</h3>
+       <AntDesign.InputNumber @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>
+</Modal>
 }
+
 
 
 @code {
@@ -48,43 +86,123 @@ else
     public Wallet wallet { get; set; }
 
     List<WalletView> tokens;
+    WalletView token;
+    string address;
 
-    protected override void OnInitialized()
+    string title = "BasicModal";
+    bool visible = false;
+    string symbol;
+    string provider;
+    string contract;
+    decimal mindep;
+    string confirm;
+
+    string dexWalletId = null;
+    string ticker = null;
+    bool transferVisible = false;
+    string transferTitle;
+    decimal transferAmount;
+    decimal transferMin = 1;
+    decimal transferMax;
+    decimal transferDefault;
+    bool transferToDex;
+    bool _confirmLoading = false;
+
+    async Task OnTransferClick(WalletView row, bool toDex)
+    {
+        if(row.DexWalletID == null)
+        {
+            // user have not create wallet yet.
+            await _notice.Open(new NotificationConfig()
+                {
+                    Message = $"You don't have a DEX wallet for {row.Symbol} yet.",
+                    Description = "Creating a DEX wallet for you",
+                    NotificationType = NotificationType.Info
+                });
+
+            await wallet.SyncAsync(null);
+            var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
+            if(crdexret.Successful())
+            {
+                await _notice.Open(new NotificationConfig()
+                {
+                    Message = $"Success! ",
+                    Description = $"DEX Wallet for {row.Symbol} has been created. Refreshing...",
+                    NotificationType = NotificationType.Success
+                });
+
+                await RefreshAllWallets();
+
+                await _notice.Open(new NotificationConfig()
+                {
+                    Message = $"Success! ",
+                    Description = $"Refreshed.",
+                    NotificationType = NotificationType.Success
+                });
+            }
+            else
+            {
+                await _notice.Open(new NotificationConfig()
+                {
+                    Message = $"Error! ",
+                    Description = $"DEX Wallet for {row.Symbol} was not created.",
+                    NotificationType = NotificationType.Warning
+                });
+            }
+        }
+        else
+        {
+            transferTitle = toDex ? "Transfer funds from my wallet to DEX wallet" : "Transfer funds from DEX wallet to my wallet";
+            transferMax = toDex ? row.MyBalance : row.DexBalance;
+            transferDefault = transferMax;            
+            transferToDex = toDex;
+            dexWalletId = row.DexWalletID;
+            ticker = $"tether/{row.Symbol}";
+            transferVisible = true;
+        }
+    }
+
+    void OnDepositClick(WalletView row)
+    {
+        token = row;
+
+        title = "Deposit funds for " + token.Name;
+        symbol = token.Symbol;
+        provider = token.NetworkProvider;
+        contract = token.Contract.Shorten();
+        address = token.Address;
+        mindep = token.MinDeposit;
+        confirm = token.ConfirmationInfo;
+
+        if(string.IsNullOrWhiteSpace(token.Address))
+        {
+            Task.Run(async () =>
+            {
+                var ret = await wallet.CreateDexWalletAsync(symbol, provider);
+                if(ret.Successful())
+                {
+                    for(var i = 0; i < 100; i++)
+                    {
+                        var dw = await wallet.FindDexWalletAsync(wallet.AccountId, symbol, provider);
+                        if (dw == null)
+                            continue;
+                        token.Address = dw.ExtAddress;
+                        address = token.Address;
+                        await InvokeAsync(() => StateHasChanged());
+                        break;
+                    }
+                }
+            });
+        }
+
+        visible = true;
+    }
+
+    protected async override Task OnInitializedAsync()
     {
         try
         {
-            var t = Task.Run(async () =>
-            {
-                var dc = new DexClient();
-                var ext = await dc.GetSupportedExtTokenAsync();
-            //_tokens = ext.Asserts;
-
-            //var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-            var brks = await wallet.GetAllDexWalletsAsync();
-
-                tokens = new List<WalletView>();
-                foreach (var ast in ext.Asserts)
-                {
-                    var wv = new WalletView
-                    {
-                        assertName = ast.Name,
-                        assertSymbol = ast.Symbol,
-                        assertNetworkProvider  = ast.NetworkProvider,
-                        assertContract = ast.Contract
-                    };
-                    var bt = brks.FirstOrDefault(a => a.ExtSymbol == ast.Symbol) as TransactionBlock;
-                    var key = $"tether/{ast.Symbol}";
-                    if (bt != null && bt.Balances.ContainsKey(key))
-                    {
-                        wv.balance = bt.Balances[key].ToBalanceDecimal();
-                    }
-                    else
-                        wv.balance = 0;
-
-                    tokens.Add(wv);
-                }
-            });
-            Task.WaitAll(t);
+            await RefreshAllWallets();
         }
         catch(Exception e)
         {
@@ -94,8 +212,113 @@ else
         //StateHasChanged();
     }
 
-    void OnRowClick(RowData<WalletView> row)
+    private async Task RefreshAllWallets()
     {
-        Console.WriteLine($"row {row.Data.assertSymbol} was clicked.");
+        var dc = new DexClient();
+        var ext = await dc.GetSupportedExtTokenAsync();
+        //_tokens = ext.Asserts;
+
+        //var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+        var brks = await wallet.GetAllDexWalletsAsync(wallet.AccountId);
+        await wallet.SyncAsync(null);
+
+        tokens = new List<WalletView>();
+        foreach (var ast in ext.Asserts)
+        {
+            var wv = new WalletView
+                {
+                    Name = ast.Name,
+                    Symbol = ast.Symbol,
+                    NetworkProvider = ast.NetworkProvider,
+                    Contract = ast.Contract,
+                    MinDeposit = ast.MinDeposit,
+                    ConfirmationInfo = ast.ConfirmationInfo,
+                    DepositFee = ast.DepositFee
+                };
+            var bt = brks.FirstOrDefault(a => a.ExtSymbol == ast.Symbol) as TransactionBlock;
+            var key = $"tether/{ast.Symbol}";
+            if (bt != null)
+            {
+                if (bt.Balances.ContainsKey(key))
+                    wv.DexBalance = bt.Balances[key].ToBalanceDecimal();
+                else
+                    wv.DexBalance = 0;
+                wv.Address = (bt as IDexWallet).ExtAddress;
+                wv.DexWalletID = bt.AccountID;
+            }
+            else
+                wv.DexBalance = 0;
+
+            var lb = wallet.GetLatestBlock();
+            if (lb != null && lb.Balances.ContainsKey(key))
+            {
+                wv.MyBalance = lb.Balances[key].ToBalanceDecimal();
+            }
+            else
+                wv.MyBalance = 0;
+
+            tokens.Add(wv);
+        }
+    }
+
+    private void HandleOk(MouseEventArgs e)
+    {
+        visible = false;
+    }
+
+    private void HandleCancel(MouseEventArgs e)
+    {
+        visible = false;
+    }
+
+    private async Task HandleOk2(MouseEventArgs e)
+    {
+        _confirmLoading = true;
+        StateHasChanged();
+
+        if (transferAmount <= 0)
+            return;
+
+        APIResult ret = null;
+        if(transferToDex)
+        {
+            await wallet.SyncAsync(null);
+            ret = await wallet.DexPutTokenAsync(dexWalletId, ticker, transferAmount);
+        }
+        else
+        {
+            await wallet.SyncAsync(null);
+            ret = await wallet.DexGetTokenAsync(dexWalletId, transferAmount);
+        }
+
+        _confirmLoading = false;
+        transferVisible = false;
+
+        await _notice.Open(new NotificationConfig()
+        {
+            Message = "Transfer Result",
+            Description = ret.ResultCode.ToString(),
+            NotificationType = ret.Successful() ? NotificationType.Success : NotificationType.Error
+        });
+
+        if(ret.Successful())
+        {
+            var wv = tokens.First(a => a.DexWalletID == dexWalletId);
+            if(transferToDex)
+            {
+                wv.MyBalance -= transferAmount;
+                wv.DexBalance += transferAmount;
+            }
+            else
+            {
+                wv.MyBalance += transferAmount;
+                wv.DexBalance -= transferAmount;
+            }
+        }
+    }
+
+    private void HandleCancel2(MouseEventArgs e)
+    {
+        transferVisible = false;
     }
 }

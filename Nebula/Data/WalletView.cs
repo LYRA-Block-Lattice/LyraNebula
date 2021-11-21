@@ -2,12 +2,12 @@
 
 namespace Nebula.Data
 {
-    public class WalletView
+    public class WalletView : ExtAssert
     {
-        public string assertName { get; set; }
-        public string assertSymbol { get; set; }    
-        public string assertNetworkProvider { get; set; }
-        public string assertContract { get; set; }
-        public decimal balance { get; set; }
+        public decimal MyBalance { get; set; }
+        public decimal DexBalance { get; set; }
+
+        public string Address { get; set; }
+        public string DexWalletID { get; set; }
     }
 }
