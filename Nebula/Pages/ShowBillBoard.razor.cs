@@ -1,4 +1,5 @@
 ﻿using Fluxor;
+using Lyra.Core.API;
 using Lyra.Core.Blocks;
 using Lyra.Data.API;
 using Microsoft.AspNetCore.Components;
@@ -29,7 +30,9 @@ namespace Nebula.Pages
 		private Dictionary<string, string> seedHosts;
 
 		private int selId;
-        private int SelectedHistId
+		List<Profiting> pfts;
+
+		private int SelectedHistId
         {
             get
             {
@@ -71,7 +74,10 @@ namespace Nebula.Pages
 				NodeState.StateChanged += NodeState_StateChanged;
 
 				seedHosts = new Dictionary<string, string>();
-				_ = Task.Run(() => {
+				_ = Task.Run(async () => {
+					var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+					pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+
 					var aggClient = new LyraAggregatedClient(Configuration["network"], true, null);
 					var seeds = aggClient.GetSeedNodes();
 					foreach (var seed in seeds)
@@ -143,6 +149,18 @@ namespace Nebula.Pages
 				return acct.Substring(0, 10);
 			else
 				return acct;
+		}
+
+		private string GetProfitingAccountName(string posAccount)
+		{
+			if (pfts == null)
+				return "";
+
+			var acct = pfts.FirstOrDefault(a => a.gens.OwnerAccountId == posAccount);
+			if (acct == null)
+				return "";
+
+			return acct.gens.Name;
 		}
 
 		private decimal GetStakingAmount(string posAccount)

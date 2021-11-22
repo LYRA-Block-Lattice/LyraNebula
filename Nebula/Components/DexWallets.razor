@@ -20,7 +20,7 @@ else
 {
     <Table TItem="WalletView" DataSource="@tokens">
     <Column @bind-Field="@context.Name">
-        <a href="">@context.Name</a>
+        <a href="@context.Url">@context.Name</a>
     </Column>
     <Column @bind-Field="@context.Symbol">
     </Column>
@@ -46,12 +46,14 @@ else
                 <Button Type="@ButtonType.Primary" OnClick="@(()=>{ OnDepositClick(context); })">Deposit</Button>
             </SpaceItem>
             <SpaceItem>
-                <Button Type="@ButtonType.Primary">Withdraw</Button>
+                <Button Type="@ButtonType.Primary" OnClick="@(()=>{ OnWithdrawClick(context); })">Withdraw</Button>
             </SpaceItem>
         </Space>
     </ActionColumn>
 </Table>
-
+<div>
+    <Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await RefreshAllWallets(); })">Refresh All Balance</Button>
+</div>
 <Modal Title="@title"
        Visible="@visible"
        Draggable="@(true)"
@@ -60,7 +62,8 @@ else
     <h3><b>@symbol</b></h3>
     <p>Provider: @provider</p>
     <p>Contract: @contract</p>
-    <p>Address: <b>@address</b></p>
+    <p>Depositon Address: </p>
+    <Input Placeholder="Deposition address" @bind-Value="@address" ReadOnly="@(true)" Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;" />
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
@@ -77,6 +80,21 @@ else
        <h3>Amount you want to transfer:</h3>
        <AntDesign.InputNumber @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>
 </Modal>
+
+<Modal Title="@withdrawTitle"
+       Visible="@withdrawVisible"
+       OnOk="@StartWithdraw"
+       OnCancel="@HandleCancel3">
+    
+        <h3><b>@symbol</b></h3>
+        <p>Provider: @provider</p>
+        <p>Contract: @contract</p>
+        <p>&nbsp;</p>
+       <h3>Address you want to withdraw:</h3>
+       <Input Placeholder="Withdraw to address" @bind-Value="@withdrawAddress"  />
+       <h3>Amount:</h3>
+       <AntDesign.InputNumber @bind-Value="withdrawAmount" Min="@withdrawMin" Max="@withdrawMax" DefaultValue="@withdrawDefault"></AntDesign.InputNumber> @symbol
+</Modal>
 }
 
 
@@ -84,6 +102,15 @@ else
 @code {
     [Parameter]
     public Wallet wallet { get; set; }
+
+    string withdrawTitle;
+    bool withdrawVisible = false;
+    string withdrawAddress;
+    decimal withdrawAmount;
+    decimal withdrawMin, withdrawMax, withdrawDefault;
+
+
+
 
     List<WalletView> tokens;
     WalletView token;
@@ -198,6 +225,50 @@ else
         visible = true;
     }
 
+    void OnWithdrawClick(WalletView row)
+    {
+        withdrawTitle = $"Withdraw {row.Symbol} to your address on {row.Name} {row.NetworkProvider}";
+        dexWalletId = row.DexWalletID;
+        provider = row.NetworkProvider;
+        symbol = row.Symbol;
+        contract = row.Contract;
+        withdrawMin = row.MinWithdraw;
+        withdrawMax = row.DexBalance;
+        withdrawDefault = withdrawMax;
+        withdrawAmount = withdrawMax;
+        withdrawAddress = "";
+
+        withdrawVisible = true;
+    }
+
+    private async Task StartWithdraw(MouseEventArgs e)
+    {
+        withdrawVisible = false;
+
+        StateHasChanged();
+
+        var wdwret = await wallet.DexWithdrawTokenAsync(dexWalletId, withdrawAddress, withdrawAmount);
+        await _notice.Open(new NotificationConfig()
+            {
+                Message = "Withdraw Result",
+                Description = wdwret.ResultCode.ToString(),
+                NotificationType = wdwret.Successful() ? NotificationType.Success : NotificationType.Error
+            });
+
+        if(wdwret.Successful())
+        {
+            var wv = tokens.First(a => a.DexWalletID == dexWalletId);
+            wv.DexBalance -= withdrawAmount;
+        }
+
+        StateHasChanged();
+    }
+
+    private void HandleCancel3(MouseEventArgs e)
+    {
+        withdrawVisible = false;
+    }
+
     protected async override Task OnInitializedAsync()
     {
         try
@@ -215,7 +286,7 @@ else
     private async Task RefreshAllWallets()
     {
         var dc = new DexClient();
-        var ext = await dc.GetSupportedExtTokenAsync();
+        var ext = await dc.GetSupportedExtTokenAsync(Configuration["network"]);
         //_tokens = ext.Asserts;
 
         //var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
@@ -274,6 +345,7 @@ else
     private async Task HandleOk2(MouseEventArgs e)
     {
         _confirmLoading = true;
+        transferVisible = false;
         StateHasChanged();
 
         if (transferAmount <= 0)
@@ -291,8 +363,7 @@ else
             ret = await wallet.DexGetTokenAsync(dexWalletId, transferAmount);
         }
 
-        _confirmLoading = false;
-        transferVisible = false;
+        _confirmLoading = false;        
 
         await _notice.Open(new NotificationConfig()
         {

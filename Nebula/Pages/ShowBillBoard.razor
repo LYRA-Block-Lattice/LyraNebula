@@ -118,6 +118,7 @@
                     <th>Rank</th>
                     <th>Primary</th>
                     <th>Node ID</th>
+                    <th>Name</th>
                     <th>Profiting ID</th>
                     <th>Staking LYR</th>
                     <th></th>
@@ -159,6 +160,7 @@
                         <td align="center">@nodeInfo.Index</td>
                         <td align="center">@(nodeInfo.IsPrimary ? "Yes" : "No")</td>
                         <td><a href="/showblock/@nodeInfo.ID">@nodeInfo.ID?.Substring(0, 10)...</a></td>
+                        <td>@GetProfitingAccountName(nodeInfo.ID)</td>
                         <td>
                             @*<a href="" @onclick="@(e => ShowPft(e, nodeInfo.ID))" @onclick:preventDefault>@GetProfitingAccountShort(nodeInfo.ID)...</a>*@
                             <a href="/profit/@GetProfitingAccount(nodeInfo.ID)?src=ne" >@GetProfitingAccountShort(nodeInfo.ID)...</a>
