@@ -285,7 +285,7 @@ else
 
     private async Task RefreshAllWallets()
     {
-        var dc = new DexClient();
+        var dc = new DexClient(Configuration["network"]);
         var ext = await dc.GetSupportedExtTokenAsync(Configuration["network"]);
         //_tokens = ext.Asserts;
 

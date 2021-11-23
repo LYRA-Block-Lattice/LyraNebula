@@ -1,0 +1,45 @@
+﻿
+@if (ui == UI.Entry)
+{
+<Button Type="@ButtonType.Primary" OnClick="@(()=>{ AddLiquidity(); })">Add Liquidity</Button>
+
+
+<p>
+    <div>Your Liquidity</div>
+</p>
+<div>No Liquidity Found</div>
+}
+
+@if(ui == UI.Adding)
+{
+    <div>
+        <Button Type="@ButtonType.Primary"
+            Icon="@IconType.Outline.ArrowLeft"
+            OnClick="BackEntry" />
+            Add Liquidity
+    </div>
+<div>
+
+</div>
+}
+
+@code {
+
+    enum UI { Entry, Adding }
+    UI ui;
+
+    protected override void OnInitialized()
+    {
+        ui = UI.Entry;
+    }
+
+    private void BackEntry()
+    {
+        ui = UI.Entry;
+    }
+
+    private void AddLiquidity()
+    {
+        ui = UI.Adding;
+    }
+}
