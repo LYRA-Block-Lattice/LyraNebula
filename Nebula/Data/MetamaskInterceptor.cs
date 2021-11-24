@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Nethereum.JsonRpc.Client;
-using Nethereum.JsonRpc.Client.RpcMessages;
-using Nethereum.RPC.Eth.DTOs;
+//using Nethereum.JsonRpc.Client;
+//using Nethereum.JsonRpc.Client.RpcMessages;
+//using Nethereum.RPC.Eth.DTOs;
 
 namespace Nethereum.Metamask.Blazor
 {
-    public class MetamaskInterceptor : RequestInterceptor
+/*    public class MetamaskInterceptor : RequestInterceptor
     {
         private readonly IMetamaskInterop _metamaskInterop;
         private readonly MetamaskService _metamaskService;
@@ -83,5 +83,5 @@ namespace Nethereum.Metamask.Blazor
             }
         }
 
-    }
+    }*/
 }

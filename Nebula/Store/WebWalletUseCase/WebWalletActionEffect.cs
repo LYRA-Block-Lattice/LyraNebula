@@ -380,18 +380,18 @@ namespace Nebula.Store.WebWalletUseCase
 
 						if (sendResult.ResultCode == APIResultCodes.Success)
 						{
-							logger.LogInformation($"TokenSwap: first stage is ok for {action.fromAddress}");
-							var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
-								action.options.ethUrl, action.options.ethContract, action.options.ethPub,
-								action.options.ethPvk, 
-								action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
-								action.gasPrice, action.gasLimit,
-								null);
+							//logger.LogInformation($"TokenSwap: first stage is ok for {action.fromAddress}");
+							//var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
+							//	action.options.ethUrl, action.options.ethContract, action.options.ethPub,
+							//	action.options.ethPvk, 
+							//	action.toAddress, new BigInteger(action.toAmount * 100000000), // 10^8 
+							//	action.gasPrice, action.gasLimit,
+							//	null);
 
-							logger.LogInformation($"TokenSwap: second stage for {action.fromAddress} eth tx hash is {txHash} IsSuccess: {result}");
+							//logger.LogInformation($"TokenSwap: second stage for {action.fromAddress} eth tx hash is {txHash} IsSuccess: {result}");
 
-							if (!result)
-								throw new Exception("Eth sending failed.");
+							//if (!result)
+							//	throw new Exception("Eth sending failed.");
 
 							IsSuccess = true;
 						}
@@ -404,41 +404,41 @@ namespace Nebula.Store.WebWalletUseCase
 
 				if (action.fromToken == "TLYR" && action.toToken == "LYR")
 				{
-					var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
-						action.options.ethUrl, action.options.ethContract, action.fromAddress,
-						null,
-						action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
-						action.gasPrice, action.gasLimit,
-						action.metamask);
+					//var (txHash, result) = await SwapUtils.SendEthContractTokenAsync(
+					//	action.options.ethUrl, action.options.ethContract, action.fromAddress,
+					//	null,
+					//	action.options.ethPub, new BigInteger(action.fromAmount * 100000000), // 10^8 
+					//	action.gasPrice, action.gasLimit,
+					//	action.metamask);
 
-					logger.LogInformation($"TokenSwap: first stage for {action.fromAddress} eth tx hash {result} IsSuccess: {result}");
+					//logger.LogInformation($"TokenSwap: first stage for {action.fromAddress} eth tx hash {result} IsSuccess: {result}");
 
-					if (result) // test if success transfer
-					{
-						var store = new AccountInMemoryStorage();
-						var wallet = Wallet.Create(store, "default", "", config["network"],
-							action.options.lyrPvk);
+					//if (result) // test if success transfer
+					//{
+					//	var store = new AccountInMemoryStorage();
+					//	var wallet = Wallet.Create(store, "default", "", config["network"],
+					//		action.options.lyrPvk);
 
-						var syncResult = await wallet.SyncAsync(client);
-						if (syncResult == APIResultCodes.Success)
-						{
-							var sendResult = await wallet.SendAsync(action.toAmount,
-								action.toAddress, "LYR");
+					//	var syncResult = await wallet.SyncAsync(client);
+					//	if (syncResult == APIResultCodes.Success)
+					//	{
+					//		var sendResult = await wallet.SendAsync(action.toAmount,
+					//			action.toAddress, "LYR");
 
-							if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
-							{
-								IsSuccess = true;
-							}
-							else
-								throw new Exception("Unable to send from your wallet.");
-						}
-						else
-							throw new Exception("Unable to sync Lyra Wallet.");
-					}
-					else
-                    {
-						throw new Exception("Eth sending failed.");
-                    }
+					//		if (sendResult.ResultCode == Lyra.Core.Blocks.APIResultCodes.Success)
+					//		{
+					//			IsSuccess = true;
+					//		}
+					//		else
+					//			throw new Exception("Unable to send from your wallet.");
+					//	}
+					//	else
+					//		throw new Exception("Unable to sync Lyra Wallet.");
+					//}
+					//else
+     //               {
+					//	throw new Exception("Eth sending failed.");
+     //               }
 				}
 				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is succeed.");
 				dispatcher.Dispatch(new WebWalletSwapTLYRResultAction { Success = IsSuccess });

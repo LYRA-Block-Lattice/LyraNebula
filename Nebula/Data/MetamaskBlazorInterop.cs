@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.JSInterop;
 using Nebula.Pages;
-using Nethereum.JsonRpc.Client.RpcMessages;
+//using Nethereum.JsonRpc.Client.RpcMessages;
 using Newtonsoft.Json;
 
 namespace Nethereum.Metamask.Blazor
 {
-    public class MetamaskBlazorInterop : IMetamaskInterop
+/*    public class MetamaskBlazorInterop : IMetamaskInterop
     {
         private readonly IJSRuntime _jsRuntime;
 
@@ -62,5 +62,5 @@ namespace Nethereum.Metamask.Blazor
         {
             await MetamaskService.Current.ChangeSelectedAccountAsync(selectedAccount);
         }
-    }
+    }*/
 }

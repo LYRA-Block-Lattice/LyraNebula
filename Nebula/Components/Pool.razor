@@ -4,22 +4,22 @@
 
 @if (ui == UI.Entry)
 {
-<Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await AddLiquidity(); })">Add Liquidity</Button>
+    <Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await AddLiquidity(); })">Add Liquidity</Button>
 
 
-<p>
-    <div>Your Liquidity</div>
-</p>
-<div>No Liquidity Found</div>
+    <p>
+        <div>Your Liquidity</div>
+    </p>
+    <div>No Liquidity Found</div>
 }
 
-@if(ui == UI.Adding)
+@if (ui == UI.Adding)
 {
     <div>
         <Button Type="@ButtonType.Primary"
             Icon="@IconType.Outline.ArrowLeft"
             OnClick="BackEntry" />
-            Add Liquidity
+        Add Liquidity
     </div>
     <div>
         <table>
@@ -27,9 +27,15 @@
                 <td>Input</td>
                 <td>Balance: --</td>
             </tr>
-                        <tr>
+            <tr>
                 <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount1" /></td>
-                <td>LYR</td>
+                <td>
+                    <Select DataSource="@tickers"
+                        @bind-Value="@selectedTicker1"
+                        Style="width:220px"
+                        OnSelectedItemChanged="OnSelectedItemChangedHandler1">
+                    </Select>
+                </td>
             </tr>
             <tr>
                 <td>+</td>
@@ -43,18 +49,17 @@
                 <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount2" /></td>
                 <td>
                     <Select DataSource="@tickers"
-                        @bind-Value="@selectedTicker"
+                        @bind-Value="@selectedTicker2"
                         Style="width:220px"
-                        OnSelectedItemChanged="OnSelectedItemChangedHandler">
+                        OnSelectedItemChanged="OnSelectedItemChangedHandler2">
                     </Select>
                 </td>
             </tr>
         </table>
     </div>
 
-<div>
-
-</div>
+    <div>
+    </div>
 }
 
 @code {
@@ -64,7 +69,8 @@
 
     decimal amount1, amount2;
     List<string> tickers;
-    string selectedTicker;
+    string selectedTicker1;
+    string selectedTicker2;
 
     protected override void OnInitialized()
     {
@@ -96,7 +102,11 @@
         ui = UI.Adding;
     }
 
-    private void OnSelectedItemChangedHandler(string value)
+    private void OnSelectedItemChangedHandler1(string value)
+    {
+        Console.WriteLine($"selected: ${value}");
+    }
+    private void OnSelectedItemChangedHandler2(string value)
     {
         Console.WriteLine($"selected: ${value}");
     }

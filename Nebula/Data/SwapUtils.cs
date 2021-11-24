@@ -1,12 +1,6 @@
 ﻿using Lyra.Core.Accounts;
 using Lyra.Core.API;
 using Lyra.Core.Blocks;
-using Nethereum.ABI.FunctionEncoding.Attributes;
-using Nethereum.Contracts;
-using Nethereum.Metamask.Blazor;
-using Nethereum.Util;
-using Nethereum.Web3;
-using Nethereum.Web3.Accounts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +56,7 @@ namespace Nebula.Data
             else
                 throw new Exception("Failed to estimate transfer time.");
         }
-
+        /*
         public static async Task<BigInteger> EstimateEthTransferFeeAsync(string ethApiUrl, string ethContract,
             string fromEthAddress, string toEthAddress, BigInteger tokenAmount, int gasPriceOracle)
         {
@@ -176,7 +170,7 @@ namespace Nebula.Data
 
             [Nethereum.ABI.FunctionEncoding.Attributes.Parameter("uint256", "_value", 2)]
             public BigInteger TokenAmount { get; set; }
-        }
+        }*/
 
         public static async Task<decimal> GetLyraBalanceAsync(string lyraNetwork, string accountPvk)
         {

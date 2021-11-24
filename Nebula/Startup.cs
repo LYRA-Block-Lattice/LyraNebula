@@ -51,9 +51,9 @@ namespace Nebula
             services.AddControllers();
 
             // for Metamask wallet
-            services.AddScoped<IMetamaskInterop, MetamaskBlazorInterop>();
-            services.AddScoped<MetamaskService>();
-            services.AddScoped<MetamaskInterceptor>();
+            //services.AddScoped<IMetamaskInterop, MetamaskBlazorInterop>();
+            //services.AddScoped<MetamaskService>();
+            //services.AddScoped<MetamaskInterceptor>();
 
             services.AddHttpClient<FetchDataActionEffect>();
 

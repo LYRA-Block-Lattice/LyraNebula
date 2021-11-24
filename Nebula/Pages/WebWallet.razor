@@ -13,13 +13,9 @@
 @inject NavigationManager Navigation
 @inject SampleAPI SampleAPI
 @inject Blazored.LocalStorage.ILocalStorageService localStore
-@inject MetamaskService metamaskService
-@inject MetamaskInterceptor metamaskInterceptor
 @inject ILogger<WebWallet> logger
 @inject IOptionsMonitor<SwapOptions> swapOptions
 @inject ILyraAPI lyraClient
-@using Nethereum.Web3;
-@using Nethereum.Hex.HexTypes;
 @using Nebula.Components;
 
 <h1>Web Wallet for @LyraGlobal.PRODUCTNAME</h1>
@@ -405,7 +401,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.SwapT
 <hr />
 @if (!EthereumEnabled)
         {
-<button class="btn btn-primary" @onclick="@EnableEthereumAsync">Connect MetaMask Wallet</button>
+@*<button class="btn btn-primary" @onclick="@EnableEthereumAsync">Connect MetaMask Wallet</button>*@
 <hr />
         }
         else
@@ -578,7 +574,7 @@ else
             }
         }
 
-        MetamaskAvailable = await metamaskService.CheckMetamaskAvailability();
+        //MetamaskAvailable = await metamaskService.CheckMetamaskAvailability();
     }
 
     // swap
@@ -590,39 +586,39 @@ else
     string TransactionHash { get; set; }
     string ErrorTransferMessage { get; set; }
 
-    protected async Task EnableEthereumAsync()
-    {
-        EthereumEnabled = await metamaskService.EnableEthereumAsync();
-        if (EthereumEnabled)
-        {
-            var dotNetObjRef = DotNetObjectReference.Create(this);
-            var bOk = await metamaskService.RegisterEventsAsync(dotNetObjRef);
+    //protected async Task EnableEthereumAsync()
+    //{
+    //    EthereumEnabled = await metamaskService.EnableEthereumAsync();
+    //    if (EthereumEnabled)
+    //    {
+    //        var dotNetObjRef = DotNetObjectReference.Create(this);
+    //        var bOk = await metamaskService.RegisterEventsAsync(dotNetObjRef);
 
-            CurrentChainName = await metamaskService.GetChainName();
-            SelectedAccount = await metamaskService.GetSelectedAccount();
-        }
-    }
+    //        CurrentChainName = await metamaskService.GetChainName();
+    //        SelectedAccount = await metamaskService.GetSelectedAccount();
+    //    }
+    //}
 
     protected async Task GetBlockHashAsync()
     {
-        var web3 = new Nethereum.Web3.Web3();
-        web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
-        var block = await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(1));
-        BlockHash = block.BlockHash;
+        //var web3 = new Nethereum.Web3.Web3();
+        //web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
+        //var block = await web3.Eth.Blocks.GetBlockWithTransactionsByNumber.SendRequestAsync(new HexBigInteger(1));
+        //BlockHash = block.BlockHash;
     }
 
     protected async Task TransferEtherAsync()
     {
-        try
-        {
-            var web3 = new Nethereum.Web3.Web3();
-            web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
+        //try
+        //{
+        //    var web3 = new Nethereum.Web3.Web3();
+        //    web3.Client.OverridingRequestInterceptor = metamaskInterceptor;
 
-            TransactionHash = await web3.Eth.GetEtherTransferService().TransferEtherAsync("0x13f022d72158410433cbd66f5dd8bf6d2d129924", 0.001m);
-        }
-        catch (Exception ex)
-        {
-            ErrorTransferMessage = ex.Message;
-        }
+        //    TransactionHash = await web3.Eth.GetEtherTransferService().TransferEtherAsync("0x13f022d72158410433cbd66f5dd8bf6d2d129924", 0.001m);
+        //}
+        //catch (Exception ex)
+        //{
+        //    ErrorTransferMessage = ex.Message;
+        //}
     }
 }

@@ -101,7 +101,7 @@ namespace Nebula.Store.WebWalletUseCase
 
         // eth contract, metamask, etc.
         public SwapOptions options { get; set; }
-        public MetamaskInterceptor metamask { get; set; }
+        //public MetamaskInterceptor metamask { get; set; }
 
         public int gasPrice { get; set; }
         public BigInteger gasLimit { get; set; }
