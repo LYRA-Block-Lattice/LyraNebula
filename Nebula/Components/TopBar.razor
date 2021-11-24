@@ -1,0 +1,56 @@
+﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@using Fluxor
+@using Nebula.Store.WebWalletUseCase
+
+<table style="width: 100%; border: 0px">
+    <tr>
+        <td>
+            <div class="top-row-left">
+                <a href="/webwallet">@banner</a>
+            </div>
+
+        </td>
+        <td>
+            <div class="top-row">
+                <span></span><a href="https://lyra.live/" target="_blank">About</a>
+            </div>
+        </td>
+    </tr>
+</table>
+
+@code
+{
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    string banner;
+
+    protected override void OnInitialized()
+    {
+        WalletChanged(this, walletState.Value);
+
+        walletState.StateChanged += this.WalletChanged;
+
+        base.OnInitialized();
+    }
+
+    private void WalletChanged(object sender, WebWalletState wallet)
+    {
+        decimal balance1 = 0;
+        if (wallet.wallet != null)
+        {
+            var blk = wallet.wallet.GetLatestBlock();
+            if (blk.Balances.ContainsKey("LYR"))
+                balance1 = blk.Balances["LYR"].ToBalanceDecimal();
+
+            banner = $"Balance: <b>{balance1}</b> LYR";
+        }
+        else
+            banner = "Wallet not opened.";
+    }
+
+    public void Dispose()
+    {
+        walletState.StateChanged -= this.WalletChanged;
+    }
+}
