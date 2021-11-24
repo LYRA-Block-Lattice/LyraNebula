@@ -3,10 +3,12 @@
 @using Microsoft.Extensions.Configuration
 @using Nebula.Store.WebWalletUseCase
 @inject IConfiguration Configuration
+@inject ILyraAPI lyraClient
+@inject MessageService _message
 
 @if (ui == UI.Entry)
 {
-    <Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await AddLiquidity(); })">Add Liquidity</Button>
+    <Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
 
 
     <p>
@@ -17,20 +19,20 @@
 
 @if (ui == UI.Adding)
 {
-    <div>
-        <Button Type="@ButtonType.Primary"
+    <div style="padding: 14px">
+        <Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle"
             Icon="@IconType.Outline.ArrowLeft"
             OnClick="BackEntry" />
-        Add Liquidity
+        &nbsp;Add Liquidity
     </div>
-    <div>
+    <div style="padding: 14px">
         <table>
             <tr>
                 <td>Input</td>
                 <td>Balance: @balance1</td>
             </tr>
             <tr>
-                <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount1" /></td>
+                <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn" /></td>
                 <td>
                     <Select DataSource="@tickers"
                         @bind-Value="@selectedTicker1"
@@ -48,7 +50,7 @@
                 <td>Balance: @balance2</td>
             </tr>
             <tr>
-                <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount2" /></td>
+                <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn" /></td>
                 <td>
                     <Select DataSource="@tickers"
                         @bind-Value="@selectedTicker2"
@@ -57,11 +59,42 @@
                     </Select>
                 </td>
             </tr>
+            @if(havepool)
+            {
+                <tr>
+                    <td>Token Pair</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Total Liquidate</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</Button>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                <td colspan="2" style="padding: 14px">
+                    @if(walletState.Value.wallet == null)
+                    {
+                        <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+                    }
+                    else
+                    {
+                        <Button Disabled="@(!clenabled)" Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</Button>
+                    }
+                </td>
+            </tr>
+
+            }
+
         </table>
     </div>
 
-    <div>
-    </div>
 }
 
 @code {
@@ -81,6 +114,12 @@
     string selectedTicker1;
     string selectedTicker2;
 
+    bool havepool;
+    bool clenabled;
+    bool alenabled;
+
+    string apiresult;
+
     public Pool()
     {
     }
@@ -96,7 +135,37 @@
         ui = UI.Entry;
     }
 
-    private async Task AddLiquidity()
+    private async Task PoolDeposit()
+    {
+        var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1, amount1, selectedTicker2, amount2);
+        if(result.Successful())
+        {
+            _message.Success($"Add liquidate success.");
+        }
+        else
+        {                
+            _message.Error($"Failed add liquidate. {result.ResultCode}");
+        }
+    }
+
+    private async Task CreateLiquidity()
+    {
+        var poolCreateResult = await walletState.Value.wallet.CreateLiquidatePoolAsync(selectedTicker1, selectedTicker2);
+        if(poolCreateResult.Successful())
+        {
+            await Task.Delay(5000);
+            await _message.Success($"Waiting for pool be created...");
+            await Task.Delay(5000);
+            await PoolDeposit();
+        }
+        else
+        {
+            _message.Error($"Pool created failed. {poolCreateResult.ResultCode}");
+        }
+
+    }
+
+    private async Task OpenAddLiquidityUI()
     {
         var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
@@ -117,6 +186,27 @@
         ui = UI.Adding;
     }
 
+    private void updateBtn(decimal a)
+    {
+        havepool = false;
+        if(selectedTicker1 != null && selectedTicker2 != null && selectedTicker1 != selectedTicker2)
+        {
+            _ = Task.Run(async () =>
+            {
+                var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+                var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+                if (existspool.PoolAccountId != null)
+                {
+                    havepool = true;
+                    await InvokeAsync(() => StateHasChanged());
+                }                    
+            });
+        }
+
+        clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
+        alenabled = amount1 > 0 && amount2 > 0;
+    }
+
     private void OnSelectedItemChangedHandler1(string value)
     {
         if(walletState.Value.wallet != null)
@@ -128,7 +218,9 @@
                 balance1 = 0;
         }
         else
-             balance1 = 0;
+            balance1 = 0;
+
+        updateBtn(0);
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
@@ -142,5 +234,7 @@
         }
         else
             balance2 = 0;
+
+        updateBtn(0);
     }
 }

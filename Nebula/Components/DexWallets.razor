@@ -3,13 +3,22 @@
 @using DexServer.Ext
 @using System.ComponentModel
 @using AntDesign.TableModels
+@using Fluxor
 @using Lyra.Core.Accounts
 @using Microsoft.Extensions.Configuration
 @using Nebula.Data
+@using Nebula.Store.WebWalletUseCase
 @inject IConfiguration Configuration
 @inject NotificationService _notice
 
-<h3>Dex Wallets</h3>
+@if(walletState.Value.wallet == null)
+{
+    
+    <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+}
+else
+{
+    <h3>Dex Wallets</h3>
 
 @if(tokens == null)
 {
@@ -97,11 +106,18 @@ else
 </Modal>
 }
 
+}
+
+
 
 
 @code {
-    [Parameter]
-    public Wallet wallet { get; set; }
+
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
 
     string withdrawTitle;
     bool withdrawVisible = false;
@@ -147,6 +163,7 @@ else
                     NotificationType = NotificationType.Info
                 });
 
+            var wallet = walletState.Value.wallet;
             await wallet.SyncAsync(null);
             var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
             if(crdexret.Successful())
@@ -205,6 +222,7 @@ else
         {
             Task.Run(async () =>
             {
+                var wallet = walletState.Value.wallet;
                 var ret = await wallet.CreateDexWalletAsync(symbol, provider);
                 if(ret.Successful())
                 {
@@ -247,6 +265,7 @@ else
 
         StateHasChanged();
 
+        var wallet = walletState.Value.wallet;
         var wdwret = await wallet.DexWithdrawTokenAsync(dexWalletId, withdrawAddress, withdrawAmount);
         await _notice.Open(new NotificationConfig()
             {
@@ -273,7 +292,8 @@ else
     {
         try
         {
-            await RefreshAllWallets();
+            if(walletState.Value.wallet != null)
+                await RefreshAllWallets();
         }
         catch(Exception e)
         {
@@ -289,6 +309,7 @@ else
         var ext = await dc.GetSupportedExtTokenAsync(Configuration["network"]);
         //_tokens = ext.Asserts;
 
+        var wallet = walletState.Value.wallet;
         //var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
         var brks = await wallet.GetAllDexWalletsAsync(wallet.AccountId);
         await wallet.SyncAsync(null);
@@ -351,6 +372,7 @@ else
         if (transferAmount <= 0)
             return;
 
+        var wallet = walletState.Value.wallet;
         APIResult ret = null;
         if(transferToDex)
         {
