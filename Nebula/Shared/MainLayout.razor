@@ -1,15 +1,20 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+<PageTitle>Nebula for Lyra Pay</PageTitle>
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="https://lyra.live/" target="_blank">About</a>
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
     </div>
 
-    <div class="content px-4">
-        @Body
-    </div>
+    <main>
+        <div class="top-row px-4">
+            <a href="https://lyra.live/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
 </div>
+

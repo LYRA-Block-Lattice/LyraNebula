@@ -1,80 +1,84 @@
 ﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href=""><img style="align-content:center; vertical-align: middle;" src="/images/nebula-logo.png" title="@Configuration["network"]" /></a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+            <a class="navbar-brand" href=""><img style="align-content:center; vertical-align: middle;" src="/images/nebula-logo.png" title="@Configuration["network"]" /></a>
+
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
 </div>
-<!-- https://iconify.design/icon-sets/oi/ -->
+
 <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="oi oi-home" aria-hidden="true"></span> Home
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="swap">
                 <span class="oi oi-loop-circular" aria-hidden="true"></span> Token Swap
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="webwallet">
                 <span class="oi oi-key" aria-hidden="true"></span> Lyra Wallet
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="profit">
                 <span class="oi oi-graph" aria-hidden="true"></span> Profit & Staking
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="asserts">
                 <span class="oi oi-layers" aria-hidden="true"></span> Assert Explorer
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="showblock">
                 <span class="oi oi-grid-four-up" aria-hidden="true"></span> Block Explorer
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="showbb">
                 <span class="oi oi-fork" aria-hidden="true"></span> Node Explorer
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="safu">
                 <span class="oi oi-shield" aria-hidden="true"></span> SAFU
             </NavLink>
-        </li>
-        @*<li class="nav-item px-3">
+        </div>
+        @*<div class="nav-item px-3">
             <NavLink class="nav-link" href="fees">
                 <span class="oi oi-dollar" aria-hidden="true"></span> Nodes Fees
             </NavLink>
-        </li>*@
-        <li class="nav-item px-3">
+        </div>*@
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="stats">
                 <span class="oi oi-timer" aria-hidden="true"></span> Statistics
             </NavLink>
-        </li>
-        <li class="nav-item px-3">
+        </div>
+        <div class="nav-item px-3">
             <NavLink class="nav-link" href="/apps">
                 <span class="oi oi-cloud-download" aria-hidden="true"></span> Download
             </NavLink>
-        </li>
-    </ul>
+        </div>
+    </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
 
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
 }
+
