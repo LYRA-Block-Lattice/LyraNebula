@@ -1,5 +1,7 @@
-﻿@using Lyra.Data.Crypto
+﻿@using Fluxor
+@using Lyra.Data.Crypto
 @using Microsoft.Extensions.Configuration
+@using Nebula.Store.WebWalletUseCase
 @inject IConfiguration Configuration
 
 @if (ui == UI.Entry)
@@ -25,7 +27,7 @@
         <table>
             <tr>
                 <td>Input</td>
-                <td>Balance: --</td>
+                <td>Balance: @balance1</td>
             </tr>
             <tr>
                 <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount1" /></td>
@@ -43,7 +45,7 @@
             </tr>
             <tr>
                 <td>Input</td>
-                <td>Balance: --</td>
+                <td>Balance: @balance2</td>
             </tr>
             <tr>
                 <td><AntDesign.Input Placeholder="Enter an amount" @bind-Value="@amount2" /></td>
@@ -64,13 +66,24 @@
 
 @code {
 
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
+
     enum UI { Entry, Adding }
     UI ui;
 
     decimal amount1, amount2;
+    decimal balance1, balance2;
     List<string> tickers;
     string selectedTicker1;
     string selectedTicker2;
+
+    public Pool()
+    {
+    }
 
     protected override void OnInitialized()
     {
@@ -97,17 +110,38 @@
         var sign = Signatures.GetSignature(pk, (lsbret.GetBlock() as ServiceBlock).Hash, pub);
         var tokens = await lc.GetTokenNamesAsync(pub, sign, "(null)");
 
-        tickers = tokens.Entities;
+        tickers = tokens.Entities
+            .Where(a => !a.StartsWith("unittest/"))
+            .ToList();
+        tickers.Insert(0, "LYR");
 
         ui = UI.Adding;
     }
 
     private void OnSelectedItemChangedHandler1(string value)
     {
-        Console.WriteLine($"selected: ${value}");
+        if(walletState.Value.wallet != null)
+        {
+            var blk = walletState.Value.wallet.GetLatestBlock();
+            if (blk.Balances.ContainsKey(value))
+                balance1 = blk.Balances[value].ToBalanceDecimal();
+            else
+                balance1 = 0;
+        }
+        else
+             balance1 = 0;
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
-        Console.WriteLine($"selected: ${value}");
+        if(walletState.Value.wallet != null)
+        {
+            var blk = walletState.Value.wallet.GetLatestBlock();
+            if (blk.Balances.ContainsKey(value))
+                balance2 = blk.Balances[value].ToBalanceDecimal();
+            else
+                balance2 = 0;
+        }
+        else
+            balance2 = 0;
     }
 }
