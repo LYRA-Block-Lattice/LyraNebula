@@ -1,7 +1,6 @@
 ﻿using Lyra.Core.Accounts;
 using Lyra.Core.Blocks;
 using Nebula.Data;
-using Nethereum.Metamask.Blazor;
 using System;
 using System.Collections.Generic;
 using System.Linq;

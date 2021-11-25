@@ -15,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nebula.Data;
 using Nebula.Store.WeatherUseCase;
-using Nethereum.Metamask.Blazor;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
@@ -81,7 +80,8 @@ namespace Nebula
             services.AddHostedService<IncentiveProgram>();
 
             var currentAssembly = typeof(Startup).Assembly;
-            services.AddFluxor(options => options.ScanAssemblies(currentAssembly));
+            var libAssembly = typeof(WalletView).Assembly;
+            services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
 
             services.AddAntDesign();
         }
