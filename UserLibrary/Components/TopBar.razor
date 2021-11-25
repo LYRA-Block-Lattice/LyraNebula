@@ -1,4 +1,6 @@
-﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+﻿@namespace Nebula.Components
+
+@inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @using Fluxor
 @using Nebula.Store.WebWalletUseCase
 
@@ -21,9 +23,9 @@
 @code
 {
     [Inject]
-    private IState<WebWalletState> walletState { get; set; }
+    private IState<WebWalletState>? walletState { get; set; }
 
-    RenderFragment banner;
+    RenderFragment? banner;
 
     protected override void OnInitialized()
     {

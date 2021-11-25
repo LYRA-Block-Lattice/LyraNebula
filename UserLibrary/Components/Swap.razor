@@ -1,6 +1,12 @@
-﻿@using CoinGecko.Clients
+﻿@namespace Nebula.Components
+
+@using AntDesign
+@using CoinGecko.Clients
 @using CoinGecko.Interfaces
 @using Fluxor
+@using Lyra.Core.API
+@using Lyra.Core.Blocks
+@using Lyra.Data.API
 @using Lyra.Data.Crypto
 @using Microsoft.Extensions.Configuration
 @using Nebula.Store.WebWalletUseCase
@@ -197,7 +203,7 @@
             amount2 = swapcal.MinimumReceived;
 
             dispswap = amount1 > 0;
-            canswap = amount1 > 0 && amount1 < balance1;
+            canswap = amount1 > 0 && amount1 <= balance1;
         }
 
         updateBtn(a);
