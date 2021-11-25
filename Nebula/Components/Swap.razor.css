@@ -1,0 +1,13 @@
+﻿
+table {
+    margin: 10px;
+    border-collapse: separate;
+}
+
+td {
+    background-clip: padding-box;
+    
+    color: black;
+    border: 5px solid white;
+    border-radius: 5px;
+}

@@ -6,11 +6,11 @@
 @inject ILyraAPI lyraClient
 @inject MessageService _message
 
-<table>
+<table cellspacing="0" cellpadding="0">
 
 
     <tr>
-        <td>Input</td>
+        <td>From</td>
         <td>Balance: @balance1</td>
     </tr>
     <tr>
@@ -24,11 +24,15 @@
         </td>
     </tr>
     <tr>
-        <td><Icon Type="arrow-down" Theme="outline" /></td>
+        <td><Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle"
+            Icon="@IconType.Outline.ArrowDown"
+            OnClick="@DoSwapTicker"
+             />
+        </td>
         <td align="right"><Icon Type="setting" Theme="outline" /></td>
     </tr>
     <tr>
-        <td>Input</td>
+        <td>To</td>
         <td>Balance: @balance2</td>
     </tr>
     <tr>
@@ -87,7 +91,11 @@
         </tr>
         <tr>
             <td>Liquidaty Provider Fee</td>
-            <td>@calfee</td>
+            <td>@calprofee</td>
+        </tr>
+        <tr>
+            <td>Consensus Node Fee</td>
+            <td>@calnodfee</td>
         </tr>
     }
 
@@ -127,11 +135,19 @@
     bool haspoolinfo = false;
     bool canswap = false;
 
-    RenderFragment calsell, calget, calimpact, calfee;
+    RenderFragment calsell, calget, calimpact, calprofee, calnodfee;
 
     string token0, token1;
     TransactionBlock poollatest;
     decimal minrecv;
+
+    private void DoSwapTicker()
+    {
+        (selectedTicker1, selectedTicker2) = (selectedTicker2, selectedTicker1);
+        (amount1, amount2) = (amount2, amount1);
+        UpdateBalance();
+        updateBtn1(amount1);
+    }
 
     private async Task DoSwap()
     {
@@ -154,7 +170,7 @@
         if (poollatest != null)
         {
             var poolRito = poollatest.Balances[selectedTicker1].ToBalanceDecimal() / poollatest.Balances[selectedTicker2].ToBalanceDecimal();
-            amount2 = amount1 / poolRito;
+            amount2 = Math.Round(amount1 / poolRito, 8);
 
             canswap = amount1 > 0 && amount1 < balance1;
         }
@@ -167,7 +183,7 @@
         if (poollatest != null)
         {
             var poolRito = poollatest.Balances[selectedTicker1].ToBalanceDecimal() / poollatest.Balances[selectedTicker2].ToBalanceDecimal();
-            amount1 = amount2 * poolRito;
+            amount1 = Math.Round(amount2 * poolRito, 8);
 
             canswap = amount2 > 0 && amount2 < balance2;
         }
@@ -195,13 +211,13 @@
     @<div>@imp</div>
     ;
 
-            var feea = $"{swapcal.PayToAuthorizer} LYR";
-            var feep = $"{swapcal.PayToProvider} LYR";
-            calfee =
-    @<div>
-        Pay To Authorizer: @feea <br />
-        Pay To Provider: @feep
-    </div>
+            var feen = $"{swapcal.PayToAuthorizer} LYR";
+            var feep = $"{swapcal.PayToProvider} {selectedTicker1}";
+            calnodfee =
+    @<div>@feen</div>
+    ;
+            calprofee =
+    @<div>@feep</div>
     ;
         }
     }
