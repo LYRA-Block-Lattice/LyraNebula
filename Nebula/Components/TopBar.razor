@@ -43,7 +43,7 @@
             if (blk.Balances.ContainsKey("LYR"))
                 balance1 = blk.Balances["LYR"].ToBalanceDecimal();
 
-            var bs = $"{Math.Round(balance1, 2)}";
+            var bs = $"{balance1:N2}";
             banner = @<div>Balance: <b>@bs</b> LYR</div>;
         }
         else
