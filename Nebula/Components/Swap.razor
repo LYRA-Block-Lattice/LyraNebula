@@ -1,5 +1,134 @@
-﻿<h3>Swap</h3>
+﻿@using Fluxor
+@using Lyra.Data.Crypto
+@using Microsoft.Extensions.Configuration
+@using Nebula.Store.WebWalletUseCase
+@inject IConfiguration Configuration
+@inject ILyraAPI lyraClient
+@inject MessageService _message
+
+<table>
+
+
+    <tr>
+        <td>Input</td>
+        <td>Balance: @balance1</td>
+    </tr>
+    <tr>
+        <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
+        <td>
+            <Select DataSource="@tickers"
+                    @bind-Value="@selectedTicker1"
+                    Style="width:220px"
+                    OnSelectedItemChanged="OnSelectedItemChangedHandler1">
+            </Select>
+        </td>
+    </tr>
+    <tr>
+        <td>+</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Input</td>
+        <td>Balance: @balance2</td>
+    </tr>
+    <tr>
+        <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
+        <td>
+            <Select DataSource="@tickers"
+                    @bind-Value="@selectedTicker2"
+                    Style="width:220px"
+                    OnSelectedItemChanged="OnSelectedItemChangedHandler2">
+            </Select>
+        </td>
+    </tr>
+    @if(canswap)
+    {
+        
+
+    }
+</table>
 
 @code {
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
 
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
+
+    decimal amount1, amount2;
+    decimal balance1, balance2;
+    List<string> tickers;
+    string selectedTicker1;
+    string selectedTicker2;
+
+    bool canswap;
+
+    private void updateBtn1(decimal a)
+    {
+        updateBtn(a);
+    }
+
+    private void updateBtn2(decimal a)
+    {
+        updateBtn(a);
+    }
+    private void updateBtn(decimal a)
+    {        
+
+    }
+
+    private void OnSelectedItemChangedHandler1(string value)
+    {
+        UpdateBalance();
+    }
+    private void OnSelectedItemChangedHandler2(string value)
+    {
+        UpdateBalance();
+    }
+    private void UpdateBalance()
+    {
+        if(walletState.Value.wallet != null)
+        {
+            var blk = walletState.Value.wallet.GetLatestBlock();
+            if (blk.Balances.ContainsKey(selectedTicker1))
+                balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
+            else
+                balance1 = 0;
+
+            if (blk.Balances.ContainsKey(selectedTicker2))
+                balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
+            else
+                balance2 = 0;
+        }
+
+        //InvokeAsync(() => StateHasChanged());
+    }
+
+    private async Task OpenSwapUI()
+    {
+        var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+
+        // for api sign only
+        var pk = "n4uh7o2kAerPZQSNBRirzA3pSUBEuEhs6r7oRwpV6Dgbs3FvY";
+        var pub = "LBRzScs8NwMcr7U8i9a8sSWETseWf3TLge4CVJy6as24hSB4hwtZ5jKTbHJdoVZBJiNC2LpjN9MQB719Py9YxXo2xpLxnS";
+
+        var lsbret = await lc.GetLastServiceBlockAsync();
+
+        var sign = Signatures.GetSignature(pk, (lsbret.GetBlock() as ServiceBlock).Hash, pub);
+        var tokens = await lc.GetTokenNamesAsync(pub, sign, "(null)");
+
+        tickers = tokens.Entities
+            .Where(a => !a.StartsWith("unittest/"))
+            .ToList();
+        tickers.Insert(0, "LYR");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        if(walletState.Value.wallet != null)
+            await walletState.Value.wallet.SyncAsync(null);
+        await OpenSwapUI();
+    }
 }
