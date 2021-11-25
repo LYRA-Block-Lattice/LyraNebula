@@ -41,9 +41,27 @@
             </Select>
         </td>
     </tr>
-    @if(canswap)
+@if (haspoolinfo)
     {
-        
+        <tr>
+            <td colspan="2"><Divider>Pair Infomation</Divider></td>
+        </tr>
+        <tr>
+            <td>Token Pair</td>
+            <td>@pairinfo</td>
+        </tr>
+        <tr>
+            <td>Total Liquidate</td>
+            <td>@pairliquid</td>
+        </tr>
+        <tr>
+            <td>Your Liquidate Share</td>
+            <td>@pairshare</td>
+        </tr>
+    }
+    @if (canswap)
+    {
+
 
     }
 </table>
@@ -61,6 +79,8 @@
     string selectedTicker1;
     string selectedTicker2;
 
+    RenderFragment pairinfo, pairliquid, pairshare;
+    bool haspoolinfo;
     bool canswap;
 
     private void updateBtn1(decimal a)
@@ -73,7 +93,7 @@
         updateBtn(a);
     }
     private void updateBtn(decimal a)
-    {        
+    {
 
     }
 
@@ -87,19 +107,41 @@
     }
     private void UpdateBalance()
     {
-        if(walletState.Value.wallet != null)
+        if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk.Balances.ContainsKey(selectedTicker1))
-                balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
-            else
-                balance1 = 0;
 
-            if (blk.Balances.ContainsKey(selectedTicker2))
-                balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
-            else
-                balance2 = 0;
+            if(selectedTicker1 != null)
+                if (blk.Balances.ContainsKey(selectedTicker1))
+                    balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
+                else
+                    balance1 = 0;
+
+            if(selectedTicker2 != null)
+                if (blk.Balances.ContainsKey(selectedTicker2))
+                    balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
+                else
+                    balance2 = 0;
         }
+
+        _ = Task.Run(async () =>
+        {
+            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+
+            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+            if (existspool.Successful())
+            {
+                var platest = existspool.GetBlock() as TransactionBlock;
+                var pool = platest as IPool;
+                CreatePoolInfo(existspool.Token0, existspool.Token1, platest);
+            }
+            else
+            {
+                CreatePoolInfo(null, null, null);
+            }
+            
+            await InvokeAsync(() => StateHasChanged());
+        });
 
         //InvokeAsync(() => StateHasChanged());
     }
@@ -127,8 +169,77 @@
     {
         await base.OnInitializedAsync();
 
-        if(walletState.Value.wallet != null)
+        if (walletState.Value.wallet != null)
             await walletState.Value.wallet.SyncAsync(null);
         await OpenSwapUI();
+    }
+
+
+    private void CreatePoolInfo(string token0, string token1, TransactionBlock platest)
+    {
+        if(token0 != null)
+        {
+            var info = $"{token0} vs {token1}";
+            pairinfo =
+    @<p>@info</p>
+    ;
+
+            if (platest.Balances.ContainsKey(token0))
+            {
+                var line1 = $"{platest.Balances[token0].ToBalanceDecimal()} {token0}";
+                var line2 = $"{platest.Balances[token1].ToBalanceDecimal()} {token1}";
+                pairliquid =
+    @<p>
+        @line1<br />
+        @line2
+    </p>
+    ;
+            }
+            else
+            {
+                pairliquid =
+    @<p>No Liquidate in Pool</p>
+    ;
+            }
+        }
+        else
+        {
+                        pairinfo =
+    @<p>No pool for selected token pair.</p>
+    ;
+
+                    pairliquid =
+    @<p>No Liquidate in Pool</p>
+    ;
+        }
+
+
+        var pool = platest as IPool;
+        if(pool != null)
+        {
+            if (pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
+            {
+                var shareinfo = $"{pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100} %";
+                pairshare =
+    @<p>@shareinfo</p>
+    ;
+            }
+            else
+            {
+                pairshare =
+    @<p>You don't have Share in Pool</p>
+    ;
+            }
+        }
+                    else
+            {
+                pairshare =
+    @<p>No Share in Pool</p>
+    ;
+            }
+
+        haspoolinfo = true;
+
+        ;
     }
 }
