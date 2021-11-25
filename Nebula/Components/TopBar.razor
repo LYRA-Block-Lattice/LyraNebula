@@ -23,7 +23,7 @@
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
 
-    string banner;
+    RenderFragment banner;
 
     protected override void OnInitialized()
     {
@@ -43,10 +43,12 @@
             if (blk.Balances.ContainsKey("LYR"))
                 balance1 = blk.Balances["LYR"].ToBalanceDecimal();
 
-            banner = $"Balance: {balance1} LYR";
+            var bs = $"{Math.Round(balance1, 2)}";
+            banner = @<div>Balance: <b>@bs</b> LYR</div>;
         }
         else
-            banner = "Wallet not opened.";
+            banner = 
+    @<div>Wallet not opened.</div>;
     }
 
     public void Dispose()

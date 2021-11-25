@@ -49,9 +49,9 @@
             Staking
         </button>
 
-        <button class="btn btn-primary" @onclick="SwapToken">
+@*        <button class="btn btn-primary" @onclick="SwapToken">
             Token Swap
-        </button>
+        </button>*@
         <button class="btn btn-primary" @onclick="StartDex">
             DEX
         </button>
@@ -83,15 +83,29 @@
         }
 </div>
 <hr />
-<div>
-    <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
-    <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
-    <p>Your wallet's balance is: @walletState.Value.balanceString</p>
-    <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>
-</div>
-<div>
-    <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
+    <div>
+        <Space>
+            @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
+            {
+                <SpaceItem>
+                    <Card Title="@kvp.Key" Style="width:300px;">
+                        <Extra>
+                            <Button Type="@ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
+                                Send
+                            </Button>
+                        </Extra>
+                        <Body>
+                            <p style="font-size: xx-large;"><b>@($"{kvp.Value.ToBalanceDecimal():N2}")</b></p>
+                        </Body>
+                    </Card>
+                </SpaceItem>
+            }
+
+        </Space>
+
+
     </div>
+
 }
 else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.DEX)
 {
@@ -265,11 +279,20 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Setti
 <h3>Settings</h3>
 <hr />
 <div>
+    <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
+    <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
+    <p>Your wallet's balance is: @walletState.Value.balanceString</p>
+    <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>
+
     <p>
         Vote For Address:
         <input size="100" type="text" @bind="@voteAddr" />
     </p>
+    <div>
+    <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
+    </div>
     <hr />
+
     <button class="btn btn-primary" @onclick="SaveSettings">Save</button>
     <button class="btn btn-primary" @onclick="CancelSave">Cancel</button>
 </div>
@@ -481,7 +504,6 @@ else
 <div>
     <p>Private Key:</p>
     <p><input size="100" type="text" @bind="prvKey" /></p>
-    <p><input type="checkbox" @bind="selfVote" id="chkVote" />&nbsp;<label for="chkVote">Self Vote</label></p>
     <p>
         <button class="btn btn-primary" @onclick="RestoreWallet">
             Restore Wallet

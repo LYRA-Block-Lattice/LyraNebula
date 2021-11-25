@@ -1,4 +1,6 @@
-﻿@using Fluxor
+﻿@using CoinGecko.Clients
+@using CoinGecko.Interfaces
+@using Fluxor
 @using Lyra.Data.Crypto
 @using Microsoft.Extensions.Configuration
 @using Nebula.Store.WebWalletUseCase
@@ -72,7 +74,7 @@
 
     }
 
-    @if (canswap)
+    @if (dispswap)
     {
         <tr>
             <td colspan="2"><Divider /></td>
@@ -105,10 +107,18 @@
     <tr>
 
         <td colspan="2">
-            <Button Block Disabled="@(!canswap)" Type="@ButtonType.Primary" 
+            @if(walletState.Value.wallet == null)
+            {
+                <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+            }
+            else
+            {
+                            <Button Block Disabled="@(!canswap)" Type="@ButtonType.Primary" 
             Icon="@IconType.Outline.Swap" Size="ButtonSize.Large" 
             OnClick="@(async ()=>{ await DoSwap(); })"
             Shape="@ButtonShape.Round">Swap</Button>
+            }
+
 
         </td>
     </tr>
@@ -133,13 +143,14 @@
 
     RenderFragment pairinfo, pairliquid, pairshare;
     bool haspoolinfo = false;
-    bool canswap = false;
+    bool dispswap, canswap;
 
     RenderFragment calsell, calget, calimpact, calprofee, calnodfee;
 
     string token0, token1;
     TransactionBlock poollatest;
     decimal minrecv;
+    decimal lyraprice;
 
     private void DoSwapTicker()
     {
@@ -158,20 +169,34 @@
         {
             await _message.Success($"Token Swap Success!");
             await walletState.Value.wallet.SyncAsync(null);
+
+            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+            if (existspool.Successful())
+            {
+                poollatest = existspool.GetBlock() as TransactionBlock;
+                token0 = existspool.Token0;
+                token1 = existspool.Token1;
+                CreatePoolInfo(poollatest);
+            }
+
+            updateBtn1(amount1);
             UpdateBalance();
         }
-            
+
         else
             await _message.Error($"Error Swap Token: {result.ResultCode}");
     }
 
     private void updateBtn1(decimal a)
     {
-        if (poollatest != null)
+        if (poollatest != null && a > 0)
         {
-            var poolRito = poollatest.Balances[selectedTicker1].ToBalanceDecimal() / poollatest.Balances[selectedTicker2].ToBalanceDecimal();
-            amount2 = Math.Round(amount1 / poolRito, 8);
+            var swapcal = new SwapCalculator(token0, token1, poollatest,
+                selectedTicker1, amount1, 0);
+            amount2 = swapcal.MinimumReceived;
 
+            dispswap = amount1 > 0;
             canswap = amount1 > 0 && amount1 < balance1;
         }
 
@@ -180,18 +205,20 @@
 
     private void updateBtn2(decimal a)
     {
-        if (poollatest != null)
+        if (poollatest != null && a > 0)
         {
-            var poolRito = poollatest.Balances[selectedTicker1].ToBalanceDecimal() / poollatest.Balances[selectedTicker2].ToBalanceDecimal();
-            amount1 = Math.Round(amount2 * poolRito, 8);
+            var swapcal = new SwapCalculator(token0, token1, poollatest,
+                selectedTicker2, amount1, 0);
+            amount1 = swapcal.MinimumReceived;
 
+            dispswap = amount2 > 0;
             canswap = amount2 > 0 && amount2 < balance2;
         }
         updateBtn(a);
     }
     private void updateBtn(decimal a)
     {
-        if (canswap)
+        if (dispswap)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
                 selectedTicker1, amount1, 0);
@@ -225,11 +252,39 @@
     private void OnSelectedItemChangedHandler1(string value)
     {
         UpdateBalance();
+        ChangePool();
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
         UpdateBalance();
+        ChangePool();
     }
+
+    private void ChangePool()
+    {
+        _ = Task.Run(async () =>
+        {
+            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+
+            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+            if (existspool.Successful())
+            {
+                poollatest = existspool.GetBlock() as TransactionBlock;
+                token0 = existspool.Token0;
+                token1 = existspool.Token1;
+                CreatePoolInfo(poollatest);
+            }
+            else
+            {
+                CreatePoolInfo(null);
+            }
+
+            updateBtn1(amount1);
+            UpdateBalance();
+            await InvokeAsync(() => StateHasChanged());
+        });
+    }
+
     private void UpdateBalance()
     {
         if (walletState.Value.wallet != null)
@@ -248,26 +303,6 @@
                 else
                     balance2 = 0;
         }
-
-        _ = Task.Run(async () =>
-        {
-            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-
-            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
-            if (existspool.Successful())
-            {
-                poollatest = existspool.GetBlock() as TransactionBlock;
-                token0 = existspool.Token0;
-                token1 = existspool.Token1;
-                CreatePoolInfo(poollatest);
-            }
-            else
-            {
-                CreatePoolInfo(null);
-            }
-
-            await InvokeAsync(() => StateHasChanged());
-        });
 
         //InvokeAsync(() => StateHasChanged());
     }
@@ -289,6 +324,11 @@
             .Where(a => !a.StartsWith("unittest/"))
             .ToList();
         tickers.Insert(0, "LYR");
+
+        ICoinGeckoClient _client = CoinGeckoClient.Instance;
+        const string vsCurrencies = "usd";
+        var prices = await _client.SimpleClient.GetSimplePrice(new[] { "lyra" }, new[] { vsCurrencies });
+        lyraprice = (decimal)prices["lyra"]["usd"];
     }
 
     protected override async Task OnInitializedAsync()
@@ -341,7 +381,7 @@
 
 
         var pool = platest as IPool;
-        if (pool != null)
+        if (pool != null && walletState.Value.wallet != null)
         {
             if (pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
             {

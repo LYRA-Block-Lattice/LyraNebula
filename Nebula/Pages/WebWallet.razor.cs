@@ -322,10 +322,19 @@ namespace Nebula.Pages
 			}
 		}
 
-		private async void Send(MouseEventArgs e)
+		private async Task Send(MouseEventArgs e)
 		{
 			if(walletState.Value.wallet.BaseBalance > 1)
 				Dispatcher.Dispatch(new WebWalletSendAction {   });
+			else
+				await JS.InvokeAsync<object>("alert", "Nothing to send.");
+		}
+
+		private async Task SendX(string name)
+		{
+			tokenName = name;
+			if (walletState.Value.wallet.BaseBalance > 1)
+				Dispatcher.Dispatch(new WebWalletSendAction { });
 			else
 				await JS.InvokeAsync<object>("alert", "Nothing to send.");
 		}
