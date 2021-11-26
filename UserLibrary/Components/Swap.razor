@@ -196,7 +196,7 @@
 
     private void updateBtn1(decimal a)
     {
-        if (poollatest != null && a > 0)
+        if (poollatest != null && amount1 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
                 selectedTicker1, amount1, 0);
@@ -211,7 +211,7 @@
 
     private void updateBtn2(decimal a)
     {
-        if (poollatest != null && a > 0)
+        if (poollatest != null && amount1 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
                 selectedTicker2, amount1, 0);
@@ -224,7 +224,7 @@
     }
     private void updateBtn(decimal a)
     {
-        if (dispswap)
+        if (dispswap && amount1 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
                 selectedTicker1, amount1, 0);
