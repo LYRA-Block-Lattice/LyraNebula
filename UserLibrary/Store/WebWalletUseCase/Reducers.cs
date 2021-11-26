@@ -118,12 +118,12 @@ namespace Nebula.Store.WebWalletUseCase
 
 		[ReducerMethod]
 		public static WebWalletState ReduceFreeTokenAction(WebWalletState state, WebWalletFreeTokenResultAction action) =>
-			state.With(new { 
-				stage = UIStage.FreeToken,
-				faucetBalance = action.faucetBalance,
-				ValidReCAPTCHA = false,
-				ServerVerificatiing = false
-			});
+			state.With(new {
+                stage = UIStage.FreeToken,
+                faucetBalance = action.faucetBalance,
+                ValidReCAPTCHA = true,
+                ServerVerificatiing = false,				
+            });
 
 		[ReducerMethod]
 		public static WebWalletState ReduceSendMeFreeTokenAction(WebWalletState state, WebWalletSendMeFreeTokenResultAction action)

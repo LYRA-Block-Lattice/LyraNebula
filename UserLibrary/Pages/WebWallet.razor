@@ -70,7 +70,7 @@
         @if (Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && walletState.Value.freeTokenTimes < 3 && !walletState.Value.freeTokenSent)
         {
             <span>
-                <button style="float: right;" class="btn btn-extra" @onclick="FreeToken">
+                <button style="float: right;" class="btn btn-success" @onclick="FreeToken">
                     Get Free Token
                 </button>
             </span>
@@ -342,12 +342,12 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeT
         <p>Current balance of faucet account: <em>@walletState.Value.faucetBalance</em> LYR</p>
     </div>
 
-    <div class="section">
+@*    <div class="section">
         <ReCAPTCHA @ref="reCAPTCHAComponent" SiteKey="6Lftd8gZAAAAAK5G9aHUFY7wtV1yocfAf2Vj-EmI" OnSuccess="OnSuccess" OnExpired="OnExpired" />
-    </div>
+    </div>*@
 
     <div class="section">
-        <button class="btn btn-extra" @onclick="OnClickPost" disabled="@walletState.Value.DisablePostButton">
+        <button class="btn btn-success" @onclick="OnClickPost" disabled="@walletState.Value.DisablePostButton">
             Send me Token!
         </button>
         &nbsp;&nbsp;
@@ -397,6 +397,13 @@ else
 
     private async Task OnClickPost()
     {
+        Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
+                        {
+                            wallet = walletState.Value.wallet,
+                            faucetPvk = Configuration["faucetPvk"]
+                        });
+        return;
+
         if (walletState.Value.ValidReCAPTCHA)
         {
             var response = await reCAPTCHAComponent.GetResponseAsync();
