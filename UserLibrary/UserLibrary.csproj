@@ -33,6 +33,9 @@
     <Reference Include="Lyra.Data">
       <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\net6.0\Lyra.Data.dll</HintPath>
     </Reference>
+    <Reference Include="lyra.shared">
+      <HintPath>..\..\LyraNetwork\Core\Lyra.Shared\bin\Debug\net6.0\lyra.shared.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,5 @@
 ﻿using Lyra.Core.Accounts;
 using Lyra.Core.Blocks;
-using Nebula.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,7 +98,7 @@ namespace Nebula.Store.WebWalletUseCase
         public decimal toAmount { get; set; }
 
         // eth contract, metamask, etc.
-        public SwapOptions options { get; set; }
+        //public SwapOptions options { get; set; }
         //public MetamaskInterceptor metamask { get; set; }
 
         public int gasPrice { get; set; }

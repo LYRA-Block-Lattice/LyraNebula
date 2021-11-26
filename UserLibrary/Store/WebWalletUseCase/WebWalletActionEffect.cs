@@ -1,12 +1,4 @@
 ﻿using Fluxor;
-using Microsoft.AspNetCore.Components;
-using Nebula.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Net.Http.Json;
 using Lyra.Core.API;
 using Microsoft.Extensions.Configuration;
 using System.IO;
@@ -364,7 +356,7 @@ namespace Nebula.Store.WebWalletUseCase
 			dispatcher.Dispatch(new WebWalletTokenSwapResultAction { Success = IsSuccess, errMessage = swapResultMessage });
 		}
 
-		[EffectMethod]
+/*		[EffectMethod]
 		public async Task HandleSwap(WebWalletBeginSwapTLYRAction action, IDispatcher dispatcher)
 		{
 			bool IsSuccess = false;
@@ -448,6 +440,6 @@ namespace Nebula.Store.WebWalletUseCase
 				logger.LogInformation($"TokenSwap: Swapping {action.fromAmount} from {action.fromAddress} to {action.toAddress} is failed. Error: {ex}");
 				dispatcher.Dispatch(new WebWalletSwapTLYRResultAction { Success = false, errMessage = ex.ToString() });
 			}
-		}
+		}*/
 	}
 }

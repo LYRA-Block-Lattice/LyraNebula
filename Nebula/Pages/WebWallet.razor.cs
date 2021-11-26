@@ -532,7 +532,7 @@ namespace Nebula.Pages
 				gasPrice = EthGasPrice,
 				gasLimit = EthGasLimit,
 
-				options = swapOptions.CurrentValue,
+				//options = swapOptions.CurrentValue,
 				//metamask = metamaskInterceptor
 			};
 			logger.LogInformation($"TokenSwap: Begin  {arg.fromAmount} from {arg.fromAddress} to {arg.toAddress} amount {arg.toAmount}");
