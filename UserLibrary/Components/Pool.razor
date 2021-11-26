@@ -267,7 +267,7 @@
                                 //    existspool.Token0, amount1, 0);
 
                                 var poolRito = latestblk.Balances[selectedTicker1].ToBalanceDecimal() / latestblk.Balances[selectedTicker2].ToBalanceDecimal();
-                                amount2 = amount1 / poolRito;
+                                amount2 = Math.Round(amount1 / poolRito, 8);
                             }
                             else if(a > 0 && a == amount2)
                             {
@@ -275,7 +275,7 @@
                                 //    existspool.Token1, amount2, 0);
 
                                 var poolRito = latestblk.Balances[selectedTicker1].ToBalanceDecimal() / latestblk.Balances[selectedTicker2].ToBalanceDecimal();
-                                amount1 = amount2 * poolRito;
+                                amount1 = Math.Round(amount2 * poolRito, 8);
                             }
                         }
 
@@ -291,7 +291,7 @@
                         if(pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
                         {
                             canremove = true;
-                            var shareinfo = $"{pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100} %";
+                            var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";
                             pairshare =
     @<p>@shareinfo</p>
     ;
@@ -323,12 +323,15 @@
     ;
                 }
 
+                clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
+                alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
+
                 await InvokeAsync(() => StateHasChanged());
             });
         }
 
         clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
-        alenabled = amount1 > 0 && amount2 > 0;
+        alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
     }
 
     private void OnSelectedItemChangedHandler1(string value)

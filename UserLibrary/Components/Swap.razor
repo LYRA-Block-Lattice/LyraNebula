@@ -141,7 +141,10 @@
     [Inject]
     private IDispatcher Dispatcher { get; set; }
 
-    decimal amount1, amount2;
+    [Parameter]
+    public decimal amount1 { get; set; }
+
+    decimal amount2;
     decimal balance1, balance2;
     List<string> tickers;
     string selectedTicker1;
@@ -339,6 +342,10 @@
 
     protected override async Task OnInitializedAsync()
     {
+        //this.ObserveParameter<decimal>(nameof(this.amount1))
+        //    .TakeUntil(Disposed) //you could even move this to the base class
+        //    .Subscribe();
+
         await base.OnInitializedAsync();
 
         if (walletState.Value.wallet != null)

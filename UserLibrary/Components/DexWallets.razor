@@ -223,54 +223,50 @@ else
         mindep = token.MinDeposit;
         confirm = token.ConfirmationInfo;
 
-        if(string.IsNullOrWhiteSpace(token.Address)         
-            && walletState.Value.wallet != null
-            && walletState.Value.wallet.GetLatestBlock() != null
-            && walletState.Value.wallet.GetLatestBlock().Balances.ContainsKey("LYR")
-            && walletState.Value.wallet.GetLatestBlock().Balances["LYR"].ToBalanceDecimal() > 10m
-            )
+        if(string.IsNullOrWhiteSpace(token.Address))
         {
-            Task.Run(async () =>
+            if(walletState.Value.wallet != null && walletState.Value.wallet.BaseBalance >= 11m)
             {
-                var wallet = walletState.Value.wallet;
-                var ret = await wallet.CreateDexWalletAsync(symbol, provider);
-                if(ret.Successful())
-                {
-                    for(var i = 0; i < 100; i++)
+                Task.Run(async () =>
                     {
-                        var dw = await wallet.FindDexWalletAsync(wallet.AccountId, symbol, provider);
-                        if (dw == null)
-                            continue;
-                        token.Address = dw.ExtAddress;
-                        address = token.Address;
-                        await InvokeAsync(() => StateHasChanged());
-                        break;
-                    }
-                }
-            });
-
-            visible = true;
-        }
-        else
-        {
-            Task.Run(async () => { 
-                await _notice.Open(new NotificationConfig()
-                    {
-                        Message = "Unable to create DEX wallet",
-                        Description = $"You need at least 11 LYR to create a DEX wallet.",
-                        NotificationType = NotificationType.Error
+                        var wallet = walletState.Value.wallet;
+                        var ret = await wallet.CreateDexWalletAsync(symbol, provider);
+                        if (ret.Successful())
+                        {
+                            for (var i = 0; i < 100; i++)
+                            {
+                                var dw = await wallet.FindDexWalletAsync(wallet.AccountId, symbol, provider);
+                                if (dw == null)
+                                    continue;
+                                token.Address = dw.ExtAddress;
+                                address = token.Address;
+                                await InvokeAsync(() => StateHasChanged());
+                                break;
+                            }
+                        }
+                    });
+            }
+            else
+            {
+                Task.Run(async () => { 
+                    await _notice.Open(new NotificationConfig()
+                        {
+                            Message = "Unable to create DEX wallet",
+                            Description = $"You need at least 11 LYR to create a DEX wallet.",
+                            NotificationType = NotificationType.Error
+                    });
                 });
-            });
+                return;
+            }         
         }
+        visible = true; 
     }
 
     void OnWithdrawClick(WalletView row)
     {
-        if(string.IsNullOrWhiteSpace(token.Address)         
+        if(!string.IsNullOrWhiteSpace(token.Address)         
             && walletState.Value.wallet != null
-            && walletState.Value.wallet.GetLatestBlock() != null
-            && walletState.Value.wallet.GetLatestBlock().Balances.ContainsKey("LYR")
-            && walletState.Value.wallet.GetLatestBlock().Balances["LYR"].ToBalanceDecimal() > 10m
+            && walletState.Value.wallet.BaseBalance >= 1m
             && row.DexWalletID != null
             && row.DexBalance > 0
             )
