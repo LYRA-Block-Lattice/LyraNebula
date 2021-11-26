@@ -92,7 +92,7 @@ else
        OnCancel="@HandleCancel2">
     
        <h3>Amount you want to transfer:</h3>
-       <AntDesign.InputNumber @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>
+       <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>&nbsp;@symbol
 </Modal>
 
 <Modal Title="@withdrawTitle"
@@ -107,7 +107,7 @@ else
        <h3>Address you want to withdraw:</h3>
        <Input Placeholder="Withdraw to address" @bind-Value="@withdrawAddress"  />
        <h3>Amount:</h3>
-       <AntDesign.InputNumber @bind-Value="withdrawAmount" Min="@withdrawMin" Max="@withdrawMax" DefaultValue="@withdrawDefault"></AntDesign.InputNumber> @symbol
+       <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="withdrawAmount" Min="@withdrawMin" Max="@withdrawMax" DefaultValue="@withdrawDefault"></AntDesign.InputNumber>&nbsp;@symbol
 </Modal>
 }
 
@@ -123,6 +123,9 @@ else
 
     [Inject]
     private IDispatcher Dispatcher { get; set; }
+
+    [CascadingParameter]
+	public Error Error { get; set; }
 
     string withdrawTitle;
     bool withdrawVisible = false;
@@ -158,57 +161,69 @@ else
 
     async Task OnTransferClick(WalletView row, bool toDex)
     {
-        if(row.DexWalletID == null)
+        try
         {
-            // user have not create wallet yet.
-            await _notice.Open(new NotificationConfig()
+            if(row.DexWalletID == null)
+            {
+                // user have not create wallet yet.
+                await _notice.Open(new NotificationConfig()
                 {
                     Message = $"You don't have a DEX wallet for {row.Symbol} yet.",
                     Description = "Creating a DEX wallet for you",
                     NotificationType = NotificationType.Info
                 });
 
-            var wallet = walletState.Value.wallet;
-            await wallet.SyncAsync(null);
-            var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
-            if(crdexret.Successful())
-            {
-                await _notice.Open(new NotificationConfig()
+                var wallet = walletState.Value.wallet;
+                await wallet.SyncAsync(null);
+                var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
+                if(crdexret.Successful())
+                {
+                    await _notice.Open(new NotificationConfig()
                 {
                     Message = $"Success! ",
                     Description = $"DEX Wallet for {row.Symbol} has been created. Refreshing...",
                     NotificationType = NotificationType.Success
                 });
 
-                await RefreshAllWallets();
+                    await RefreshAllWallets();
 
-                await _notice.Open(new NotificationConfig()
+                    await _notice.Open(new NotificationConfig()
                 {
                     Message = $"Success! ",
                     Description = $"Refreshed.",
                     NotificationType = NotificationType.Success
                 });
-            }
-            else
-            {
-                await _notice.Open(new NotificationConfig()
+                }
+                else
+                {
+                    await _notice.Open(new NotificationConfig()
                 {
                     Message = $"Error! ",
                     Description = $"DEX Wallet for {row.Symbol} was not created.",
                     NotificationType = NotificationType.Warning
                 });
+                }
             }
+            else
+            {
+                symbol = row.Symbol;
+                transferTitle = toDex ? "Transfer funds from my wallet to DEX wallet" : "Transfer funds from DEX wallet to my wallet";
+                transferMax = toDex ? row.MyBalance : row.DexBalance;
+                transferDefault = toDex ? row.MyBalance : row.DexBalance;  
+                transferAmount = toDex ? row.MyBalance : row.DexBalance;
+                transferToDex = toDex;
+                dexWalletId = row.DexWalletID;
+                ticker = $"tether/{row.Symbol}";
+                transferVisible = true;
+            }
+
         }
-        else
+        catch(Exception ex)
         {
-            transferTitle = toDex ? "Transfer funds from my wallet to DEX wallet" : "Transfer funds from DEX wallet to my wallet";
-            transferMax = toDex ? row.MyBalance : row.DexBalance;
-            transferDefault = transferMax;            
-            transferToDex = toDex;
-            dexWalletId = row.DexWalletID;
-            ticker = $"tether/{row.Symbol}";
-            transferVisible = true;
+            Error.ProcessError(ex);
+
         }
+
     }
 
     void OnDepositClick(WalletView row)
@@ -264,6 +279,7 @@ else
 
     void OnWithdrawClick(WalletView row)
     {
+        token = row;
         if(!string.IsNullOrWhiteSpace(token.Address)         
             && walletState.Value.wallet != null
             && walletState.Value.wallet.BaseBalance >= 1m

@@ -43,7 +43,9 @@ namespace Nebula
             services.AddTransient<SampleAPI>();
 
             services.AddRazorPages();
-            services.AddServerSideBlazor();
+            services.AddServerSideBlazor().AddCircuitOptions(e => {
+                e.DetailedErrors = true;
+            });
             services.AddSingleton<WeatherForecastService>();
 
             services.AddMvc();
