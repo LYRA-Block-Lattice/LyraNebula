@@ -19,6 +19,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using UserLibrary.Components;
 
 namespace UserLibrary.Pages
 {
@@ -29,6 +30,9 @@ namespace UserLibrary.Pages
 
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
+
+		[CascadingParameter]
+		public Error Error { get; set; }
 
 		public string stkName { get; set; }
 		public string stkVoting { get; set; }

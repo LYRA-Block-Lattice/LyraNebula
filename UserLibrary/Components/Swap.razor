@@ -122,6 +122,7 @@
                             <Button Block Disabled="@(!canswap)" Type="@ButtonType.Primary" 
             Icon="@IconType.Outline.Swap" Size="ButtonSize.Large" 
             OnClick="@(async ()=>{ await DoSwap(); })"
+            Loading="@swapping"
             Shape="@ButtonShape.Round">Swap</Button>
             }
 
@@ -153,6 +154,7 @@
     RenderFragment pairinfo, pairliquid, pairshare;
     bool haspoolinfo = false;
     bool dispswap, canswap;
+    bool swapping;
 
     RenderFragment calsell, calget, calimpact, calprofee, calnodfee;
 
@@ -171,6 +173,7 @@
 
     private async Task DoSwap()
     {
+        swapping = true;
         var result = await walletState.Value.wallet.SwapTokenAsync(token0, token1, 
             selectedTicker1, amount1, minrecv);
 
@@ -191,10 +194,12 @@
 
             updateBtn1(amount1);
             UpdateBalance();
+            swapping = false;
         }
-
         else
             await _message.Error($"Error Swap Token: {result.ResultCode}");
+
+        swapping = false;
     }
 
     private void updateBtn1(decimal a)
