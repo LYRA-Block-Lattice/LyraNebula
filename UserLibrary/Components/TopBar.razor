@@ -1,4 +1,4 @@
-﻿@namespace Nebula.Components
+﻿@namespace UserLibrary.Components
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
 @using Fluxor
@@ -37,11 +37,21 @@
         if (wallet.wallet != null)
         {
             var blk = wallet.wallet.GetLatestBlock();
-            if (blk.Balances.ContainsKey("LYR"))
-                balance1 = blk.Balances["LYR"].ToBalanceDecimal();
+            if(blk!= null)
+            {
+                if (blk.Balances.ContainsKey("LYR"))
+                    balance1 = blk.Balances["LYR"].ToBalanceDecimal();
 
             var bs = $"{balance1:N2}";
-            banner = @<div>Balance: <b>@bs</b> LYR</div>;
+            banner = 
+    @<div>Balance: <b>@bs</b> LYR</div>
+        ;
+            }
+            else
+            {
+                banner = 
+    @<div>Wallet empty.</div>;
+            }
         }
         else
             banner = 

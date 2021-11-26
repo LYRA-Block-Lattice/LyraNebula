@@ -16,7 +16,7 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStore
 @inject ILogger<WebWallet> logger
 @inject ILyraAPI lyraClient
-@using Nebula.Components;
+@using UserLibrary.Components;
 
 <h1>Web Wallet for @LyraGlobal.PRODUCTNAME</h1>
 <hr />
@@ -79,21 +79,25 @@
     <hr />
     <div>
         <Space Wrap>
-            @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
+            @if(walletState.Value.wallet.GetLatestBlock() != null)
             {
-                <SpaceItem>
-                    <Card Title="@kvp.Key" Style="width:300px;">
-                        <Extra>
-                            <Button Type="@ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
-                                Send
-                            </Button>
-                        </Extra>
-                        <Body>
-                            <p style="font-size: xx-large;"><b>@($"{kvp.Value.ToBalanceDecimal():N2}")</b></p>
-                        </Body>
-                    </Card>
-                </SpaceItem>
+                @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
+                {
+                    <SpaceItem>
+                        <Card Title="@kvp.Key" Style="width:300px;">
+                            <Extra>
+                                <Button Type="@ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
+                                    Send
+                                </Button>
+                            </Extra>
+                            <Body>
+                                <p style="font-size: xx-large;"><b>@($"{kvp.Value.ToBalanceDecimal():N2}")</b></p>
+                            </Body>
+                        </Card>
+                    </SpaceItem>
+                }
             }
+
 
         </Space>
 

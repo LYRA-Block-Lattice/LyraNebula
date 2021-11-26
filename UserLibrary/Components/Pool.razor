@@ -1,4 +1,4 @@
-﻿@namespace Nebula.Components
+﻿@namespace UserLibrary.Components
 
 @using Fluxor
 @using Lyra.Data.Crypto
@@ -336,7 +336,7 @@
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk.Balances.ContainsKey(value))
+            if (blk != null && blk.Balances.ContainsKey(value))
                 balance1 = blk.Balances[value].ToBalanceDecimal();
             else
                 balance1 = 0;
@@ -351,7 +351,7 @@
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk.Balances.ContainsKey(value))
+            if (blk != null && blk.Balances.ContainsKey(value))
                 balance2 = blk.Balances[value].ToBalanceDecimal();
             else
                 balance2 = 0;
@@ -367,12 +367,12 @@
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk.Balances.ContainsKey(selectedTicker1))
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker1))
                 balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
             else
                 balance1 = 0;
 
-            if (blk.Balances.ContainsKey(selectedTicker2))
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker2))
                 balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
             else
                 balance2 = 0;

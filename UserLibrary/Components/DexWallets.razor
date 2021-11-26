@@ -1,4 +1,4 @@
-﻿@namespace Nebula.Components
+﻿@namespace UserLibrary.Components
 
 @using AntDesign
 @using DexServer.Ext
@@ -12,6 +12,7 @@
 @using Microsoft.Extensions.Configuration
 @using Nebula.Data
 @using Nebula.Store.WebWalletUseCase
+@using UserLibrary.Data
 @inject IConfiguration Configuration
 @inject NotificationService _notice
 
@@ -222,7 +223,12 @@ else
         mindep = token.MinDeposit;
         confirm = token.ConfirmationInfo;
 
-        if(string.IsNullOrWhiteSpace(token.Address))
+        if(string.IsNullOrWhiteSpace(token.Address)         
+            && walletState.Value.wallet != null
+            && walletState.Value.wallet.GetLatestBlock() != null
+            && walletState.Value.wallet.GetLatestBlock().Balances.ContainsKey("LYR")
+            && walletState.Value.wallet.GetLatestBlock().Balances["LYR"].ToBalanceDecimal() > 10m
+            )
         {
             Task.Run(async () =>
             {
@@ -242,25 +248,57 @@ else
                     }
                 }
             });
-        }
 
-        visible = true;
+            visible = true;
+        }
+        else
+        {
+            Task.Run(async () => { 
+                await _notice.Open(new NotificationConfig()
+                    {
+                        Message = "Unable to create DEX wallet",
+                        Description = $"You need at least 11 LYR to create a DEX wallet.",
+                        NotificationType = NotificationType.Error
+                });
+            });
+        }
     }
 
     void OnWithdrawClick(WalletView row)
     {
-        withdrawTitle = $"Withdraw {row.Symbol} to your address on {row.Name} {row.NetworkProvider}";
-        dexWalletId = row.DexWalletID;
-        provider = row.NetworkProvider;
-        symbol = row.Symbol;
-        contract = row.Contract;
-        withdrawMin = row.MinWithdraw;
-        withdrawMax = row.DexBalance;
-        withdrawDefault = withdrawMax;
-        withdrawAmount = withdrawMax;
-        withdrawAddress = "";
+        if(string.IsNullOrWhiteSpace(token.Address)         
+            && walletState.Value.wallet != null
+            && walletState.Value.wallet.GetLatestBlock() != null
+            && walletState.Value.wallet.GetLatestBlock().Balances.ContainsKey("LYR")
+            && walletState.Value.wallet.GetLatestBlock().Balances["LYR"].ToBalanceDecimal() > 10m
+            && row.DexWalletID != null
+            && row.DexBalance > 0
+            )
+        {
+            withdrawTitle = $"Withdraw {row.Symbol} to your address on {row.Name} {row.NetworkProvider}";
+            dexWalletId = row.DexWalletID;
+            provider = row.NetworkProvider;
+            symbol = row.Symbol;
+            contract = row.Contract;
+            withdrawMin = row.MinWithdraw;
+            withdrawMax = row.DexBalance;
+            withdrawDefault = withdrawMax;
+            withdrawAmount = withdrawMax;
+            withdrawAddress = "";
 
-        withdrawVisible = true;
+            withdrawVisible = true;
+        }
+        else
+        {
+            Task.Run(async () => { 
+                await _notice.Open(new NotificationConfig()
+                    {
+                        Message = "Unable to withdraw funds.",
+                        Description = $"No Token found.",
+                        NotificationType = NotificationType.Error
+                });
+            });
+        }
     }
 
     private async Task StartWithdraw(MouseEventArgs e)

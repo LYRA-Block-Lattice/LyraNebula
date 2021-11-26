@@ -80,7 +80,7 @@ namespace Nebula
             services.AddHostedService<IncentiveProgram>();
 
             var currentAssembly = typeof(Startup).Assembly;
-            var libAssembly = typeof(WalletView).Assembly;
+            var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
 
             services.AddAntDesign();

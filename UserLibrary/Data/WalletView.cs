@@ -1,6 +1,6 @@
 ﻿using DexServer.Ext;
 
-namespace Nebula.Data
+namespace UserLibrary.Data
 {
     public class WalletView : ExtAssert
     {
