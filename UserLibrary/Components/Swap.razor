@@ -14,7 +14,24 @@
 @inject ILyraAPI lyraClient
 @inject MessageService _message
 
-<table cellspacing="0" cellpadding="0">
+<Styled>
+    
+.swt {
+    margin: 10px;
+    border-collapse: separate;
+}
+
+table.swt td {
+    background-clip: padding-box;
+    
+    color: black;
+    border: 5px solid white;
+    border-radius: 5px;
+}
+
+</Styled>
+
+<table cellspacing="0" cellpadding="0" class="swt">
 
 
     <tr>

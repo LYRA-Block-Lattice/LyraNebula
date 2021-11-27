@@ -20,6 +20,7 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
+using BlazorStyled;
 
 namespace Nebula
 {
@@ -86,6 +87,7 @@ namespace Nebula
             services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
 
             services.AddAntDesign();
+            services.AddBlazorStyled();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
