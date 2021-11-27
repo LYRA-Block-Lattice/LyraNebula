@@ -31,7 +31,7 @@
         <table>
             <tr>
                 <td>Input</td>
-                <td>Balance: @balance1</td>
+                <td>Balance: @($"{balance1:N8}")</td>
             </tr>
             <tr>
                 <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
@@ -49,7 +49,7 @@
             </tr>
             <tr>
                 <td>Input</td>
-                <td>Balance: @balance2</td>
+                <td>Balance: @($"{balance2:N8}")</td>
             </tr>
             <tr>
                 <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
@@ -379,6 +379,8 @@
                 balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
             else
                 balance2 = 0;
+
+            Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
         }
 
         InvokeAsync(() => StateHasChanged());

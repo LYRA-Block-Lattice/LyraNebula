@@ -36,7 +36,7 @@ table.swt td {
 
     <tr>
         <td>From</td>
-        <td>Balance: @balance1</td>
+        <td>Balance: @($"{balance1:N8}")</td>
     </tr>
     <tr>
         <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
@@ -58,7 +58,7 @@ table.swt td {
     </tr>
     <tr>
         <td>To</td>
-        <td>Balance: @balance2</td>
+        <td>Balance: @($"{balance2:N8}")</td>
     </tr>
     <tr>
         <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
@@ -101,6 +101,10 @@ table.swt td {
     {
         <tr>
             <td colspan="2"><Divider /></td>
+        </tr>
+        <tr>
+            <td>Estimated Price</td>
+            <td>@calprice</td>
         </tr>
         <tr>
             <td>You will sell</td>
@@ -173,10 +177,11 @@ table.swt td {
     bool dispswap, canswap;
     bool swapping;
 
-    RenderFragment calsell, calget, calimpact, calprofee, calnodfee;
+    RenderFragment calprice, calsell, calget, calimpact, calprofee, calnodfee;
 
     string token0, token1;
     TransactionBlock poollatest;
+    decimal price;
     decimal minrecv;
     decimal lyraprice;
 
@@ -211,6 +216,7 @@ table.swt td {
 
             updateBtn1(amount1);
             UpdateBalance();
+            
             swapping = false;
         }
         else
@@ -251,11 +257,18 @@ table.swt td {
     {
         if (dispswap && amount1 > 0 && token0 != null)
         {
+            var fromticker = selectedTicker1;
             var swapcal = new SwapCalculator(token0, token1, poollatest,
-                selectedTicker1, amount1, 0);
-            var sell = $"{amount1} {selectedTicker1}";
+                fromticker, amount1, 0);
+            var sell = $"{amount1} {fromticker}";
             calsell =
     @<div>@sell</div>
+    ;
+
+            price = swapcal.Price;
+            var pricestr = $"{Math.Round(1/price, 8)} {selectedTicker2}";
+            calprice =
+    @<div>@pricestr</div>
     ;
 
             minrecv = swapcal.MinimumReceived;
@@ -270,7 +283,7 @@ table.swt td {
     ;
 
             var feen = $"{swapcal.PayToAuthorizer} LYR";
-            var feep = $"{swapcal.PayToProvider} {selectedTicker1}";
+            var feep = $"{swapcal.PayToProvider} {fromticker}";
             calnodfee =
     @<div>@feen</div>
     ;
@@ -333,6 +346,8 @@ table.swt td {
                     balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
                 else
                     balance2 = 0;
+
+            Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
         }
 
         //InvokeAsync(() => StateHasChanged());

@@ -16,10 +16,18 @@
 @inject IConfiguration Configuration
 @inject NotificationService _notice
 
+<style>
+    .ant-progress-circle-wrap,
+    .ant-progress-line-wrap {
+        margin-right: 8px;
+        margin-bottom: 5px;
+    }
+</style>
+
 @if(walletState.Value.wallet == null)
 {
     
-    <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+    <a href="/webwallet"> <AntDegisn.Button Block Type="@ButtonType.Primary">Open Wallet</AntDegisn.Button></a>
 }
 else
 {
@@ -82,6 +90,13 @@ else
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
     <p>Confirmation: @token.ConfirmationInfo</p>
+    @if(crwalletshow)
+            {
+                        <div>
+        <Progress Type="ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
+    </div>
+            }
+
 </Modal>
 
 
@@ -125,7 +140,7 @@ else
     private IDispatcher Dispatcher { get; set; }
 
     [CascadingParameter]
-	public Error Err { get; set; }
+    public Error Err { get; set; }
 
     string withdrawTitle;
     bool withdrawVisible = false;
@@ -133,8 +148,9 @@ else
     decimal withdrawAmount;
     decimal withdrawMin, withdrawMax, withdrawDefault;
 
-
-
+    int crwalletprogress;
+    ProgressStatus crwalletstatus;
+    bool crwalletshow;
 
     List<WalletView> tokens;
     WalletView token;
@@ -240,29 +256,56 @@ else
 
         if(string.IsNullOrWhiteSpace(token.Address))
         {
+            crwalletprogress = 0;
+            crwalletshow = true;
+            StateHasChanged();
             if(walletState.Value.wallet != null && walletState.Value.wallet.BaseBalance >= 11m)
             {
                 Task.Run(async () =>
                     {
+                        crwalletprogress = 10;
+                        await InvokeAsync(() => StateHasChanged());
+
                         var wallet = walletState.Value.wallet;
                         var ret = await wallet.CreateDexWalletAsync(symbol, provider);
                         if (ret.Successful())
                         {
-                            for (var i = 0; i < 100; i++)
+                            crwalletprogress = 30;
+                            await InvokeAsync(() => StateHasChanged());
+
+                            for (var i = 30; i < 100; i++)
                             {
                                 var dw = await wallet.FindDexWalletAsync(wallet.AccountId, symbol, provider);
+
                                 if (dw == null)
+                                {
+                                    crwalletprogress = i;
+                                    await InvokeAsync(() => StateHasChanged());   
+
+                                    await Task.Delay(500);
                                     continue;
+                                }
+
                                 token.Address = dw.ExtAddress;
                                 address = token.Address;
-                                await InvokeAsync(() => StateHasChanged());
+
+                                crwalletprogress = 100;
+                                crwalletstatus = ProgressStatus.Success;
+                                await InvokeAsync(() => StateHasChanged());   
+
                                 break;
                             }
                         }
+                        else
+                        {
+                            crwalletstatus = ProgressStatus.Exception;
+                        }
+                        await InvokeAsync(() => StateHasChanged());
                     });
             }
             else
             {
+                crwalletstatus = ProgressStatus.Exception;
                 Task.Run(async () => { 
                     await _notice.Open(new NotificationConfig()
                         {
@@ -274,6 +317,10 @@ else
                 return;
             }         
         }
+        else
+        {
+            crwalletshow = false;
+        }        
         visible = true; 
     }
 
