@@ -1,0 +1,242 @@
+﻿@using Fluxor
+@using Nebula.Store.WebWalletUseCase
+
+<Tabs>
+    <TabPane Tab="Stakings" Key="1">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Staking Amount</th>
+                    <th>Compound Mode</th>
+                    <th>Total Reward</th>
+                    <th>Start Time</th>
+                    <th>Staking Days</th>
+                    <th>Staking to Account</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stk in walletState.Value.brokerAccounts.Where(a => a is StakingGenesis)
+                .Cast<StakingGenesis>())
+                {
+                    <tr>
+                        <td>@stk.Name</td>
+                        @if (walletState.Value.stkBalances != null)
+                        {
+                            <td>@walletState.Value.stkBalances[stk.AccountID]</td>
+                        }
+                        else
+                        {
+                            <td>0</td>
+                        }
+                        <td>@stk.CompoundMode</td>
+                        <td>@walletState.Value.stkRewards[stk.AccountID]</td>
+                        <td>@stk.TimeStamp</td>
+                        <td>@stk.Days</td>
+                        <td>@stk.Voting</td>
+                        <td>
+                            <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
+                            &nbsp;
+                            <Popconfirm Title="Unstaking within the promised staking period will pay 0.8% panalise fee. "
+                                    OnConfirm="@(e => RmStk(e, stk.AccountID))"
+                                    OkText="Yes, I know."
+                                    CancelText="No, cancel unstaking">
+                                <a style="color:blue"><u>Unstaking</u></a>
+                            </Popconfirm>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </TabPane>
+    <TabPane Tab="Profiting" Key="2">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Share Ratio</th>
+                    <th>Seats</th>
+                    <th>Profiting Account ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pft in walletState.Value.brokerAccounts.Where(a => a is ProfitingGenesis)
+                .Cast<ProfitingGenesis>())
+                {
+                    <tr>
+                        <td>@pft.Name</td>
+                        <td>@pft.PType</td>
+                        <td>@pft.ShareRito</td>
+                        <td>@pft.Seats</td>
+                        <td>
+                            @pft.AccountID
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </TabPane>
+</Tabs>
+
+<Divider />
+
+<Tabs>
+    <TabPane Tab="Create new staking account" Key="1">
+        <p>
+            Name:
+            <input size="60" type="text" @bind="@stkName" />
+        </p>
+        <p>
+            Staking For Address:
+            <input size="100" type="text" @bind="@stkVoting" />
+        </p>
+        <p>
+            Days of staking:
+            <input size="10" type="text" @bind="@stkDays" />
+        </p>
+        <p>
+            Compound staking mode:
+            <input size="10" type="checkbox" @bind="@stkCompound" />
+        </p>
+        <div>
+            <button class="btn btn-primary" @onclick="StakingCreate">Create Staking</button>
+        </div>
+    </TabPane>
+    <TabPane Tab="Create new profiting account" Key="2">
+        <p>
+            Name:
+            <input size="60" type="text" @bind="@pftName" />
+        </p>
+        <p>
+            Type:
+            <select style="height: 40px; width: 380px" @bind="@pftType">
+                <option value="Node">Node</option>
+                <option disabled value="Oracle">Oracle</option>
+                <option disabled value="Merchant">Merchant</option>
+                <option value="Yield">Yield</option>
+            </select>
+        </p>
+        <p>
+            Ratio to share to staking (0% - 100%):
+            <input size="10" type="text" @bind="@pftShare" />
+        </p>
+        <p>
+            Number of staking (0 - 100):
+            <input size="10" type="text" @bind="@pftSeats" />
+        </p>
+        <div>
+            <button class="btn btn-primary" @onclick="ProfitingCreate">Create Profiting Account</button>
+        </div>
+    </TabPane>
+</Tabs>
+
+@code {
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
+
+    [Inject]
+    private IJSRuntime JS { get; set; }
+
+    public string stkName { get; set; }
+    public string stkVoting { get; set; }
+    public string stkDays { get; set; }
+    public bool stkCompound { get; set; }
+
+    public string pftName { get; set; }
+    public string pftType { get; set; } = "Node";
+    public string pftShare { get; set; }
+    public string pftSeats { get; set; }
+
+    private async Task AddStkAsync(MouseEventArgs e, string stkid)
+    {
+        try
+        {
+            var amt = await GetAmountInput();
+            if (amt > 0)
+            {
+                Dispatcher.Dispatch(new WebWalletAddStakingAction
+                    {
+                        wallet = walletState.Value.wallet,
+                        stkid = stkid,
+                        amount = amt
+                    });
+            }
+        }
+        catch (Exception ex)
+        {
+            Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+        }
+    }
+
+    private void RmStk(MouseEventArgs e, string stkid)
+    {
+        try
+        {
+            Dispatcher.Dispatch(new WebWalletRemoveStakingAction
+                {
+                    wallet = walletState.Value.wallet,
+                    stkid = stkid
+                });
+        }
+        catch (Exception ex)
+        {
+            Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+        }
+    }
+
+    private async Task<decimal> GetAmountInput()
+    {
+        string prompted = await JS.InvokeAsync<string>("prompt", "How many LYR do you want to stake?"); // Prompt
+        if (prompted == null)
+            return 0;
+        return decimal.Parse(prompted);
+    }
+
+    private void StakingCreate(MouseEventArgs e)
+    {
+        try
+        {
+            Dispatcher.Dispatch(new WebWalletCreateStakingAction
+                {
+                    wallet = walletState.Value.wallet,
+                    name = stkName,
+                    voting = stkVoting,
+                    days = int.Parse(stkDays),
+                    compound = stkCompound
+                });
+        }
+        catch (Exception ex)
+        {
+            Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+        }
+    }
+
+    private void ProfitingCreate(MouseEventArgs e)
+    {
+        try
+        {
+            if (pftType != "Node" && pftType != "Yield")
+                return;
+
+            var type = (ProfitingType)Enum.Parse(typeof(ProfitingType), pftType);
+
+            Dispatcher.Dispatch(new WebWalletCreateProfitingAction
+                {
+                    wallet = walletState.Value.wallet,
+                    name = pftName,
+                    type = type,
+                    share = decimal.Parse(pftShare) / 100m,
+                    seats = int.Parse(pftSeats)
+                });
+        }
+        catch (Exception ex)
+        {
+            Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
+        }
+    }
+}

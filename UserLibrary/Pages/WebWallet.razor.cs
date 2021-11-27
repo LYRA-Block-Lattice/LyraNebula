@@ -33,15 +33,6 @@ namespace UserLibrary.Pages
 		[Inject]
 		private IJSRuntime JS { get; set; }
 
-		public string stkName { get; set; }
-		public string stkVoting { get; set; }
-		public string stkDays { get; set; }
-		public bool stkCompound { get; set; }
-
-		public string pftName { get; set; }
-		public string pftType { get; set; }
-		public string pftShare { get; set; }
-		public string pftSeats { get; set; }
 
 		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
@@ -59,9 +50,7 @@ namespace UserLibrary.Pages
 		public WebWallet()
         {
 			tokenName = "LYR";
-			altDisplay = "************";
-
-			pftType = "Node";
+			altDisplay = "************";			
 		}
 
         private void ToggleKey(MouseEventArgs e)
@@ -123,93 +112,11 @@ namespace UserLibrary.Pages
 			Dispatcher.Dispatch(new WalletErrorResetAction());
 		}
 
-		private void StakingCreate(MouseEventArgs e)
-        {
-			try
-            {
-				Dispatcher.Dispatch(new WebWalletCreateStakingAction
-				{
-					wallet = walletState.Value.wallet,
-					name = stkName,
-					voting = stkVoting,
-					days = int.Parse(stkDays),
-					compound = stkCompound
-				});
-			}
-			catch (Exception ex)
-			{
-				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
-			}
-		}
 
-		private void ProfitingCreate(MouseEventArgs e)
-		{
-			try
-            {
-				if (pftType != "Node" && pftType != "Yield")
-					return;
 
-				var type = (ProfitingType)Enum.Parse(typeof(ProfitingType), pftType);
 
-				Dispatcher.Dispatch(new WebWalletCreateProfitingAction
-				{
-					wallet = walletState.Value.wallet,
-					name = pftName,
-					type = type,
-					share = decimal.Parse(pftShare) / 100m,
-					seats = int.Parse(pftSeats)
-				});
-			}
-			catch(Exception ex)
-            {
-				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
-            }
-		}
 
-		private async Task AddStkAsync(MouseEventArgs e, string stkid)
-		{
-			try
-            {
-				var amt = await GetAmountInput();
-				if(amt > 0)
-                {
-					Dispatcher.Dispatch(new WebWalletAddStakingAction
-					{
-						wallet = walletState.Value.wallet,
-						stkid = stkid,
-						amount = amt
-					});
-				}
-			}
-			catch (Exception ex)
-			{
-				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
-			}
-		}
 
-		private void RmStk(MouseEventArgs e, string stkid)
-		{
-			try
-			{
-				Dispatcher.Dispatch(new WebWalletRemoveStakingAction
-				{
-					wallet = walletState.Value.wallet,
-					stkid = stkid
-				});
-			}
-			catch (Exception ex)
-			{
-				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
-			}
-		}
-
-		private async Task<decimal> GetAmountInput()
-		{
-			string prompted = await JS.InvokeAsync<string>("prompt", "How many LYR do you want to stake?"); // Prompt
-			if (prompted == null)
-				return 0;
-			return decimal.Parse(prompted);
-		}
 
 		private void OnSuccess()
 		{
