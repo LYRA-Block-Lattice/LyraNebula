@@ -1,5 +1,6 @@
 ﻿using Lyra.Core.Accounts;
 using Lyra.Core.Blocks;
+using System.Collections.Generic;
 
 namespace Nebula.Store.WebWalletUseCase
 {

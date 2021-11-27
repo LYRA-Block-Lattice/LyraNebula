@@ -9,9 +9,7 @@
 @using Microsoft.Extensions.Logging
 @using Microsoft.Extensions.Options
 @inject IConfiguration Configuration
-@inject IJSRuntime JS
 @inject NavigationManager Navigation
-@inject SampleAPI SampleAPI
 @inject Blazored.LocalStorage.ILocalStorageService localStore
 @inject ILogger<WebWallet> logger
 @inject ILyraAPI lyraClient
@@ -131,7 +129,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.DEX)
     <h3>Lyra DEX</h3>
     <hr />
     <div>
-        <DexWallets></DexWallets>
+        <UserLibrary.Components.DexWallets></UserLibrary.Components.DexWallets>
     </div>
     <hr />
     <div>
@@ -390,95 +388,3 @@ else
     </div>
 }
 
-@code {
-
-    private ReCAPTCHA reCAPTCHAComponent;
-
-    private async Task<decimal> GetAmountInput()
-    {
-        string prompted = await JS.InvokeAsync<string>("prompt", "How many LYR do you want to stake?"); // Prompt
-        if (prompted == null)
-            return 0;
-        return decimal.Parse(prompted);
-    }
-
-    private void OnSuccess()
-    {
-        Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = true });
-    }
-
-    private void OnExpired()
-    {
-        Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = false });
-    }
-
-    private async Task OnClickPost()
-    {
-        Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
-            {
-                wallet = walletState.Value.wallet,
-                faucetPvk = Configuration["faucetPvk"]
-            });
-        return;
-
-        if (walletState.Value.ValidReCAPTCHA)
-        {
-            var response = await reCAPTCHAComponent.GetResponseAsync();
-            try
-            {
-                Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = true });
-
-                var result = await SampleAPI.Post(response);
-                if (result.Success)
-                {
-                    Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
-                        {
-                            wallet = walletState.Value.wallet,
-                            faucetPvk = Configuration["faucetPvk"]
-                        });
-                    //Navigation.NavigateTo("/valid");
-                }
-                else
-                {
-                    await JS.InvokeAsync<object>("alert", string.Join(", ", result.ErrorCodes));
-
-                    Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
-                }
-            }
-            catch (HttpRequestException e)
-            {
-                await JS.InvokeAsync<object>("alert", e.Message);
-
-                Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
-            }
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        var key = Configuration["network"] + "freelyr";
-        if (walletState.Value.freeTokenTimes.HasValue)
-        {
-            // if it need save
-            var oldValue = await localStore.GetItemAsync<string>(key);
-            int oldCount;
-            if (oldValue == null || (int.TryParse(oldValue, out oldCount) && oldCount < walletState.Value.freeTokenTimes))
-            {
-                await localStore.SetItemAsync(key, walletState.Value.freeTokenTimes.ToString());
-            }
-        }
-        else
-        {
-            var oldValue = await localStore.GetItemAsync<string>(key);
-            int oldCount;
-            if (oldValue != null && int.TryParse(oldValue, out oldCount))
-            {
-                walletState.Value.freeTokenTimes = oldCount;
-            }
-            else
-            {
-                walletState.Value.freeTokenTimes = 0;
-            }
-        }
-    }
-}

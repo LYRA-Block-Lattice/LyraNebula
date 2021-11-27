@@ -125,7 +125,7 @@ else
     private IDispatcher Dispatcher { get; set; }
 
     [CascadingParameter]
-	public Error Error { get; set; }
+	public Error Err { get; set; }
 
     string withdrawTitle;
     bool withdrawVisible = false;
@@ -220,7 +220,7 @@ else
         }
         catch(Exception ex)
         {
-            Error.ProcessError(ex);
+            Err.ProcessError(ex);
 
         }
 

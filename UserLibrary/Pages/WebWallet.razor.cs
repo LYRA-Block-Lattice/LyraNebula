@@ -19,7 +19,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using UserLibrary.Components;
 
 namespace UserLibrary.Pages
 {
@@ -31,8 +30,8 @@ namespace UserLibrary.Pages
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
 
-		[CascadingParameter]
-		public Error Error { get; set; }
+		[Inject]
+		private IJSRuntime JS { get; set; }
 
 		public string stkName { get; set; }
 		public string stkVoting { get; set; }
@@ -65,10 +64,6 @@ namespace UserLibrary.Pages
 			pftType = "Node";
 		}
 
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
-		}
         private void ToggleKey(MouseEventArgs e)
 		{
 			if (altDisplay == "************")
@@ -207,6 +202,94 @@ namespace UserLibrary.Pages
 				Dispatcher.Dispatch(new WalletErrorResultAction { error = ex.Message });
 			}
 		}
+
+		private async Task<decimal> GetAmountInput()
+		{
+			string prompted = await JS.InvokeAsync<string>("prompt", "How many LYR do you want to stake?"); // Prompt
+			if (prompted == null)
+				return 0;
+			return decimal.Parse(prompted);
+		}
+
+		private void OnSuccess()
+		{
+			Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = true });
+		}
+
+		private void OnExpired()
+		{
+			Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = false });
+		}
+
+		private async Task OnClickPost()
+		{
+			Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
+			{
+				wallet = walletState.Value.wallet,
+				faucetPvk = Configuration["faucetPvk"]
+			});
+			return;
+
+			/*        if (walletState.Value.ValidReCAPTCHA)
+					{
+						var response = await reCAPTCHAComponent.GetResponseAsync();
+						try
+						{
+							Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = true });
+
+							var result = await SampleAPI.Post(response);
+							if (result.Success)
+							{
+								Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
+									{
+										wallet = walletState.Value.wallet,
+										faucetPvk = Configuration["faucetPvk"]
+									});
+								//Navigation.NavigateTo("/valid");
+							}
+							else
+							{
+								await JS.InvokeAsync<object>("alert", string.Join(", ", result.ErrorCodes));
+
+								Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
+							}
+						}
+						catch (HttpRequestException e)
+						{
+							await JS.InvokeAsync<object>("alert", e.Message);
+
+							Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
+						}
+					}*/
+		}
+
+		//protected override async Task OnAfterRenderAsync(bool firstRender)
+		//{
+		//	var key = Configuration["network"] + "freelyr";
+		//	if (walletState.Value.freeTokenTimes.HasValue)
+		//	{
+		//		// if it need save
+		//		var oldValue = await localStore.GetItemAsync<string>(key);
+		//		int oldCount;
+		//		if (oldValue == null || (int.TryParse(oldValue, out oldCount) && oldCount < walletState.Value.freeTokenTimes))
+		//		{
+		//			await localStore.SetItemAsync(key, walletState.Value.freeTokenTimes.ToString());
+		//		}
+		//	}
+		//	else
+		//	{
+		//		var oldValue = await localStore.GetItemAsync<string>(key);
+		//		int oldCount;
+		//		if (oldValue != null && int.TryParse(oldValue, out oldCount))
+		//		{
+		//			walletState.Value.freeTokenTimes = oldCount;
+		//		}
+		//		else
+		//		{
+		//			walletState.Value.freeTokenTimes = 0;
+		//		}
+		//	}
+		//}
 
 		private async Task Send(MouseEventArgs e)
 		{

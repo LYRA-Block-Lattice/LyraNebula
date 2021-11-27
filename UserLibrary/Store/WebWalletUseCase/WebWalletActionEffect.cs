@@ -7,6 +7,10 @@ using Lyra.Core.Blocks;
 using System.Numerics;
 using Microsoft.Extensions.Logging;
 using Lyra.Data.API;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace Nebula.Store.WebWalletUseCase
 {
