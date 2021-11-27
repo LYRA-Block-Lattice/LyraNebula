@@ -39,11 +39,11 @@ table.swt td {
         <td>Balance: @($"{balance1:N8}")</td>
     </tr>
     <tr>
-        <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
+        <td><AntDesign.Input TValue="decimal" Style="width: 100px" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
         <td>
             <Select DataSource="@tickers"
                     @bind-Value="@selectedTicker1"
-                    Style="width:220px"
+                    Style="width:200px"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler1">
             </Select>
         </td>
@@ -61,11 +61,11 @@ table.swt td {
         <td>Balance: @($"{balance2:N8}")</td>
     </tr>
     <tr>
-        <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
+        <td><AntDesign.Input TValue="decimal" Style="width: 100px" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
         <td>
             <Select DataSource="@tickers"
                     @bind-Value="@selectedTicker2"
-                    Style="width:220px"
+                    Style="width:200px"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler2">
             </Select>
         </td>
