@@ -61,12 +61,6 @@
             <SpaceItem>&nbsp;</SpaceItem>
 
             <SpaceItem>
-                <button class="btn btn-primary" @onclick="Transactions">
-                    Transactions
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>
                 <button class="btn btn-primary" @onclick="Settings">
                     Settings
                 </button>
@@ -168,7 +162,9 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Setti
             <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
         </div>
         <hr />
-
+                        <button class="btn btn-primary" @onclick="Transactions">
+                    Transactions
+                </button>
         <button class="btn btn-primary" @onclick="SaveSettings">Save</button>
         <button class="btn btn-primary" @onclick="CancelSave">Cancel</button>
     </div>
