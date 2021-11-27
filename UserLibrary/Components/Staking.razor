@@ -86,15 +86,15 @@
     <TabPane Tab="Create new staking account" Key="1">
         <p>
             Name:
-            <input size="60" type="text" @bind="@stkName" />
+            <Input TValue="string" Placeholder="Name" @bind-Value="@stkName" /> 
         </p>
         <p>
             Staking For Address:
-            <input size="100" type="text" @bind="@stkVoting" />
+            <Input TValue="string" Placeholder="Address" @bind-Value="@stkVoting" /> 
         </p>
         <p>
             Days of staking:
-            <input size="10" type="text" @bind="@stkDays" />
+            <Input TValue="string" Placeholder="Days" @bind-Value="@stkDays" /> 
         </p>
         <p>
             Compound staking mode:
@@ -107,7 +107,7 @@
     <TabPane Tab="Create new profiting account" Key="2">
         <p>
             Name:
-            <input size="60" type="text" @bind="@pftName" />
+            <Input TValue="string" Placeholder="Name" @bind-Value="@pftName" /> 
         </p>
         <p>
             Type:
@@ -120,11 +120,11 @@
         </p>
         <p>
             Ratio to share to staking (0% - 100%):
-            <input size="10" type="text" @bind="@pftShare" />
+            <Input TValue="string" Placeholder="Ratio" @bind-Value="@pftShare" /> 
         </p>
         <p>
             Number of staking (0 - 100):
-            <input size="10" type="text" @bind="@pftSeats" />
+            <Input TValue="string" Placeholder="Max number" @bind-Value="@pftSeats" /> 
         </p>
         <div>
             <button class="btn btn-primary" @onclick="ProfitingCreate">Create Profiting Account</button>

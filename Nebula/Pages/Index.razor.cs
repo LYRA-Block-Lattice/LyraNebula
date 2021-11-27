@@ -23,9 +23,12 @@ namespace Nebula.Pages
 
         public Supply CurrentSupply { get; private set; }
 
-        public void oninput(ChangeEventArgs args)
+        string hash;
+
+        public void oninput()
         {
-            navigationManager.NavigateTo($"/showblock/{args.Value}");
+            if(hash != null)
+                navigationManager.NavigateTo($"/showblock/{hash}");
         }
 
         protected override void OnInitialized()

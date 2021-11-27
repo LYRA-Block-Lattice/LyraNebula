@@ -21,6 +21,7 @@ namespace Nebula.Pages
 		[Inject]
 		private IDispatcher Dispatcher { get; set; }
 
+		string search;
 		private int dot { get; set; }
 		protected override void OnInitialized()
 		{
@@ -35,10 +36,10 @@ namespace Nebula.Pages
 			await base.OnParametersSetAsync();
         }
 
-        public void oninput(ChangeEventArgs args)
+        public void oninput()
 		{
-			hash = args.Value.ToString();
-			Dispatcher.Dispatch(new BlockSearchAction(args.Value.ToString(), height));
+			hash = search;
+			Dispatcher.Dispatch(new BlockSearchAction(hash, height));
 		}
 	}
 }

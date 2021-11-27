@@ -4,7 +4,9 @@
 @page "/showblock/{hash}/{height:long}"
 
 <h2 style="text-align: center">Search by Hash or Account ID</h2>
-<p style="text-align: center"><input size="100" type="text" @oninput="oninput" /></p>
+<p style="text-align: center">
+    <Input TValue="string" Placeholder="Hash or Account ID" @bind-Value="@search" OnChange="@oninput" />
+</p>
 
 @if (searchState.Value.IsLoading)
 {

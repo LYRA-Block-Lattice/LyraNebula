@@ -172,7 +172,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Setti
 
         <p>
             Vote For Address:
-            <input size="100" type="text" @bind="@voteAddr" />
+            <Input TValue="string" Placeholder="Address" @bind-Value="@voteAddr" /> 
         </p>
         <div>
             <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
@@ -192,15 +192,15 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Send)
     <div>
         <p>
             Destination Wallet Address:<br />
-            <input size="120" type="text" @bind="@dstAddr" />
+            <Input TValue="string" Placeholder="Address" @bind-Value="@dstAddr" /> 
         </p>
         <p>
             Token Name:<br />
-            <input size="20" type="text" @bind="@tokenName" />
+            <Input TValue="string" Placeholder="Name" @bind-Value="@tokenName" /> 
         </p>
         <p>
             Amount:<br />
-            <input size="20" type="text" @bind="@amount" />
+            <Input TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
         </p>
         <hr />
         <button class="btn btn-primary" @onclick="SendToken">Send Token</button>
@@ -259,7 +259,9 @@ else
     <hr />
     <div>
         <p>Private Key:</p>
-        <p><input size="100" type="text" @bind="prvKey" /></p>
+        <p>
+            <Input TValue="string" Placeholder="Private Key" @bind-Value="@prvKey" />    
+        </p>
         <p>
             <button class="btn btn-primary" @onclick="RestoreWallet">
                 Restore Wallet
