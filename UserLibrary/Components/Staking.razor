@@ -1,4 +1,8 @@
 ﻿@using Fluxor
+@using Lyra.Core.Blocks
+@using Lyra.Data.Blocks
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
 @using Nebula.Store.WebWalletUseCase
 
 <Tabs>
@@ -36,7 +40,7 @@
                         <td>@stk.Days</td>
                         <td>@stk.Voting</td>
                         <td>
-                            <a href="" @onclick="@(e => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
+                            <a href="" @onclick="@((e) => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
                             &nbsp;
                             <Popconfirm Title="Unstaking within the promised staking period will pay 0.8% panalise fee. "
                                     OnConfirm="@(e => RmStk(e, stk.AccountID))"
