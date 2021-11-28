@@ -14,28 +14,11 @@
 @inject ILyraAPI lyraClient
 @inject MessageService _message
 
-<Styled>
-    
-.swt {
-    margin: 10px;
-    border-collapse: separate;
-}
-
-table.swt td {
-    background-clip: padding-box;
-    
-    color: black;
-    border: 5px solid white;
-    border-radius: 5px;
-}
-
-</Styled>
-
 <table cellspacing="0" cellpadding="0" class="swt">
 
 
     <tr>
-        <td>From</td>
+        <td>From</td> 
         <td>Balance: @($"{balance1:N8}")</td>
     </tr>
     <tr>
@@ -119,11 +102,11 @@ table.swt td {
             <td>@calimpact</td>
         </tr>
         <tr>
-            <td>Liquidaty Provider Fee</td>
+            <td>Pool Fee</td>
             <td>@calprofee</td>
         </tr>
         <tr>
-            <td>Consensus Node Fee</td>
+            <td>Network Fee</td>
             <td>@calnodfee</td>
         </tr>
     }
@@ -405,10 +388,10 @@ table.swt td {
                 var line1 = $"{platest.Balances[token0].ToBalanceDecimal()} {token0}";
                 var line2 = $"{platest.Balances[token1].ToBalanceDecimal()} {token1}";
                 pairliquid =
-    @<p>
-        @line1<br />
-        @line2
-    </p>
+    @<div>
+        <div>@line1</div>
+        <div>@line2</div>
+    </div>
     ;
             }
             else
