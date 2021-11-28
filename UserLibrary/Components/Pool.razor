@@ -12,43 +12,59 @@
 @inject ILyraAPI lyraClient
 @inject MessageService _message
 
+<div class="swc">
+
 @if (ui == UI.Entry)
 {
-    <Button Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
+        <div style="padding: 14px; width: 370px">
+        <Button Block Type="@ButtonType.Primary" 
+    Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+    OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
 
 
-    <p>
-        <div>Your Liquidity</div>
-    </p>
-    <div>(TBA)</div>
+        <p>
+            <div>Your Liquidity</div>
+        </p>
+        <div>(TBA)</div>
+        </div>
 }
 
 @if (ui == UI.Adding)
 {
-    <div style="padding: 14px">
+    <div style="padding: 14px; width: 370px">
         <Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle"
             Icon="@IconType.Outline.ArrowLeft"
             OnClick="BackEntry" />
         &nbsp;Add Liquidity
     </div>
-    <div style="padding: 14px">
-        <table>
+    <div>
+        <table class="swt">
             <tr>
                 <td>Input</td>
                 <td>Balance: @($"{balance1:N8}")</td>
             </tr>
             <tr>
-                <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
                 <td>
+                    <div class="round">
+                    <AntDesign.Input TValue="decimal" Placeholder="Enter an amount" 
+                    Style="width: 100px; background: white;"
+                    Bordered="false"
+                    @bind-Value="@amount1" OnChange="@updateBtn1" />
+                    </div>
+                </td>
+                <td>
+                    <div class="round">
                     <Select DataSource="@tickers"
                         @bind-Value="@selectedTicker1"
-                        Style="width:220px"
+                        Style="width:200px; background: white;"
+                        Bordered="false"
                         OnSelectedItemChanged="OnSelectedItemChangedHandler1">
                     </Select>
+                    </div>
                 </td>
             </tr>
             <tr>
-                <td>+</td>
+                <td><Icon Type="plus-circle" Theme="outline" Style="font-size: x-large;" /></td>
                 <td></td>
             </tr>
             <tr>
@@ -56,42 +72,53 @@
                 <td>Balance: @($"{balance2:N8}")</td>
             </tr>
             <tr>
-                <td><AntDesign.Input TValue="decimal" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
                 <td>
+                    <div class="round">
+                    <AntDesign.Input TValue="decimal" Placeholder="Enter an amount" 
+                    Style="width: 100px; background: white;"
+                    Bordered="false"
+                    @bind-Value="@amount2" OnChange="@updateBtn2" />
+                    </div>
+                </td>
+                <td>
+                    <div class="round">
                     <Select DataSource="@tickers"
                         @bind-Value="@selectedTicker2"
-                        Style="width:220px"
+                        Style="width:200px; background: white;"
+                        Bordered="false"
                         OnSelectedItemChanged="OnSelectedItemChangedHandler2">
                     </Select>
+                    </div>
                 </td>
             </tr>
             @if(havepool)
             {
-                <tr>
-                    <td colspan="2"><Divider>Pair Infomation</Divider></td>
-                </tr>
-                <tr>
+@*                <tr>
                     <td>Token Pair</td>
                     <td>@pairinfo</td>
-                </tr>
+                </tr>*@
                 <tr>
-                    <td>Total Liquidate</td>
+                    <td>Pool Liquidate</td>
                     <td>@pairliquid</td>
                 </tr>
                 <tr>
-                    <td>Your Liquidate Share</td>
+                    <td>Your Share</td>
                     <td>@pairshare</td>
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</Button>
+                        <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" 
+                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                        OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</Button>
                     </td>
                 </tr>
                 @if(canremove)
                 {
                 <tr>
                     <td colspan="2"><Divider>Or</Divider>
-                    <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove Liquidate</Button>    
+                    <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" 
+                    Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                    OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove Liquidate</Button>    
                     </td>
                 </tr>
                 }
@@ -102,11 +129,15 @@
                 <td colspan="2" style="padding: 14px">
                     @if(walletState.Value.wallet == null)
                     {
-                        <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+                        <a href="/webwallet"> <Button Block Type="@ButtonType.Primary"
+                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                        >Open Wallet</Button></a>
                     }
                     else
                     {
-                        <Button Disabled="@(!clenabled)" Block Type="@ButtonType.Primary" OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</Button>
+                        <Button Disabled="@(!clenabled)" Block Type="@ButtonType.Primary" 
+                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                        OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</Button>
                     }
                 </td>
             </tr>
@@ -117,6 +148,8 @@
     </div>
 
 }
+
+</div>
 
 @code {
 
@@ -292,7 +325,7 @@
     </p>
     ;
                         var pool = latestblk as IPool;
-                        if(pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
+                        if(walletState.Value.wallet != null && pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
                         {
                             canremove = true;
                             var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";

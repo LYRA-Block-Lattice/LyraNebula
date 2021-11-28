@@ -1,7 +1,9 @@
 ﻿<Fluxor.Blazor.Web.StoreInitializer />
 
 <Error>
-    <Router AppAssembly="@typeof(App).Assembly">
+    <Router AppAssembly="@typeof(App).Assembly"
+        AdditionalAssemblies="new[] { typeof(UserLibrary.Pages.WebWallet).Assembly }"
+    >
         <Found Context="routeData">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />

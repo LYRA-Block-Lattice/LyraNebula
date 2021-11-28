@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <Folder Include="LiteDb\" />
+    <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
   <ItemGroup>

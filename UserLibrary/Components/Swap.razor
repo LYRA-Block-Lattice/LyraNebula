@@ -14,6 +14,8 @@
 @inject ILyraAPI lyraClient
 @inject MessageService _message
 
+<div class="swc">
+
 <table cellspacing="0" cellpadding="0" class="swt">
 
 
@@ -22,35 +24,51 @@
         <td>Balance: @($"{balance1:N8}")</td>
     </tr>
     <tr>
-        <td><AntDesign.Input TValue="decimal" Style="width: 100px" Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" /></td>
+        <td><div class="round">
+            <AntDesign.Input TValue="decimal" Style="width: 100px; background: white;" 
+            Bordered="false"
+            Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" />
+            </div>
+        </td>
         <td>
+            <div class="round">
             <Select DataSource="@tickers"
                     @bind-Value="@selectedTicker1"
-                    Style="width:200px"
+                    Style="width:200px; background: white;"
+                    Bordered="false"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler1">
             </Select>
+            </div>
         </td>
     </tr>
     <tr>
-        <td><Button Type="@ButtonType.Dashed" Shape="@ButtonShape.Circle"           
+        <td><Button Type="@ButtonType.Text" Shape="@ButtonShape.Circle"           
             OnClick="@DoSwapTicker">
-            <Icon Type="sync" Theme="outline"/>   
+            <Icon Type="sync" Theme="outline" Style="font-size: x-large;"/>   
         </Button>
         </td>
-        <td align="right"><Icon Type="setting" Theme="outline" /></td>
+        <td align="right"><Icon Type="setting" Theme="outline" Style="font-size: x-large;" /></td>
     </tr>
     <tr>
         <td>To</td>
         <td>Balance: @($"{balance2:N8}")</td>
     </tr>
     <tr>
-        <td><AntDesign.Input TValue="decimal" Style="width: 100px" Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" /></td>
+        <td><div class="round">
+            <AntDesign.Input TValue="decimal" Style="width: 100px; background: white;" 
+            Bordered="false"
+            Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" />
+            </div>
+        </td>
         <td>
+            <div class="round">
             <Select DataSource="@tickers"
                     @bind-Value="@selectedTicker2"
-                    Style="width:200px"
+                    Style="width:200px; background: white;"
+                    Bordered="false"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler2">
             </Select>
+            </div>
         </td>
     </tr>
     @if (haspoolinfo)
@@ -119,7 +137,9 @@
         <td colspan="2">
             @if(walletState.Value.wallet == null)
             {
-                <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+                <a href="/webwallet"> <Button Block Shape="@ButtonShape.Round"
+                    Size="ButtonSize.Large" Icon="@IconType.Outline.Unlock"
+                    Type="@ButtonType.Primary">Open Wallet</Button></a>
             }
             else
             {
@@ -139,6 +159,7 @@
 
 </table>
 
+</div>
 @code {
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
