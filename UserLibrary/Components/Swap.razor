@@ -49,10 +49,10 @@ table.swt td {
         </td>
     </tr>
     <tr>
-        <td><Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle"
-            Icon="@IconType.Outline.ArrowDown"
-            OnClick="@DoSwapTicker"
-             />
+        <td><Button Type="@ButtonType.Dashed" Shape="@ButtonShape.Circle"           
+            OnClick="@DoSwapTicker">
+            <Icon Type="sync" Theme="outline"/>   
+        </Button>
         </td>
         <td align="right"><Icon Type="setting" Theme="outline" /></td>
     </tr>
@@ -75,10 +75,10 @@ table.swt td {
         <tr style="height: 10px">
             <td colspan="2"></td>
         </tr>
-        <tr>
+@*        <tr>
             <td>Token Pair</td>
             <td>@pairinfo</td>
-        </tr>
+        </tr>*@
         <tr>
             <td>Total Liquidate</td>
             <td>@pairliquid</td>
