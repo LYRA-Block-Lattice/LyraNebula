@@ -232,17 +232,30 @@ namespace Nebula.Store.WebWalletUseCase
 		{
 			try
             {
-				var store = new AccountInMemoryStorage();
-				var name = Guid.NewGuid().ToString();
-				Wallet.Create(store, name, "", config["network"], action.privateKey);
+				if (await _localStorage.ContainKeyAsync(action.store))
+					await _localStorage.RemoveItemAsync(action.store);
 
-				var wallet = Wallet.Open(store, name, "");
-				if (action.selfVote)
-					wallet.SetVoteFor(wallet.AccountId);
+				using (var ms = new MemoryStream())
+				{
+					using (var ss = new SecuredWalletStore(ms))
+					{
+						Wallet.Create(ss, action.name, action.password, config["network"], action.privateKey);
+					}
+					// sws will flush.
+					var data = ms.GetBuffer();
+					await _localStorage.SetItemAsync(action.store, data);
+				}
+				//var store = new AccountInMemoryStorage();
+				//var name = Guid.NewGuid().ToString();
+				//Wallet.Create(store, name, "", config["network"], action.privateKey);
 
-				await wallet.SyncAsync(client);
+				//var wallet = Wallet.Open(store, name, "");
+				//if (action.selfVote)
+				//	wallet.SetVoteFor(wallet.AccountId);
 
-				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+				//await wallet.SyncAsync(client);
+
+				//dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
 			}
 			catch(Exception ex)
             {
