@@ -258,12 +258,12 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeT
 }
 else
 {
-    <div>
+@*    <div>
         <button class="btn btn-primary" @onclick="CreateWallet">
             Create New Wallet
         </button>
     </div>
-    <hr />
+    <hr />*@
     <div>
         <p>Private Key:</p>
         <p>
@@ -317,6 +317,7 @@ else
 		private void CloseWallet(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletCloseAction());
+            Navigation.NavigateTo("/login");
 		}
 
 		private void CreateWallet(MouseEventArgs e)

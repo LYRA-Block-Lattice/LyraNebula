@@ -1,0 +1,30 @@
+﻿@page "/login"
+@using Blazored.LocalStorage
+
+@if(hasStore)
+{
+    <UserLibrary.Components.OpenWithPassword />
+}
+else
+{
+    <UserLibrary.Components.CreateWithPassword OnFinished="@(() => {hasStore = true;})" />
+}
+
+@code{
+    [Inject]
+    public ILocalStorageService _localStorage { get; set; }
+
+    bool hasStore;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var storeName = "nebstor";
+
+        if (await _localStorage.ContainKeyAsync(storeName))
+            hasStore = true;
+        else
+            hasStore = false;
+
+        await base.OnInitializedAsync();
+    }
+}

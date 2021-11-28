@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace Nebula.Store.WebWalletUseCase
 {
+	public class WalletCreateResultAction
+    {
+
+    }
 	public class WebWalletResultAction
 	{
 		public bool IsOpening { get; }

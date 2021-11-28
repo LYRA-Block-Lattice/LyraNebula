@@ -43,6 +43,11 @@ main {
     .top-row a, .top-row .btn-link {
         margin-left: 0;
     }
+
+    .fw {
+        width: 100vw;
+        height: calc(100vh - 56px);
+    }
 }
 
 @media (min-width: 641px) {
@@ -66,5 +71,10 @@ main {
     .top-row, article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
+    }
+
+    .fw {
+        width: calc(100vw - 250px);
+        height: calc(100vh - 56px);
     }
 }

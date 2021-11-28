@@ -9,7 +9,15 @@ using System.Threading.Tasks;
 namespace Nebula.Store.WebWalletUseCase
 {
     public class WebWalletCreateAction {
+        public string store { get; set; }
         public string name { get; set; }   
+        public string password { get; set; }
+    }
+
+    public class WebWalletOpenAction
+    {
+        public string store { get; set; }
+        public string name { get; set; }
         public string password { get; set; }
     }
 

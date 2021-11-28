@@ -197,13 +197,13 @@ namespace Nebula.Store.WebWalletUseCase
 					}
 					// sws will flush.
 					var data = ms.GetBuffer();
-					await _localStorage.SetItemAsync(action.name, data);
+					await _localStorage.SetItemAsync(action.store, data);
 				}	
 				
-				// open it
-				var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.name));	
-				var ss2 = new SecuredWalletStore(ms2);
-				wallet = Wallet.Open(ss2, action.name, action.password);
+				//// open it
+				//var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));	
+				//var ss2 = new SecuredWalletStore(ms2);
+				//wallet = Wallet.Open(ss2, action.name, action.password);
             }
 			else
             {
@@ -212,9 +212,20 @@ namespace Nebula.Store.WebWalletUseCase
 				wallet = Wallet.Open(store, action.name, action.password);
 			}
 
-			await wallet.SyncAsync(client);
-			dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+			//await wallet.SyncAsync(client);
+			//dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
 		}
+
+		[EffectMethod]
+		public async Task HandleOpen(WebWalletOpenAction action, IDispatcher dispatcher)
+		{
+            var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));
+            var ss2 = new SecuredWalletStore(ms2);
+            var wallet = Wallet.Open(ss2, action.name, action.password);
+
+            await wallet.SyncAsync(client);
+            dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+        }
 
 		[EffectMethod]
 		public async Task HandleRestore(WebWalletRestoreAction action, IDispatcher dispatcher)
