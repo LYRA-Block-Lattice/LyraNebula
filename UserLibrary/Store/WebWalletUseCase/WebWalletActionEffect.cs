@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using Blazored.LocalStorage;
 
 namespace Nebula.Store.WebWalletUseCase
 {
@@ -19,14 +20,17 @@ namespace Nebula.Store.WebWalletUseCase
 		private readonly ILyraAPI client;
 		private readonly IConfiguration config;
 		private readonly ILogger<Effects> logger;
+		private readonly ILocalStorageService _localStorage;
 
 		public Effects(ILyraAPI lyraClient, 
 			IConfiguration configuration,
-			ILogger<Effects> logger)
+			ILogger<Effects> logger,
+			ILocalStorageService storage)
 		{
 			client = lyraClient;
 			config = configuration;
 			this.logger = logger;
+			_localStorage = storage;
 		}
 
 		[EffectMethod]
@@ -181,13 +185,34 @@ namespace Nebula.Store.WebWalletUseCase
         [EffectMethod]
 		public async Task HandleCreation(WebWalletCreateAction action, IDispatcher dispatcher)
 		{
-			var store = new AccountInMemoryStorage();
-			var name = Guid.NewGuid().ToString();
-			Wallet.Create(store, name, "", config["network"]);
+			Wallet wallet;
+			if(config["localstore"] == "yes")
+            {
+				// maui app. save data encrypted
+				using (var ms = new MemoryStream())
+                {
+					using (var ss = new SecuredWalletStore(ms))
+					{
+						Wallet.Create(ss, action.name, action.password, config["network"]);
+					}
+					// sws will flush.
+					var data = ms.GetBuffer();
+					await _localStorage.SetItemAsync(action.name, data);
+				}	
+				
+				// open it
+				var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.name));	
+				var ss2 = new SecuredWalletStore(ms2);
+				wallet = Wallet.Open(ss2, action.name, action.password);
+            }
+			else
+            {
+				var store = new AccountInMemoryStorage();
+				Wallet.Create(store, action.name, action.password, config["network"]);
+				wallet = Wallet.Open(store, action.name, action.password);
+			}
 
-			var wallet = Wallet.Open(store, name, "");
 			await wallet.SyncAsync(client);
-
 			dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
 		}
 
