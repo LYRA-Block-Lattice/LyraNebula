@@ -83,7 +83,7 @@
 
         </Space>
         &nbsp;&nbsp;&nbsp;
-        @if (Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
+        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
         {
             <span>
                 <button style="float: right;" class="btn btn-success" @onclick="FreeToken">
@@ -236,7 +236,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
         </div>
     }
 }
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)
+else if(!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)
 {
     <h3>Verify and get free LYR</h3>
     <hr />
