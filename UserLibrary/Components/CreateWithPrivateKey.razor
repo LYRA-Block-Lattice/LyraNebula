@@ -1,5 +1,4 @@
 ﻿@namespace UserLibrary.Components
-@using AntDesign
 @using Blazored.LocalStorage
 @using DexServer.Ext
 @using System.ComponentModel
@@ -17,8 +16,6 @@
 @using Nebula.Store.WebWalletUseCase
 @using UserLibrary.Data
 @inject IConfiguration Configuration
-@inject ModalService _modalService
-@inject MessageService _message
 
 <div class="flex-container">
     @if (ui == UI.entry)
@@ -35,22 +32,18 @@
         @if(hasStore)
         {
             <div class="mid">
-                <Checkbox @bind-Checked="@confirmdelete" OnChange="@DoAlert">
-                    Confirm delete existing wallet
-                </Checkbox>
+                <Check TValue="bool" @bind-Checked="@confirmdelete">Confirm delete existing wallet</Check>
             </div>            
         }
         <div class="mid">
-            <AntDesign.Button Type="@AntDesign.ButtonType.Primary"
-                OnClick="@(async ()=>{ await RestoreWallet(); })">
-                Restore Wallet
-            </AntDesign.Button>
+            <Button Color="Color.Primary" Clicked="@RestoreWallet">Restore Wallet</Button>
         </div>
         <div class="mid">
             <AntDesign.Divider Style="width: 0px; height: 0px" />
         </div>
         <div class="mid">
-        <a href="/login"><AntDesign.Button Type="@AntDesign.ButtonType.Link">@act with password</AntDesign.Button></a>
+        <a href="/login">
+            <Button>@act with password</Button></a>
         </div>
     }
 
@@ -103,6 +96,8 @@
     [Inject]
     public ILocalStorageService _localStorage { get; set; }
 
+    [Inject] IMessageService MessageService { get; set; }
+
     [Parameter]
     public EventCallback OnFinished { get; set; }
 
@@ -115,19 +110,27 @@
     string title = "BasicModal";
     bool _visible = false;
 
-    bool confirmdelete = false;
+    bool _confirmdelete = false;
+    bool confirmdelete
+    {
+        get
+        {
+            return _confirmdelete;
+        }
+        set
+        {
+            _confirmdelete = value;
+            DoAlert(_confirmdelete);
+        }
+    }
 
     RenderFragment extraok =
     @<a href="login">
-        <AntDesign.Button Type="primary">
-            Login
-        </AntDesign.Button>
+        <Button Color="Color.Primary">Login</Button>
     </a>;
 
     RenderFragment extrafail =
-    @<AntDesign.Button Type="primary">
-        Retry
-    </AntDesign.Button>;
+    @<Button Color="Color.Primary">Retry</Button>;
 
     RenderFragment actionSetting(Func<Task> clickActionAsync, Dictionary<string, object> iconAttributes) =>
     @<AntDesign.Icon @attributes="@iconAttributes" OnClick="@clickActionAsync" />
@@ -136,43 +139,6 @@
     private string txtValue1 { get; set; }
     private string txtValue2 { get; set; }
     private bool visible = false;
-    private InputPassword _inputPassword;
-
-    Dictionary<string, object> hideAttributes = new()
-        {
-            ["Type"] = "eye-invisible",
-            ["Style"] = ""
-        };
-
-    Dictionary<string, object> showAttributes = new()
-        {
-            ["Type"] = "eye",
-            ["Style"] = "color: #1890ff"
-        };
-
-    Dictionary<string, object> attributes = new()
-        {
-            ["Class"] = "custom-password-icon",
-            ["Type"] = "eye-invisible",
-            ["Theme"] = "outline"
-        };
-
-    private void Submit(KeyboardEventArgs args, string password)
-    {
-        Console.WriteLine($"password: {password}");
-    }
-
-    private async Task OnClick()
-    {
-        Console.WriteLine("Custom icon clicked");
-        visible = !visible;
-        if (visible)
-            attributes = showAttributes;
-        else
-            attributes = hideAttributes;
-        await _inputPassword.Focus();
-    }
-
     bool hasStore;
 
     protected async override Task OnInitializedAsync()
@@ -223,7 +189,7 @@
         {
             if(!Signatures.ValidatePrivateKey(prvKey))
             {
-                _message.Error("Invalid private key.");
+                await MessageService.Info( "Invalid private key.", "Notice" );
                 return;
             }
             // warn if wallet exists
@@ -248,7 +214,7 @@
 
         else
         {
-            _message.Error("Passwords not match.");
+            await MessageService.Info( "Passwords not match.", "Notice" );
         }
     }
 
@@ -256,7 +222,7 @@
     {
         if(ck)
         {
-            _message.Error("Your current wallet will be overwritten!!! Please make sure you want to do this.");
+            MessageService.Info( "Your current wallet will be overwritten!!! Please make sure you want to do this.", "Warnning" );
         }
     }
 }

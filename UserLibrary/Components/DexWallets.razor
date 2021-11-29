@@ -1,9 +1,7 @@
 ﻿@namespace UserLibrary.Components
 
-@using AntDesign
 @using DexServer.Ext
 @using System.ComponentModel
-@using AntDesign.TableModels
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Core.Accounts
@@ -16,7 +14,7 @@
 @using Nebula.Store.WebWalletUseCase
 @using UserLibrary.Data
 @inject IConfiguration Configuration
-@inject NotificationService _notice
+@inject AntDesign.NotificationService _notice
 
 <style>
     .ant-progress-circle-wrap,
@@ -29,7 +27,7 @@
 @if(walletState.Value.wallet == null)
 {
     
-    <a href="/webwallet"> <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary">Open Wallet</AntDesign.Button></a>
+    <a href="/webwallet"><Button Color="Color.Primary">Open Wallet</Button></a>
 }
 else
 {
@@ -51,14 +49,14 @@ else
     <AntDesign.Column Title="Network Provider" @bind-Field="@context.NetworkProvider">
     </AntDesign.Column>
     <AntDesign.Column Title="My Balance" @bind-Field="@context.MyBalance"></AntDesign.Column>
-        <AntDesign.ActionColumn Align="ColumnAlign.Center" Title="Transfer">
+        <AntDesign.ActionColumn Align="AntDesign.ColumnAlign.Center" Title="Transfer">
             <AntDesign.Space Size=@("middle")>
                 <AntDesign.SpaceItem>
-                    <AntDesign.Button Icon="@IconType.Outline.ArrowLeft" Type="@AntDesign.ButtonType.Primary"
+                    <AntDesign.Button Icon="@AntDesign.IconType.Outline.ArrowLeft" Type="@AntDesign.ButtonType.Primary"
                          OnClick="@(async ()=>{ await OnTransferClick(context, false); })"></AntDesign.Button>
                 </AntDesign.SpaceItem>
                 <AntDesign.SpaceItem>
-                    <AntDesign.Button Icon="@IconType.Outline.ArrowRight" Type="@AntDesign.ButtonType.Primary"
+                    <AntDesign.Button Icon="@AntDesign.IconType.Outline.ArrowRight" Type="@AntDesign.ButtonType.Primary"
                         OnClick="@(async ()=>{ await OnTransferClick(context, true); })"></AntDesign.Button>
                 </AntDesign.SpaceItem>
             </AntDesign.Space>
@@ -88,7 +86,7 @@ else
     <p>Contract: @contract</p>
     <p>Depositon Address: </p>
     <TextEdit Size="Size.Large" Placeholder="Deposition address" @bind-Text="@address" ReadOnly
-        Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;"/>
+        Style="font-weight: bold;"/>
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
@@ -96,7 +94,7 @@ else
     @if(crwalletshow)
             {
                         <div>
-        <AntDesign.Progress Type="ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
+        <AntDesign.Progress Type="AntDesign.ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
     </div>
             }
 
@@ -110,7 +108,7 @@ else
        OnCancel="@HandleCancel2">
     
        <h3>Amount you want to transfer:</h3>
-       <NumericEdit TValue="decimal?" Style="width: 100px; background: white; border:none; font-size:xx-large;" 
+       <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
             Min="@transferMin" Max="@transferMax"
             ValueChanged="@((e) => {transferAmount = e.Value;})" />
        &nbsp;@symbol
@@ -126,9 +124,9 @@ else
         <p>Contract: @contract</p>
         <p>&nbsp;</p>
        <h3>Address you want to withdraw:</h3>
-       <Input Placeholder="Withdraw to address" @bind-Value="@withdrawAddress"  />
+       <TextEdit Placeholder="Withdraw to address" @bind-Text="@withdrawAddress" />
        <h3>Amount:</h3>
-              <NumericEdit TValue="decimal?" Style="width: 100px; background: white; border:none; font-size:xx-large;" 
+              <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
             Min="@withdrawMin" Max="@withdrawMax"
             ValueChanged="@((e) => {withdrawAmount = e.Value;})" />
 
@@ -159,7 +157,7 @@ else
     decimal withdrawMin, withdrawMax, withdrawDefault;
 
     int crwalletprogress;
-    ProgressStatus crwalletstatus;
+    AntDesign.ProgressStatus crwalletstatus;
     bool crwalletshow;
 
     List<WalletView> tokens;
@@ -192,7 +190,7 @@ else
             if(row.DexWalletID == null)
             {
                 // user have not create wallet yet.
-                await _notice.Open(new NotificationConfig()
+                await _notice.Open(new AntDesign.NotificationConfig()
                 {
                     Message = $"You don't have a DEX wallet for {row.Symbol} yet.",
                     Description = "Creating a DEX wallet for you",
@@ -204,7 +202,7 @@ else
                 var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
                 if(crdexret.Successful())
                 {
-                    await _notice.Open(new NotificationConfig()
+                    await _notice.Open(new AntDesign.NotificationConfig()
                 {
                     Message = $"Success! ",
                     Description = $"DEX Wallet for {row.Symbol} has been created. Refreshing...",
@@ -213,7 +211,7 @@ else
 
                     await RefreshAllWallets();
 
-                    await _notice.Open(new NotificationConfig()
+                    await _notice.Open(new AntDesign.NotificationConfig()
                 {
                     Message = $"Success! ",
                     Description = $"Refreshed.",
@@ -222,7 +220,7 @@ else
                 }
                 else
                 {
-                    await _notice.Open(new NotificationConfig()
+                    await _notice.Open(new AntDesign.NotificationConfig()
                 {
                     Message = $"Error! ",
                     Description = $"DEX Wallet for {row.Symbol} was not created.",
@@ -300,7 +298,7 @@ else
                                 address = token.Address;
 
                                 crwalletprogress = 100;
-                                crwalletstatus = ProgressStatus.Success;
+                                crwalletstatus = AntDesign.ProgressStatus.Success;
                                 await InvokeAsync(() => StateHasChanged());   
 
                                 break;
@@ -308,16 +306,16 @@ else
                         }
                         else
                         {
-                            crwalletstatus = ProgressStatus.Exception;
+                            crwalletstatus = AntDesign.ProgressStatus.Exception;
                         }
                         await InvokeAsync(() => StateHasChanged());
                     });
             }
             else
             {
-                crwalletstatus = ProgressStatus.Exception;
+                crwalletstatus = AntDesign.ProgressStatus.Exception;
                 Task.Run(async () => { 
-                    await _notice.Open(new NotificationConfig()
+                    await _notice.Open(new AntDesign.NotificationConfig()
                         {
                             Message = "Unable to create DEX wallet",
                             Description = $"You need at least 11 LYR to create a DEX wallet.",
@@ -360,7 +358,7 @@ else
         else
         {
             Task.Run(async () => { 
-                await _notice.Open(new NotificationConfig()
+                await _notice.Open(new AntDesign.NotificationConfig()
                     {
                         Message = "Unable to withdraw funds.",
                         Description = $"No Token found.",
@@ -378,7 +376,7 @@ else
 
         var wallet = walletState.Value.wallet;
         var wdwret = await wallet.DexWithdrawTokenAsync(dexWalletId, withdrawAddress, withdrawAmount);
-        await _notice.Open(new NotificationConfig()
+        await _notice.Open(new AntDesign.NotificationConfig()
             {
                 Message = "Withdraw Result",
                 Description = wdwret.ResultCode.ToString(),
@@ -498,7 +496,7 @@ else
 
         _confirmLoading = false;        
 
-        await _notice.Open(new NotificationConfig()
+        await _notice.Open(new AntDesign.NotificationConfig()
         {
             Message = "Transfer Result",
             Description = ret.ResultCode.ToString(),

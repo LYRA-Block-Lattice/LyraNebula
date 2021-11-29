@@ -32,7 +32,7 @@ namespace Nebula.Data
         {
             await Task.Delay(5 * 60 * 1000);
 
-            if(!string.IsNullOrWhiteSpace(config["ipdb"]))      // only server do this.
+            if(config["network"] == "mainnet" || config["network"] == "testnet")      // only server do this.
             while (!stoppingToken.IsCancellationRequested)
             {
                 try

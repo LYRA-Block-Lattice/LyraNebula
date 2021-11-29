@@ -44,12 +44,12 @@
                         <td>
                             <a href="" @onclick="@((e) => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
                             &nbsp;
-                            <Popconfirm Title="Unstaking within the promised staking period will pay 0.8% panalise fee. "
-                                    OnConfirm="@(e => RmStk(e, stk.AccountID))"
+                            <AntDesign.Popconfirm Title="Unstaking within the promised staking period will pay 0.8% panalise fee. "
+                                    OnConfirm="@(e => {RmStk(e, stk.AccountID);})"
                                     OkText="Yes, I know."
                                     CancelText="No, cancel unstaking">
                                 <a style="color:blue"><u>Unstaking</u></a>
-                            </Popconfirm>
+                            </AntDesign.Popconfirm>
                         </td>
                     </tr>
                 }
