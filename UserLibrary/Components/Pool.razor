@@ -307,6 +307,7 @@
                     dbname = a,
                     Name = a.Replace("tether/", "$")
             })
+            .OrderBy(a => a.Name)
             .ToList();
         tickers.Insert(0, new Ticker{ dbname = "LYR", Name = "LYR" });
 
