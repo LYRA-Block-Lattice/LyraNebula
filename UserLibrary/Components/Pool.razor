@@ -1,6 +1,7 @@
 ﻿@namespace UserLibrary.Components
 
 @using AntDesign
+@using Blazorise.Components
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Core.Blocks
@@ -52,12 +53,15 @@
                 </td>
                 <td>
                     <div class="round">
-                    <AntDesign.Select DataSource="@tickers"
-                        @bind-Value="@selectedTicker1"
-                        Style="width:200px; background: white;"
-                        Bordered="false"
-                        OnSelectedItemChanged="OnSelectedItemChangedHandler1">
-                    </AntDesign.Select>
+                        <SelectList TItem="string"
+                    TValue="string"
+                    Data="@tickers"
+                    TextField="@((item)=>item)"
+                    ValueField="@((item)=>item)"
+                    SelectedValue="@selectedTicker1"
+                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
+                    Style="width:200px; background: white; border:none;"
+                    DefaultItemText="Choose Token" />
                     </div>
                 </td>
             </tr>
@@ -78,12 +82,15 @@
                 </td>
                 <td>
                     <div class="round">
-                    <AntDesign.Select DataSource="@tickers"
-                        @bind-Value="@selectedTicker2"
-                        Style="width:200px; background: white;"
-                        Bordered="false"
-                        OnSelectedItemChanged="OnSelectedItemChangedHandler2">
-                    </AntDesign.Select>
+                <SelectList TItem="string"
+                    TValue="string"
+                    Data="@tickers"
+                    TextField="@((item)=>item)"
+                    ValueField="@((item)=>item)"
+                    SelectedValue="@selectedTicker2"
+                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
+                    Style="width:200px; background: white; border:none;"
+                    DefaultItemText="Choose Token" />
                     </div>
                 </td>
             </tr>
@@ -407,6 +414,7 @@
 
     private void OnSelectedItemChangedHandler1(string value)
     {
+        selectedTicker1 = value;
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
@@ -422,6 +430,7 @@
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
+        selectedTicker2 = value;
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();

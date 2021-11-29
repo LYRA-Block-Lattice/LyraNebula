@@ -11,9 +11,10 @@
 @using Lyra.Data.Crypto
 @using Microsoft.Extensions.Configuration
 @using Nebula.Store.WebWalletUseCase
-@inject IConfiguration Configuration
+@using UserLibrary.Data
+@inject IConfiguration _config
 @inject ILyraAPI lyraClient
-@inject MessageService _message
+@inject AntDesign.MessageService _message
 
 <div class="swc">
 
@@ -32,12 +33,12 @@
         </td>
         <td>
             <div class="round">
-                <SelectList TItem="string"
+                <SelectList TItem="Ticker"
                     TValue="string"
                     Data="@tickers"
-                    TextField="@((item)=>item)"
-                    ValueField="@((item)=>item)"
-                    SelectedValue="@selectedTicker1"
+                    TextField="@((item)=>item.Name)"
+                    ValueField="@((item)=>item.dbname)"
+                    SelectedValue="@selectedValue1"
                     SelectedValueChanged="@OnSelectedItemChangedHandler1"
                     Style="width:200px; background: white; border:none;"
                     DefaultItemText="Choose Token" />
@@ -65,12 +66,12 @@
         </td>
         <td>
             <div class="round">
-                <SelectList TItem="string"
+                <SelectList TItem="Ticker"
                     TValue="string"
                     Data="@tickers"
-                    TextField="@((item)=>item)"
-                    ValueField="@((item)=>item)"
-                    SelectedValue="@selectedTicker2"
+                    TextField="@((item)=>item.Name)"
+                    ValueField="@((item)=>item.dbname)"
+                    SelectedValue="@selectedValue2"
                     SelectedValueChanged="@OnSelectedItemChangedHandler2"
                     Style="width:200px; background: white; border:none;"
                     DefaultItemText="Choose Token" />
@@ -104,7 +105,7 @@
 
     }
 
-    @if (dispswap)
+    @if (haspoolinfo && dispswap)
     {
         <tr style="height: 10px">
             <td colspan="2"></td>
@@ -212,9 +213,11 @@
     }
 
     decimal balance1, balance2;
-    List<string> tickers;
-    string selectedTicker1;
-    string selectedTicker2;
+    List<Ticker> tickers;
+    Ticker selectedTicker1;
+    Ticker selectedTicker2;
+    string selectedValue1;
+    string selectedValue2;
 
     RenderFragment pairinfo, pairliquid, pairshare;
     bool haspoolinfo = false;
@@ -237,19 +240,24 @@
         updateBtn1(amount1);
     }
 
+    private string GN(string dbname)
+    {
+        return dbname.Replace("tether/", "$");
+    }
+
     private async Task DoSwap()
     {
         swapping = true;
         var result = await walletState.Value.wallet.SwapTokenAsync(token0, token1, 
-            selectedTicker1, amount1, minrecv);
+            selectedTicker1.dbname, amount1, minrecv);
 
         if(result.Successful())
         {
             await _message.Success($"Token Swap Success!");
             await walletState.Value.wallet.SyncAsync(null);
 
-            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+            var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+            var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
             if (existspool.Successful())
             {
                 poollatest = existspool.GetBlock() as TransactionBlock;
@@ -274,7 +282,7 @@
         if (poollatest != null && amount1 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
-                selectedTicker1, amount1, 0);
+                selectedTicker1.dbname, amount1, 0);
             _amount2 = swapcal.MinimumReceived;
             amount2 = swapcal.MinimumReceived;
 
@@ -294,7 +302,7 @@
         if (poollatest != null && amount2 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
-                selectedTicker2, amount2, 0);
+                selectedTicker2.dbname, amount2, 0);
 
             _amount1 = swapcal.MinimumReceived;
             amount1 = swapcal.MinimumReceived;
@@ -315,7 +323,7 @@
         {
             var fromticker = selectedTicker1;
             var swapcal = new SwapCalculator(token0, token1, poollatest,
-                fromticker, amount1, 0);
+                fromticker.dbname, amount1, 0);
             var sell = $"{amount1} {fromticker}";
             calsell =
     @<div>@sell</div>
@@ -351,43 +359,49 @@
 
     private void OnSelectedItemChangedHandler1(string value)
     {
-        selectedTicker1 = value;
+        selectedValue1 = value;
+        selectedTicker1 = tickers.First(a => a.dbname == value);
         UpdateBalance();
         ChangePool();
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
-        selectedTicker2 = value;
+        selectedValue2 = value;
+        selectedTicker2 = tickers.First(a => a.dbname == value);
         UpdateBalance();
         ChangePool();
     }
 
     private void ChangePool()
     {
-        _ = Task.Run(async () =>
-        {
-            var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-
-            var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
-            if (existspool.Successful())
+        if (selectedTicker1 != null && selectedTicker2 != null && selectedTicker1 != selectedTicker2)
+            _ = Task.Run(async () =>
             {
-                poollatest = existspool.GetBlock() as TransactionBlock;
-                token0 = existspool.Token0;
-                token1 = existspool.Token1;                
-            }
-            else
-            {
-                poollatest = null;
-                token0 = null;
-                token1 = null;
-            }
+                var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
-            CreatePoolInfo(poollatest);
+                var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
+                if (existspool.Successful())
+                {
+                    poollatest = existspool.GetBlock() as TransactionBlock;
+                    token0 = existspool.Token0;
+                    token1 = existspool.Token1;
+                }
+                else
+                {
+                    poollatest = null;
+                    token0 = null;
+                    token1 = null;
+                }
 
-            updateBtn1(amount1);
-            UpdateBalance();
-            await InvokeAsync(() => StateHasChanged());
-        });
+                CreatePoolInfo(poollatest);
+
+                updateBtn1(amount1);
+                UpdateBalance();
+                await InvokeAsync(() => StateHasChanged());
+            });
+        else
+            haspoolinfo = false;
+
     }
 
     private void UpdateBalance()
@@ -397,14 +411,14 @@
             var blk = walletState.Value.wallet.GetLatestBlock();
 
             if (selectedTicker1 != null)
-                if (blk != null && blk.Balances.ContainsKey(selectedTicker1))
-                    balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
+                if (blk != null && blk.Balances.ContainsKey(selectedTicker1.dbname))
+                    balance1 = blk.Balances[selectedTicker1.dbname].ToBalanceDecimal();
                 else
                     balance1 = 0;
 
             if (selectedTicker2 != null)
-                if (blk != null && blk.Balances.ContainsKey(selectedTicker2))
-                    balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
+                if (blk != null && blk.Balances.ContainsKey(selectedTicker2.dbname))
+                    balance2 = blk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
                 else
                     balance2 = 0;
 
@@ -414,9 +428,11 @@
         //InvokeAsync(() => StateHasChanged());
     }
 
+
+
     private async Task OpenSwapUI()
     {
-        var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+        var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
         // for api sign only
         var pk = "n4uh7o2kAerPZQSNBRirzA3pSUBEuEhs6r7oRwpV6Dgbs3FvY";
@@ -429,8 +445,13 @@
 
         tickers = tokens.Entities
             .Where(a => !a.StartsWith("unittest/"))
+            .Select(a => new Ticker
+                {
+                    dbname = a,
+                    Name = a.Replace("tether/", "$")
+            })
             .ToList();
-        tickers.Insert(0, "LYR");
+        tickers.Insert(0, new Ticker{ dbname = "LYR", Name = "LYR" });
 
         ICoinGeckoClient _client = CoinGeckoClient.Instance;
         const string vsCurrencies = "usd";
@@ -463,8 +484,8 @@
 
             if (platest.Balances.ContainsKey(token0))
             {
-                var line1 = $"{platest.Balances[token0].ToBalanceDecimal()} {token0}";
-                var line2 = $"{platest.Balances[token1].ToBalanceDecimal()} {token1}";
+                var line1 = $"{platest.Balances[token0].ToBalanceDecimal()} {GN(token0)}";
+                var line2 = $"{platest.Balances[token1].ToBalanceDecimal()} {GN(token1)}";
                 pairliquid =
     @<div>
         <div>@line1</div>
@@ -517,6 +538,6 @@
 
     ;
 
-        haspoolinfo = true;
+        haspoolinfo = platest != null;
     }
 }
