@@ -1,5 +1,8 @@
 ﻿@page "/login"
 @using Blazored.LocalStorage
+@using Fluxor
+@using Nebula.Store.WebWalletUseCase
+@inject NavigationManager Navigation
 
 @if(hasStore)
 {
@@ -12,12 +15,23 @@ else
 
 @code{
     [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
+
+    [Inject]
     public ILocalStorageService _localStorage { get; set; }
 
     bool hasStore;
 
     protected async override Task OnInitializedAsync()
     {
+        if(walletState.Value.wallet != null)
+        {
+            Navigation.NavigateTo("wallet");
+        }
+
         var storeName = "nebstor";
 
         if (await _localStorage.ContainKeyAsync(storeName))

@@ -219,13 +219,22 @@ namespace Nebula.Store.WebWalletUseCase
 		[EffectMethod]
 		public async Task HandleOpen(WebWalletOpenAction action, IDispatcher dispatcher)
 		{
-            var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));
-            var ss2 = new SecuredWalletStore(ms2);
-            var wallet = Wallet.Open(ss2, action.name, action.password);
+			try
+            {
+				var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));
+				var ss2 = new SecuredWalletStore(ms2);
+				var wallet = Wallet.Open(ss2, action.name, action.password);
 
-            await wallet.SyncAsync(client);
-            dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
-        }
+				await wallet.SyncAsync(client);
+				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+
+			}
+			catch(Exception ex)
+            {
+				logger.LogError($"IN HandleOpen: {ex}");
+            }
+
+		}
 
 		[EffectMethod]
 		public async Task HandleRestore(WebWalletRestoreAction action, IDispatcher dispatcher)
