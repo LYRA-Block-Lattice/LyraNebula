@@ -95,8 +95,10 @@ namespace Nebula
             services
               .AddBlazorise(options =>
               {
-                  options.ChangeTextOnKeyPress = true; // optional
-                  })
+                  options.ChangeTextOnKeyPress = false; // optional
+                  options.DelayTextOnKeyPress = true;
+                  options.DelayTextOnKeyPressInterval = 300;
+              })
               .AddBootstrap5Providers()
               .AddFontAwesomeIcons();
         }

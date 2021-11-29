@@ -24,13 +24,13 @@
     @if (ui == UI.entry)
     {
         <div class="mid">
-            <InputPassword @bind-Value="@txtValue1" Placeholder="Password" Size="@InputSize.Large" OnPressEnter="(e)=>Submit(e, txtValue1)" />
+            <TextEdit Role="TextRole.Password" Size="Size.Large" @bind-Text="@txtValue1" />
         </div>
         <div class="mid">
-            <InputPassword @bind-Value="@txtValue2" Placeholder="Repeat Password" Size="@InputSize.Large" OnPressEnter="(e)=>Submit(e, txtValue2)" />
+            <TextEdit Role="TextRole.Password" Size="Size.Large" @bind-Text="@txtValue2" />
         </div>
         <div class="mid">
-            <AntDesign.Input TValue="string" Placeholder="Private Key" @bind-Value="@prvKey" />
+            <TextEdit Size="Size.Large" Placeholder="Private Key" @bind-Text="@prvKey" />
         </div>
         @if(hasStore)
         {

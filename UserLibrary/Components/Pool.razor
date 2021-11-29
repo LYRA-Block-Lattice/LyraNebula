@@ -46,10 +46,8 @@
             <tr>
                 <td>
                     <div class="round">
-                    <AntDesign.Input TValue="decimal" Placeholder="Enter an amount" 
-                    Style="width: 100px; background: white;"
-                    Bordered="false"
-                    @bind-Value="@amount1" OnChange="@updateBtn1" />
+                        <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;"  lang="en-us" DecimalsSeparator="."
+                            @bind-Value="@amount1" />
                     </div>
                 </td>
                 <td>
@@ -74,10 +72,8 @@
             <tr>
                 <td>
                     <div class="round">
-                    <AntDesign.Input TValue="decimal" Placeholder="Enter an amount" 
-                    Style="width: 100px; background: white;"
-                    Bordered="false"
-                    @bind-Value="@amount2" OnChange="@updateBtn2" />
+                        <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                            @bind-Value="@amount2" />
                     </div>
                 </td>
                 <td>
@@ -162,7 +158,43 @@
     enum UI { Entry, Adding }
     UI ui;
 
-    decimal amount1, amount2;
+    private decimal _amount1;
+    public decimal amount1
+    {
+        get
+        {
+            return _amount1;
+        }
+        set
+        {
+            if(_amount1 != value)
+            {
+                _amount1 = value;
+                updateBtn1(_amount1);
+            }
+            else
+                _amount1 = value;
+        }
+    }
+
+    private decimal _amount2;
+    public decimal amount2
+    {
+        get
+        {
+            return _amount2;
+        }
+        set
+        {
+            if(_amount2 != value)
+            {
+                _amount2 = value;
+                updateBtn2(_amount2);
+            }
+            else
+                _amount2 = value;
+        }
+    }
     decimal balance1, balance2;
     List<string> tickers;
     string selectedTicker1;
@@ -200,7 +232,7 @@
         {
             await _message.Success($"Remove liquidate success.");
             updateBtn1(amount1);
-            
+
             await walletState.Value.wallet.SyncAsync(null);
             UpdateBalance();
         }
@@ -265,14 +297,16 @@
         ui = UI.Adding;
     }
 
-    private void updateBtn1(decimal a)
+    private void updateBtn1(decimal? a)
     {
-        updateBtn(a);
+        amount1 = a ?? 0;
+        updateBtn(amount1);
     }
 
-    private void updateBtn2(decimal a)
+    private void updateBtn2(decimal? a)
     {
-        updateBtn(a);
+        amount2 = a ?? 0;
+        updateBtn(amount2);
     }
     private void updateBtn(decimal a)
     {

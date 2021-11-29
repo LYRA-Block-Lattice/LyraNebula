@@ -57,7 +57,7 @@
     @<div>Wallet is not opened.</div>
     ;
 
-        StateHasChanged();
+        InvokeAsync(() => StateHasChanged());
     }
 
     public void Dispose()

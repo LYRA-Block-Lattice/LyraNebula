@@ -87,7 +87,8 @@ else
     <p>Provider: @provider</p>
     <p>Contract: @contract</p>
     <p>Depositon Address: </p>
-    <AntDesign.Input Placeholder="Deposition address" @bind-Value="@address" ReadOnly="@(true)" Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;" />
+    <TextEdit Size="Size.Large" Placeholder="Deposition address" @bind-Text="@address" ReadOnly
+        Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;"/>
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
@@ -109,7 +110,10 @@ else
        OnCancel="@HandleCancel2">
     
        <h3>Amount you want to transfer:</h3>
-       <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>&nbsp;@symbol
+       <NumericEdit TValue="decimal?" Style="width: 100px; background: white; border:none; font-size:xx-large;" 
+            Min="@transferMin" Max="@transferMax"
+            ValueChanged="@((e) => {transferAmount = e.Value;})" />
+       &nbsp;@symbol
 </AntDesign.Modal>
 
 <AntDesign.Modal Title="@withdrawTitle"
@@ -124,7 +128,11 @@ else
        <h3>Address you want to withdraw:</h3>
        <Input Placeholder="Withdraw to address" @bind-Value="@withdrawAddress"  />
        <h3>Amount:</h3>
-       <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="withdrawAmount" Min="@withdrawMin" Max="@withdrawMax" DefaultValue="@withdrawDefault"></AntDesign.InputNumber>&nbsp;@symbol
+              <NumericEdit TValue="decimal?" Style="width: 100px; background: white; border:none; font-size:xx-large;" 
+            Min="@withdrawMin" Max="@withdrawMax"
+            ValueChanged="@((e) => {withdrawAmount = e.Value;})" />
+
+       &nbsp;@symbol
 </AntDesign.Modal>
 }
 

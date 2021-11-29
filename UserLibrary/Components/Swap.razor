@@ -1,6 +1,7 @@
 ﻿@namespace UserLibrary.Components
 
 @using AntDesign
+@using Blazorise.Components
 @using CoinGecko.Clients
 @using CoinGecko.Interfaces
 @using Fluxor
@@ -25,19 +26,22 @@
     </tr>
     <tr>
         <td><div class="round">
-            <AntDesign.Input TValue="decimal" Style="width: 100px; background: white;" 
-            Bordered="false"
-            Placeholder="Enter an amount" @bind-Value="@amount1" OnChange="@updateBtn1" />
+            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="." 
+                @bind-Value="@amount1" />
             </div>
         </td>
         <td>
             <div class="round">
-            <AntDesign.Select DataSource="@tickers"
-                    @bind-Value="@selectedTicker1"
-                    Style="width:200px; background: white;"
-                    Bordered="false"
-                    OnSelectedItemChanged="OnSelectedItemChangedHandler1">
-            </AntDesign.Select>
+                <SelectList TItem="string"
+                    TValue="string"
+                    Data="@tickers"
+                    TextField="@((item)=>item)"
+                    ValueField="@((item)=>item)"
+                    SelectedValue="@selectedTicker1"
+                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
+                    Style="width:200px; background: white; border:none;"
+                    DefaultItemText="Choose Token" />
+
             </div>
         </td>
     </tr>
@@ -55,19 +59,21 @@
     </tr>
     <tr>
         <td><div class="round">
-            <AntDesign.Input TValue="decimal" Style="width: 100px; background: white;" 
-            Bordered="false"
-            Placeholder="Enter an amount" @bind-Value="@amount2" OnChange="@updateBtn2" />
+            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                @bind-Value="@amount2" />
             </div>
         </td>
         <td>
             <div class="round">
-            <AntDesign.Select DataSource="@tickers"
-                    @bind-Value="@selectedTicker2"
-                    Style="width:200px; background: white;"
-                    Bordered="false"
-                    OnSelectedItemChanged="OnSelectedItemChangedHandler2">
-            </AntDesign.Select>
+                <SelectList TItem="string"
+                    TValue="string"
+                    Data="@tickers"
+                    TextField="@((item)=>item)"
+                    ValueField="@((item)=>item)"
+                    SelectedValue="@selectedTicker2"
+                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
+                    Style="width:200px; background: white; border:none;"
+                    DefaultItemText="Choose Token" />
             </div>
         </td>
     </tr>
@@ -167,10 +173,44 @@
     [Inject]
     private IDispatcher Dispatcher { get; set; }
 
-    [Parameter]
-    public decimal amount1 { get; set; }
+    private decimal _amount1;
+    public decimal amount1
+    {
+        get
+        {
+            return _amount1;
+        }
+        set
+        {
+            if(_amount1 != value)
+            {
+                _amount1 = value;
+                updateBtn1(_amount1);
+            }
+            else
+                _amount1 = value;
+        }
+    }
 
-    decimal amount2;
+    private decimal _amount2;
+    public decimal amount2
+    {
+        get
+        {
+            return _amount2;
+        }
+        set
+        {
+            if(_amount2 != value)
+            {
+                _amount2 = value;
+                updateBtn2(_amount2);
+            }
+            else
+                _amount2 = value;
+        }
+    }
+
     decimal balance1, balance2;
     List<string> tickers;
     string selectedTicker1;
@@ -220,7 +260,7 @@
 
             updateBtn1(amount1);
             UpdateBalance();
-            
+
             swapping = false;
         }
         else
@@ -229,33 +269,36 @@
         swapping = false;
     }
 
-    private void updateBtn1(decimal a)
+    private void updateBtn1(decimal? a)
     {
         if (poollatest != null && amount1 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
                 selectedTicker1, amount1, 0);
+            _amount2 = swapcal.MinimumReceived;
             amount2 = swapcal.MinimumReceived;
 
             dispswap = amount1 > 0;
             canswap = amount1 > 0 && amount1 <= balance1;
         }
 
-        updateBtn(a);
+        updateBtn(amount1);
     }
 
-    private void updateBtn2(decimal a)
+    private void updateBtn2(decimal? a)
     {
-        if (poollatest != null && amount1 > 0 && token0 != null)
+        if (poollatest != null && amount2 > 0 && token0 != null)
         {
             var swapcal = new SwapCalculator(token0, token1, poollatest,
-                selectedTicker2, amount1, 0);
+                selectedTicker2, amount2, 0);
+
+            _amount1 = swapcal.MinimumReceived;
             amount1 = swapcal.MinimumReceived;
 
             dispswap = amount2 > 0;
             canswap = amount2 > 0 && amount2 < balance2;
         }
-        updateBtn(a);
+        updateBtn(amount2);
     }
     private void updateBtn(decimal a)
     {
@@ -299,11 +342,13 @@
 
     private void OnSelectedItemChangedHandler1(string value)
     {
+        selectedTicker1 = value;
         UpdateBalance();
         ChangePool();
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
+        selectedTicker2 = value;
         UpdateBalance();
         ChangePool();
     }
@@ -319,13 +364,16 @@
             {
                 poollatest = existspool.GetBlock() as TransactionBlock;
                 token0 = existspool.Token0;
-                token1 = existspool.Token1;
-                CreatePoolInfo(poollatest);
+                token1 = existspool.Token1;                
             }
             else
             {
-                CreatePoolInfo(null);
+                poollatest = null;
+                token0 = null;
+                token1 = null;
             }
+
+            CreatePoolInfo(poollatest);
 
             updateBtn1(amount1);
             UpdateBalance();

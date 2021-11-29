@@ -92,15 +92,15 @@
     <AntDesign.TabPane Tab="Create new staking account" Key="1">
         <p>
             Name:
-            <AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@stkName" /> 
+            <TextEdit Placeholder="Name" @bind-Text="@stkName" />
         </p>
         <p>
             Staking For Address:
-            <AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@stkVoting" /> 
+            <TextEdit Placeholder="Address" @bind-Text="@stkVoting" />
         </p>
         <p>
             Days of staking:
-            <AntDesign.Input TValue="string" Placeholder="Days" @bind-Value="@stkDays" /> 
+            <TextEdit Placeholder="Days" @bind-Text="@stkDays" />
         </p>
         <p>
             Compound staking mode:
@@ -113,7 +113,7 @@
     <AntDesign.TabPane Tab="Create new profiting account" Key="2">
         <p>
             Name:
-            <AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@pftName" /> 
+            <TextEdit Placeholder="Name" @bind-Text="@pftName" />
         </p>
         <p>
             Type:
@@ -126,11 +126,11 @@
         </p>
         <p>
             Ratio to share to staking (0% - 100%):
-            <AntDesign.Input TValue="string" Placeholder="Ratio" @bind-Value="@pftShare" /> 
+            <TextEdit Placeholder="Ratio" @bind-Text="@pftShare" />
         </p>
         <p>
             Number of staking (0 - 100):
-            <AntDesign.Input TValue="string" Placeholder="Max number" @bind-Value="@pftSeats" /> 
+            <TextEdit Placeholder="Max number" @bind-Text="@pftSeats" />
         </p>
         <div>
             <button class="btn btn-primary" @onclick="ProfitingCreate">Create Profiting Account</button>
