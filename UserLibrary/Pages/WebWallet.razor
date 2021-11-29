@@ -258,8 +258,8 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeT
 }
 else
 {
-    <CreateWithPrivateKey OnFinished="@(() => {Navigation.NavigateTo("/login");})" />
-@*    <div>
+    Navigation.NavigateTo("login");
+    @*    <div>
         <button class="btn btn-primary" @onclick="CreateWallet">
             Create New Wallet
         </button>

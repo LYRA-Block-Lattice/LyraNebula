@@ -1,10 +1,15 @@
 ﻿@page "/login"
+@page "/login/{src}"
 @using Blazored.LocalStorage
 @using Fluxor
 @using Nebula.Store.WebWalletUseCase
 @inject NavigationManager Navigation
 
-@if(hasStore)
+@if(src == "key")
+{
+    <UserLibrary.Components.CreateWithPrivateKey OnFinished="@(() => {hasStore = true; Navigation.NavigateTo("/login");})" />
+}
+else if(hasStore)
 {
     <UserLibrary.Components.OpenWithPassword />
 }
@@ -14,6 +19,9 @@ else
 }
 
 @code{
+      [Parameter]
+  public string src { get; set; }
+
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
 

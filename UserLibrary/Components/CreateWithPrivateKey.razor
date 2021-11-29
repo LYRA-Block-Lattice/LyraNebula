@@ -46,6 +46,12 @@
                 Restore Wallet
             </Button>
         </div>
+        <div class="mid">
+            <Divider Style="width: 0px; height: 0px" />
+        </div>
+        <div class="mid">
+        <a href="/login"><Button Type="@ButtonType.Link">@act with password</Button></a>
+        </div>
     }
 
     @if (ui == UI.success)
@@ -103,6 +109,7 @@
     enum UI { entry, success, failed }
     UI ui = UI.entry;
 
+    string act = "Create new";
     string prvKey;
 
     string title = "BasicModal";
@@ -126,7 +133,7 @@
     @<Icon @attributes="@iconAttributes" OnClick="@clickActionAsync" />
     ;
 
-        private string txtValue1 { get; set; }
+    private string txtValue1 { get; set; }
     private string txtValue2 { get; set; }
     private bool visible = false;
     private InputPassword _inputPassword;
@@ -166,16 +173,23 @@
         await _inputPassword.Focus();
     }
 
-        bool hasStore;
+    bool hasStore;
 
     protected async override Task OnInitializedAsync()
     {
         var storeName = "nebstor";
 
         if (await _localStorage.ContainKeyAsync(storeName))
+        {
             hasStore = true;
+            act = "Open existing wallet";
+        }        
         else
+        {
             hasStore = false;
+            act = "Create new";
+        }
+        
 
         await base.OnInitializedAsync();
     }
@@ -199,7 +213,8 @@
         Console.WriteLine("Cancel");
         return Task.CompletedTask;
     };
-    RenderFragment icon = @<Icon Type="exclamation-circle" Theme="outline"></Icon>
+    RenderFragment icon = 
+    @<Icon Type="exclamation-circle" Theme="outline"></Icon>
     ;
 
     private async Task RestoreWallet()
@@ -212,7 +227,7 @@
                 return;
             }
             // warn if wallet exists
-            if (!confirmdelete)
+            if (hasStore && !confirmdelete)
             {
                 return;
             }
@@ -241,7 +256,7 @@
     {
         if(ck)
         {
-            _message.Error("Your wallet will be destroyed!!!");
+            _message.Error("Your current wallet will be overwritten!!! Please make sure you want to do this.");
         }
     }
 }
