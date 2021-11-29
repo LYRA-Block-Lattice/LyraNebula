@@ -9,6 +9,7 @@
 @using Lyra.Data.Crypto
 @using Microsoft.Extensions.Configuration
 @using Nebula.Store.WebWalletUseCase
+@using UserLibrary.Data
 @inject IConfiguration Configuration
 @inject ILyraAPI lyraClient
 @inject MessageService _message
@@ -53,12 +54,12 @@
                 </td>
                 <td>
                     <div class="round">
-                        <SelectList TItem="string"
+                <SelectList TItem="Ticker"
                     TValue="string"
                     Data="@tickers"
-                    TextField="@((item)=>item)"
-                    ValueField="@((item)=>item)"
-                    SelectedValue="@selectedTicker1"
+                    TextField="@((item)=>item.Name)"
+                    ValueField="@((item)=>item.dbname)"
+                    SelectedValue="@selectedValue1"
                     SelectedValueChanged="@OnSelectedItemChangedHandler1"
                     Style="width:200px; background: white; border:none;"
                     DefaultItemText="Choose Token" />
@@ -82,12 +83,12 @@
                 </td>
                 <td>
                     <div class="round">
-                <SelectList TItem="string"
+                <SelectList TItem="Ticker"
                     TValue="string"
                     Data="@tickers"
-                    TextField="@((item)=>item)"
-                    ValueField="@((item)=>item)"
-                    SelectedValue="@selectedTicker2"
+                    TextField="@((item)=>item.Name)"
+                    ValueField="@((item)=>item.dbname)"
+                    SelectedValue="@selectedValue2"
                     SelectedValueChanged="@OnSelectedItemChangedHandler2"
                     Style="width:200px; background: white; border:none;"
                     DefaultItemText="Choose Token" />
@@ -203,9 +204,11 @@
         }
     }
     decimal balance1, balance2;
-    List<string> tickers;
-    string selectedTicker1;
-    string selectedTicker2;
+    List<Ticker> tickers;
+    Ticker selectedTicker1;
+    Ticker selectedTicker2;
+    string selectedValue1;
+    string selectedValue2;
 
     bool havepool;
     bool clenabled;
@@ -217,8 +220,9 @@
     TransactionBlock poolblk;
     RenderFragment pairinfo, pairliquid, pairshare;
 
-    public Pool()
+    private string GN(string dbname)
     {
+        return dbname.Replace("tether/", "$");
     }
 
     protected override void OnInitialized()
@@ -234,7 +238,7 @@
 
     private async Task PoolWithdraw()
     {
-        var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1, selectedTicker2);
+        var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
         if(result.Successful())
         {
             await _message.Success($"Remove liquidate success.");
@@ -251,7 +255,7 @@
 
     private async Task PoolDeposit()
     {
-        var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1, amount1, selectedTicker2, amount2);
+        var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1.dbname, amount1, selectedTicker2.dbname, amount2);
         if(result.Successful())
         {
             await _message.Success($"Add liquidate success.");
@@ -268,7 +272,7 @@
 
     private async Task CreateLiquidity()
     {
-        var poolCreateResult = await walletState.Value.wallet.CreateLiquidatePoolAsync(selectedTicker1, selectedTicker2);
+        var poolCreateResult = await walletState.Value.wallet.CreateLiquidatePoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
         if(poolCreateResult.Successful())
         {
             await Task.Delay(5000);
@@ -298,8 +302,13 @@
 
         tickers = tokens.Entities
             .Where(a => !a.StartsWith("unittest/"))
+            .Select(a => new Ticker
+                {
+                    dbname = a,
+                    Name = a.Replace("tether/", "$")
+            })
             .ToList();
-        tickers.Insert(0, "LYR");
+        tickers.Insert(0, new Ticker{ dbname = "LYR", Name = "LYR" });
 
         ui = UI.Adding;
     }
@@ -322,7 +331,7 @@
             _ = Task.Run(async () =>
             {
                 var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-                var existspool = await lc.GetPoolAsync(selectedTicker1, selectedTicker2);
+                var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
                 if (existspool.PoolAccountId != null)
                 {
                     havepool = true;
@@ -337,14 +346,14 @@
                         var latestblk = latestret.GetBlock() as TransactionBlock;
                         poolblk = latestblk;
 
-                        if(latestblk.Balances.ContainsKey(selectedTicker1) && latestblk.Balances[selectedTicker1] > 0)
+                        if(latestblk.Balances.ContainsKey(selectedTicker1.dbname) && latestblk.Balances[selectedTicker1.dbname] > 0)
                         {
                             if(a > 0 && a == amount1)
                             {
                                 //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
                                 //    existspool.Token0, amount1, 0);
 
-                                var poolRito = latestblk.Balances[selectedTicker1].ToBalanceDecimal() / latestblk.Balances[selectedTicker2].ToBalanceDecimal();
+                                var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
                                 amount2 = Math.Round(amount1 / poolRito, 8);
                             }
                             else if(a > 0 && a == amount2)
@@ -352,14 +361,14 @@
                                 //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
                                 //    existspool.Token1, amount2, 0);
 
-                                var poolRito = latestblk.Balances[selectedTicker1].ToBalanceDecimal() / latestblk.Balances[selectedTicker2].ToBalanceDecimal();
+                                var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
                                 amount1 = Math.Round(amount2 * poolRito, 8);
                             }
                         }
 
 
-                        var line1 = $"{latestblk.Balances[existspool.Token0].ToBalanceDecimal()} {existspool.Token0}";
-                        var line2 = $"{latestblk.Balances[existspool.Token1].ToBalanceDecimal()} {existspool.Token1}";
+                        var line1 = $"{latestblk.Balances[existspool.Token0].ToBalanceDecimal()} {GN(existspool.Token0)}";
+                        var line2 = $"{latestblk.Balances[existspool.Token1].ToBalanceDecimal()} {GN(existspool.Token1)}";
                         pairliquid = 
     @<p>@line1<br />
 @line2
@@ -414,7 +423,8 @@
 
     private void OnSelectedItemChangedHandler1(string value)
     {
-        selectedTicker1 = value;
+        selectedValue1 = value;
+        selectedTicker1 = tickers.First(a => a.dbname == value);
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
@@ -430,7 +440,8 @@
     }
     private void OnSelectedItemChangedHandler2(string value)
     {
-        selectedTicker2 = value;
+        selectedValue2 = value;
+        selectedTicker2 = tickers.First(a => a.dbname == value);
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
@@ -450,13 +461,13 @@
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk != null && blk.Balances.ContainsKey(selectedTicker1))
-                balance1 = blk.Balances[selectedTicker1].ToBalanceDecimal();
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker1.dbname))
+                balance1 = blk.Balances[selectedTicker1.dbname].ToBalanceDecimal();
             else
                 balance1 = 0;
 
-            if (blk != null && blk.Balances.ContainsKey(selectedTicker2))
-                balance2 = blk.Balances[selectedTicker2].ToBalanceDecimal();
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker2.dbname))
+                balance2 = blk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
             else
                 balance2 = 0;
 
