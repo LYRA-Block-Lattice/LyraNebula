@@ -32,22 +32,22 @@
         </td>
         <td>
             <div class="round">
-            <Select DataSource="@tickers"
+            <AntDesign.Select DataSource="@tickers"
                     @bind-Value="@selectedTicker1"
                     Style="width:200px; background: white;"
                     Bordered="false"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler1">
-            </Select>
+            </AntDesign.Select>
             </div>
         </td>
     </tr>
     <tr>
-        <td><Button Type="@ButtonType.Text" Shape="@ButtonShape.Circle"           
+        <td><AntDesign.Button Type="@AntDesign.ButtonType.Text" Shape="@AntDesign.ButtonShape.Circle"           
             OnClick="@DoSwapTicker">
-            <Icon Type="sync" Theme="outline" Style="font-size: x-large;"/>   
-        </Button>
+            <AntDesign.Icon Type="sync" Theme="outline" Style="font-size: x-large;"/>   
+        </AntDesign.Button>
         </td>
-        <td align="right"><Icon Type="setting" Theme="outline" Style="font-size: x-large;" /></td>
+        <td align="right"><AntDesign.Icon Type="setting" Theme="outline" Style="font-size: x-large;" /></td>
     </tr>
     <tr>
         <td>To</td>
@@ -62,12 +62,12 @@
         </td>
         <td>
             <div class="round">
-            <Select DataSource="@tickers"
+            <AntDesign.Select DataSource="@tickers"
                     @bind-Value="@selectedTicker2"
                     Style="width:200px; background: white;"
                     Bordered="false"
                     OnSelectedItemChanged="OnSelectedItemChangedHandler2">
-            </Select>
+            </AntDesign.Select>
             </div>
         </td>
     </tr>
@@ -137,17 +137,17 @@
         <td colspan="2">
             @if(walletState.Value.wallet == null)
             {
-                <a href="/webwallet"> <Button Block Shape="@ButtonShape.Round"
-                    Size="ButtonSize.Large" Icon="@IconType.Outline.Unlock"
-                    Type="@ButtonType.Primary">Open Wallet</Button></a>
+                <a href="/webwallet"> <AntDesign.Button Block Shape="@AntDesign.ButtonShape.Round"
+                    Size="AntDesign.ButtonSize.Large" Icon="@AntDesign.IconType.Outline.Unlock"
+                    Type="@AntDesign.ButtonType.Primary">Open Wallet</AntDesign.Button></a>
             }
             else
             {
-                            <Button Block Disabled="@(!canswap)" Type="@ButtonType.Primary" 
-            Icon="@IconType.Outline.Swap" Size="ButtonSize.Large" 
+                            <AntDesign.Button Block Disabled="@(!canswap)" Type="@AntDesign.ButtonType.Primary" 
+            Icon="@AntDesign.IconType.Outline.Swap" Size="ButtonSize.Large" 
             OnClick="@(async ()=>{ await DoSwap(); })"
             Loading="@swapping"
-            Shape="@ButtonShape.Round">Swap</Button>
+            Shape="@AntDesign.ButtonShape.Round">Swap</AntDesign.Button>
             }
 
 

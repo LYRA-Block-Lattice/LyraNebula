@@ -17,9 +17,9 @@
 @if (ui == UI.Entry)
 {
         <div style="padding: 14px; width: 370px">
-        <Button Block Type="@ButtonType.Primary" 
-    Size="ButtonSize.Large" Shape="@ButtonShape.Round"
-    OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
+        <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary" 
+    Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
+    OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</AntDesign.Button>
 
 
         <p>
@@ -32,8 +32,8 @@
 @if (ui == UI.Adding)
 {
     <div style="padding: 14px; width: 370px">
-        <Button Type="@ButtonType.Primary" Shape="@ButtonShape.Circle"
-            Icon="@IconType.Outline.ArrowLeft"
+        <AntDesign.Button Type="@AntDesign.ButtonType.Primary" Shape="@AntDesign.ButtonShape.Circle"
+            Icon="@AntDesign.IconType.Outline.ArrowLeft"
             OnClick="BackEntry" />
         &nbsp;Add Liquidity
     </div>
@@ -54,17 +54,17 @@
                 </td>
                 <td>
                     <div class="round">
-                    <Select DataSource="@tickers"
+                    <AntDesign.Select DataSource="@tickers"
                         @bind-Value="@selectedTicker1"
                         Style="width:200px; background: white;"
                         Bordered="false"
                         OnSelectedItemChanged="OnSelectedItemChangedHandler1">
-                    </Select>
+                    </AntDesign.Select>
                     </div>
                 </td>
             </tr>
             <tr>
-                <td><Icon Type="plus-circle" Theme="outline" Style="font-size: x-large;" /></td>
+                <td><AntDesign.Icon Type="plus-circle" Theme="outline" Style="font-size: x-large;" /></td>
                 <td></td>
             </tr>
             <tr>
@@ -82,12 +82,12 @@
                 </td>
                 <td>
                     <div class="round">
-                    <Select DataSource="@tickers"
+                    <AntDesign.Select DataSource="@tickers"
                         @bind-Value="@selectedTicker2"
                         Style="width:200px; background: white;"
                         Bordered="false"
                         OnSelectedItemChanged="OnSelectedItemChangedHandler2">
-                    </Select>
+                    </AntDesign.Select>
                     </div>
                 </td>
             </tr>
@@ -107,18 +107,18 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" 
+                        <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
                         Size="ButtonSize.Large" Shape="@ButtonShape.Round"
-                        OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</Button>
+                        OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</AntDesign.Button>
                     </td>
                 </tr>
                 @if(canremove)
                 {
                 <tr>
-                    <td colspan="2"><Divider>Or</Divider>
-                    <Button Disabled="@(!alenabled)" Block Type="@ButtonType.Primary" 
+                    <td colspan="2"><AntDesign.Divider>Or</AntDesign.Divider>
+                    <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
                     Size="ButtonSize.Large" Shape="@ButtonShape.Round"
-                    OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove Liquidate</Button>    
+                    OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove Liquidate</AntDesign.Button>    
                     </td>
                 </tr>
                 }
@@ -129,15 +129,15 @@
                 <td colspan="2" style="padding: 14px">
                     @if(walletState.Value.wallet == null)
                     {
-                        <a href="/webwallet"> <Button Block Type="@ButtonType.Primary"
-                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
-                        >Open Wallet</Button></a>
+                        <a href="/webwallet"> <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary"
+                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
+                        >Open Wallet</AntDesign.Button></a>
                     }
                     else
                     {
-                        <Button Disabled="@(!clenabled)" Block Type="@ButtonType.Primary" 
-                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
-                        OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</Button>
+                        <AntDesign.Button Disabled="@(!clenabled)" Block Type="@AntDesign.ButtonType.Primary" 
+                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
+                        OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</AntDesign.Button>
                     }
                 </td>
             </tr>

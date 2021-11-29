@@ -7,8 +7,8 @@
 @using Microsoft.JSInterop
 @using Nebula.Store.WebWalletUseCase
 
-<Tabs>
-    <TabPane Tab="Stakings" Key="1">
+<AntDesign.Tabs>
+    <AntDesign.TabPane Tab="Stakings" Key="1">
         <table class="table">
             <thead>
                 <tr>
@@ -55,8 +55,8 @@
                 }
             </tbody>
         </table>
-    </TabPane>
-    <TabPane Tab="Profiting" Key="2">
+    </AntDesign.TabPane>
+    <AntDesign.TabPane Tab="Profiting" Key="2">
         <table class="table">
             <thead>
                 <tr>
@@ -83,24 +83,24 @@
                 }
             </tbody>
         </table>
-    </TabPane>
-</Tabs>
+    </AntDesign.TabPane>
+</AntDesign.Tabs>
 
-<Divider />
+<AntDesign.Divider />
 
-<Tabs>
-    <TabPane Tab="Create new staking account" Key="1">
+<AntDesign.Tabs>
+    <AntDesign.TabPane Tab="Create new staking account" Key="1">
         <p>
             Name:
-            <Input TValue="string" Placeholder="Name" @bind-Value="@stkName" /> 
+            <AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@stkName" /> 
         </p>
         <p>
             Staking For Address:
-            <Input TValue="string" Placeholder="Address" @bind-Value="@stkVoting" /> 
+            <AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@stkVoting" /> 
         </p>
         <p>
             Days of staking:
-            <Input TValue="string" Placeholder="Days" @bind-Value="@stkDays" /> 
+            <AntDesign.Input TValue="string" Placeholder="Days" @bind-Value="@stkDays" /> 
         </p>
         <p>
             Compound staking mode:
@@ -109,11 +109,11 @@
         <div>
             <button class="btn btn-primary" @onclick="StakingCreate">Create Staking</button>
         </div>
-    </TabPane>
-    <TabPane Tab="Create new profiting account" Key="2">
+    </AntDesign.TabPane>
+    <AntDesign.TabPane Tab="Create new profiting account" Key="2">
         <p>
             Name:
-            <Input TValue="string" Placeholder="Name" @bind-Value="@pftName" /> 
+            <AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@pftName" /> 
         </p>
         <p>
             Type:
@@ -126,17 +126,17 @@
         </p>
         <p>
             Ratio to share to staking (0% - 100%):
-            <Input TValue="string" Placeholder="Ratio" @bind-Value="@pftShare" /> 
+            <AntDesign.Input TValue="string" Placeholder="Ratio" @bind-Value="@pftShare" /> 
         </p>
         <p>
             Number of staking (0 - 100):
-            <Input TValue="string" Placeholder="Max number" @bind-Value="@pftSeats" /> 
+            <AntDesign.Input TValue="string" Placeholder="Max number" @bind-Value="@pftSeats" /> 
         </p>
         <div>
             <button class="btn btn-primary" @onclick="ProfitingCreate">Create Profiting Account</button>
         </div>
-    </TabPane>
-</Tabs>
+    </AntDesign.TabPane>
+</AntDesign.Tabs>
 
 @code {
     [Inject]

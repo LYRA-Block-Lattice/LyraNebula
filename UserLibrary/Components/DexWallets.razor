@@ -29,7 +29,7 @@
 @if(walletState.Value.wallet == null)
 {
     
-    <a href="/webwallet"> <Button Block Type="@ButtonType.Primary">Open Wallet</Button></a>
+    <a href="/webwallet"> <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary">Open Wallet</AntDesign.Button></a>
 }
 else
 {
@@ -42,43 +42,43 @@ else
 }
 else
 {
-    <Table TItem="WalletView" DataSource="@tokens">
-    <Column @bind-Field="@context.Name">
+    <AntDesign.Table TItem="WalletView" DataSource="@tokens">
+    <AntDesign.Column @bind-Field="@context.Name">
         <a href="@context.Url">@context.Name</a>
-    </Column>
-    <Column @bind-Field="@context.Symbol">
-    </Column>
-    <Column Title="Network Provider" @bind-Field="@context.NetworkProvider">
-    </Column>
-    <Column Title="My Balance" @bind-Field="@context.MyBalance"></Column>
-        <ActionColumn Align="ColumnAlign.Center" Title="Transfer">
-            <Space Size=@("middle")>
-                <SpaceItem>
-                    <Button Icon="@IconType.Outline.ArrowLeft" Type="@ButtonType.Primary"
-                         OnClick="@(async ()=>{ await OnTransferClick(context, false); })"></Button>
-                </SpaceItem>
-                <SpaceItem>
-                    <Button Icon="@IconType.Outline.ArrowRight" Type="@ButtonType.Primary"
-                        OnClick="@(async ()=>{ await OnTransferClick(context, true); })"></Button>
-                </SpaceItem>
-            </Space>
-        </ActionColumn>
-    <Column Title="DEX Balance" @bind-Field="@context.DexBalance"></Column>
-    <ActionColumn Title="Action">
-        <Space Size=@("middle")>
-            <SpaceItem>
-                <Button Type="@ButtonType.Primary" OnClick="@(()=>{ OnDepositClick(context); })">Deposit</Button>
-            </SpaceItem>
-            <SpaceItem>
-                <Button Type="@ButtonType.Primary" OnClick="@(()=>{ OnWithdrawClick(context); })">Withdraw</Button>
-            </SpaceItem>
-        </Space>
-    </ActionColumn>
-</Table>
+    </AntDesign.Column>
+    <AntDesign.Column @bind-Field="@context.Symbol">
+    </AntDesign.Column>
+    <AntDesign.Column Title="Network Provider" @bind-Field="@context.NetworkProvider">
+    </AntDesign.Column>
+    <AntDesign.Column Title="My Balance" @bind-Field="@context.MyBalance"></AntDesign.Column>
+        <AntDesign.ActionColumn Align="ColumnAlign.Center" Title="Transfer">
+            <AntDesign.Space Size=@("middle")>
+                <AntDesign.SpaceItem>
+                    <AntDesign.Button Icon="@IconType.Outline.ArrowLeft" Type="@AntDesign.ButtonType.Primary"
+                         OnClick="@(async ()=>{ await OnTransferClick(context, false); })"></AntDesign.Button>
+                </AntDesign.SpaceItem>
+                <AntDesign.SpaceItem>
+                    <AntDesign.Button Icon="@IconType.Outline.ArrowRight" Type="@AntDesign.ButtonType.Primary"
+                        OnClick="@(async ()=>{ await OnTransferClick(context, true); })"></AntDesign.Button>
+                </AntDesign.SpaceItem>
+            </AntDesign.Space>
+        </AntDesign.ActionColumn>
+    <AntDesign.Column Title="DEX Balance" @bind-Field="@context.DexBalance"></AntDesign.Column>
+    <AntDesign.ActionColumn Title="Action">
+        <AntDesign.Space Size=@("middle")>
+            <AntDesign.SpaceItem>
+                <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(()=>{ OnDepositClick(context); })">Deposit</AntDesign.Button>
+            </AntDesign.SpaceItem>
+            <AntDesign.SpaceItem>
+                <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(()=>{ OnWithdrawClick(context); })">Withdraw</AntDesign.Button>
+            </AntDesign.SpaceItem>
+        </AntDesign.Space>
+    </AntDesign.ActionColumn>
+</AntDesign.Table>
 <div>
-    <Button Type="@ButtonType.Primary" OnClick="@(async ()=>{ await RefreshAllWallets(); })">Refresh All Balance</Button>
+    <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(async ()=>{ await RefreshAllWallets(); })">Refresh All Balance</AntDesign.Button>
 </div>
-<Modal Title="@title"
+<AntDesign.Modal Title="@title"
        Visible="@visible"
        Draggable="@(true)"
        OnOk="@HandleOk"
@@ -87,7 +87,7 @@ else
     <p>Provider: @provider</p>
     <p>Contract: @contract</p>
     <p>Depositon Address: </p>
-    <Input Placeholder="Deposition address" @bind-Value="@address" ReadOnly="@(true)" Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;" />
+    <AntDesign.Input Placeholder="Deposition address" @bind-Value="@address" ReadOnly="@(true)" Style="font-weight: bold; border: none transparent; border-color: transparent; outline: none;" />
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
@@ -95,14 +95,14 @@ else
     @if(crwalletshow)
             {
                         <div>
-        <Progress Type="ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
+        <AntDesign.Progress Type="ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
     </div>
             }
 
-</Modal>
+</AntDesign.Modal>
 
 
-<Modal Title="@transferTitle"
+<AntDesign.Modal Title="@transferTitle"
        Visible="@transferVisible"
        ConfirmLoading="@_confirmLoading"
        OnOk="@HandleOk2"
@@ -110,9 +110,9 @@ else
     
        <h3>Amount you want to transfer:</h3>
        <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="transferAmount" Min="@transferMin" Max="@transferMax" DefaultValue="@transferDefault"></AntDesign.InputNumber>&nbsp;@symbol
-</Modal>
+</AntDesign.Modal>
 
-<Modal Title="@withdrawTitle"
+<AntDesign.Modal Title="@withdrawTitle"
        Visible="@withdrawVisible"
        OnOk="@StartWithdraw"
        OnCancel="@HandleCancel3">
@@ -125,7 +125,7 @@ else
        <Input Placeholder="Withdraw to address" @bind-Value="@withdrawAddress"  />
        <h3>Amount:</h3>
        <AntDesign.InputNumber Size="@InputSize.Large" Style="width: 80%" @bind-Value="withdrawAmount" Min="@withdrawMin" Max="@withdrawMax" DefaultValue="@withdrawDefault"></AntDesign.InputNumber>&nbsp;@symbol
-</Modal>
+</AntDesign.Modal>
 }
 
 }
@@ -188,7 +188,7 @@ else
                 {
                     Message = $"You don't have a DEX wallet for {row.Symbol} yet.",
                     Description = "Creating a DEX wallet for you",
-                    NotificationType = NotificationType.Info
+                    NotificationType = AntDesign.NotificationType.Info
                 });
 
                 var wallet = walletState.Value.wallet;
@@ -200,7 +200,7 @@ else
                 {
                     Message = $"Success! ",
                     Description = $"DEX Wallet for {row.Symbol} has been created. Refreshing...",
-                    NotificationType = NotificationType.Success
+                    NotificationType = AntDesign.NotificationType.Success
                 });
 
                     await RefreshAllWallets();
@@ -209,7 +209,7 @@ else
                 {
                     Message = $"Success! ",
                     Description = $"Refreshed.",
-                    NotificationType = NotificationType.Success
+                    NotificationType = AntDesign.NotificationType.Success
                 });
                 }
                 else
@@ -218,7 +218,7 @@ else
                 {
                     Message = $"Error! ",
                     Description = $"DEX Wallet for {row.Symbol} was not created.",
-                    NotificationType = NotificationType.Warning
+                    NotificationType = AntDesign.NotificationType.Warning
                 });
                 }
             }
@@ -313,7 +313,7 @@ else
                         {
                             Message = "Unable to create DEX wallet",
                             Description = $"You need at least 11 LYR to create a DEX wallet.",
-                            NotificationType = NotificationType.Error
+                            NotificationType = AntDesign.NotificationType.Error
                     });
                 });
                 return;
@@ -356,7 +356,7 @@ else
                     {
                         Message = "Unable to withdraw funds.",
                         Description = $"No Token found.",
-                        NotificationType = NotificationType.Error
+                        NotificationType = AntDesign.NotificationType.Error
                 });
             });
         }
@@ -374,7 +374,7 @@ else
             {
                 Message = "Withdraw Result",
                 Description = wdwret.ResultCode.ToString(),
-                NotificationType = wdwret.Successful() ? NotificationType.Success : NotificationType.Error
+                NotificationType = wdwret.Successful() ? AntDesign.NotificationType.Success : AntDesign.NotificationType.Error
             });
 
         if(wdwret.Successful())
@@ -494,7 +494,7 @@ else
         {
             Message = "Transfer Result",
             Description = ret.ResultCode.ToString(),
-            NotificationType = ret.Successful() ? NotificationType.Success : NotificationType.Error
+            NotificationType = ret.Successful() ? AntDesign.NotificationType.Success : AntDesign.NotificationType.Error
         });
 
         if(ret.Successful())

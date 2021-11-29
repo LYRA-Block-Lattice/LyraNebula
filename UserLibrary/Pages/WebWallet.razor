@@ -32,7 +32,7 @@
 @if (!string.IsNullOrEmpty(walletState.Value.error))
 {
     <p>
-        <Alert Type="@AlertType.Error"
+        <AntDesign.Alert Type="@AlertType.Error"
            Message="Wallet Operation Error"
            Description="@walletState.Value.error"
            ShowIcon="true" Closable OnClose="ClearError" />
@@ -99,35 +99,35 @@
             {
                 @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
                 {
-                    <SpaceItem>
-                        <Card Title="@kvp.Key" Style="height:180px; width:280px;">
-                            <Extra>
-                                <Button Type="@ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
+                    <AntDesign.SpaceItem>
+                        <AntDesign.Card Title="@kvp.Key" Style="height:180px; width:280px;">
+                            <AntDesign.Extra>
+                                <AntDesign.Button Type="@AntDesign.ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
                                     Send
-                                </Button>
-                            </Extra>
-                            <Body>
+                                </AntDesign.Button>
+                            </AntDesign.Extra>
+                            <AntDesign.Body>
                                 <p style="font-size: xx-large; text-align: right;4"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></p>
-                            </Body>
-                        </Card>
-                    </SpaceItem>
+                            </AntDesign.Body>
+                        </AntDesign.Card>
+                    </AntDesign.SpaceItem>
                 }
 
-                    <SpaceItem Style="display: none">
-                        <Card Title="Your New Token" Style="height:180px; width:280px;">
-                            <Extra>
-                                <Button Type="@ButtonType.Text" >
+                    <AntDesign.SpaceItem Style="display: none">
+                        <AntDesign.Card Title="Your New Token" Style="height:180px; width:280px;">
+                            <AntDesign.Extra>
+                                <AntDesign.Button Type="@AntDesign.ButtonType.Text" >
                                     ...
-                                </Button>
-                            </Extra>
-                            <Body>
-                                <p style="font-size: xx-large; text-align:center;"><b><Button Type="@ButtonType.Primary" 
+                                </AntDesign.Button>
+                            </AntDesign.Extra>
+                            <AntDesign.Body>
+                                <p style="font-size: xx-large; text-align:center;"><b><AntDesign.Button Type="@AntDesign.ButtonType.Primary" 
                                     Shape="@ButtonShape.Circle" Icon="@IconType.Outline.Plus" 
-                                    Size="@ButtonSize.Large"/>
+                                    Size="@AntDesign.ButtonSize.Large"/>
                                 </b></p>
-                            </Body>
-                        </Card>
-                    </SpaceItem>
+                            </AntDesign.Body>
+                        </AntDesign.Card>
+                    </AntDesign.SpaceItem>
             }
 
 

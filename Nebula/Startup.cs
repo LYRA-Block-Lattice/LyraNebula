@@ -21,6 +21,9 @@ using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
 using BlazorStyled;
+using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Icons.FontAwesome;
 
 namespace Nebula
 {
@@ -88,6 +91,14 @@ namespace Nebula
 
             services.AddAntDesign();
             services.AddBlazorStyled();
+
+            services
+              .AddBlazorise(options =>
+              {
+                  options.ChangeTextOnKeyPress = true; // optional
+                  })
+              .AddBootstrap5Providers()
+              .AddFontAwesomeIcons();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

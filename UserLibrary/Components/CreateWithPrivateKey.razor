@@ -30,7 +30,7 @@
             <InputPassword @bind-Value="@txtValue2" Placeholder="Repeat Password" Size="@InputSize.Large" OnPressEnter="(e)=>Submit(e, txtValue2)" />
         </div>
         <div class="mid">
-            <Input TValue="string" Placeholder="Private Key" @bind-Value="@prvKey" />
+            <AntDesign.Input TValue="string" Placeholder="Private Key" @bind-Value="@prvKey" />
         </div>
         @if(hasStore)
         {
@@ -41,16 +41,16 @@
             </div>            
         }
         <div class="mid">
-            <Button Type="@ButtonType.Primary"
+            <AntDesign.Button Type="@AntDesign.ButtonType.Primary"
                 OnClick="@(async ()=>{ await RestoreWallet(); })">
                 Restore Wallet
-            </Button>
+            </AntDesign.Button>
         </div>
         <div class="mid">
-            <Divider Style="width: 0px; height: 0px" />
+            <AntDesign.Divider Style="width: 0px; height: 0px" />
         </div>
         <div class="mid">
-        <a href="/login"><Button Type="@ButtonType.Link">@act with password</Button></a>
+        <a href="/login"><AntDesign.Button Type="@AntDesign.ButtonType.Link">@act with password</AntDesign.Button></a>
         </div>
     }
 
@@ -119,18 +119,18 @@
 
     RenderFragment extraok =
     @<a href="login">
-        <Button Type="primary">
+        <AntDesign.Button Type="primary">
             Login
-        </Button>
+        </AntDesign.Button>
     </a>;
 
     RenderFragment extrafail =
-    @<Button Type="primary">
+    @<AntDesign.Button Type="primary">
         Retry
-    </Button>;
+    </AntDesign.Button>;
 
     RenderFragment actionSetting(Func<Task> clickActionAsync, Dictionary<string, object> iconAttributes) =>
-    @<Icon @attributes="@iconAttributes" OnClick="@clickActionAsync" />
+    @<AntDesign.Icon @attributes="@iconAttributes" OnClick="@clickActionAsync" />
     ;
 
     private string txtValue1 { get; set; }
@@ -194,7 +194,7 @@
         await base.OnInitializedAsync();
     }
 
-    Func<ModalClosingEventArgs, Task> onOk = (e) =>
+    Func<AntDesign.ModalClosingEventArgs, Task> onOk = (e) =>
     {
         var storeName = "nebstor";
         //Dispatcher.Dispatch(new WebWalletRestoreAction
@@ -208,13 +208,13 @@
         e.Cancel = false;
         return Task.CompletedTask;
     };
-    Func<ModalClosingEventArgs, Task> onCancel = (e) =>
+    Func<AntDesign.ModalClosingEventArgs, Task> onCancel = (e) =>
     {
         Console.WriteLine("Cancel");
         return Task.CompletedTask;
     };
     RenderFragment icon = 
-    @<Icon Type="exclamation-circle" Theme="outline"></Icon>
+    @<AntDesign.Icon Type="exclamation-circle" Theme="outline"></AntDesign.Icon>
     ;
 
     private async Task RestoreWallet()
