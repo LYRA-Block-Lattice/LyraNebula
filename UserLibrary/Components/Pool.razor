@@ -1,6 +1,5 @@
 ﻿@namespace UserLibrary.Components
 
-@using AntDesign
 @using Blazorise.Components
 @using Fluxor
 @using Lyra.Core.API
@@ -12,18 +11,15 @@
 @using UserLibrary.Data
 @inject IConfiguration Configuration
 @inject ILyraAPI lyraClient
-@inject MessageService _message
+@inject AntDesign.MessageService _message
 
 <div class="swc">
 
 @if (ui == UI.Entry)
 {
         <div style="padding: 14px; width: 370px">
-        <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary" 
-    Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-    OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</AntDesign.Button>
-
-
+            <Button Color="Color.Primary" Block class="rounded-pill"
+                Clicked="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
         <p>
             <div>Your Liquidity</div>
         </p>
@@ -112,7 +108,7 @@
                 <tr>
                     <td colspan="2">
                         <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
-                        Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
                         OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</AntDesign.Button>
                     </td>
                 </tr>
@@ -121,7 +117,7 @@
                 <tr>
                     <td colspan="2"><AntDesign.Divider>Or</AntDesign.Divider>
                     <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
-                    Size="ButtonSize.Large" Shape="@ButtonShape.Round"
+                    Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
                     OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove All Your Share</AntDesign.Button>    
                     </td>
                 </tr>
@@ -130,12 +126,15 @@
             else
             {
                 <tr>
+                    <td colspan="2">No pool for selected pair.</td>
+                </tr>
+                <tr>
                 <td colspan="2" style="padding: 14px">
                     @if(walletState.Value.wallet == null)
                     {
                         <a href="/webwallet"> <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary"
                         Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-                        >Open Wallet</AntDesign.Button></a>
+                        >Open Wallet to Create a Pool</AntDesign.Button></a>
                     }
                     else
                     {
@@ -425,7 +424,7 @@
     private void OnSelectedItemChangedHandler1(string value)
     {
         selectedValue1 = value;
-        selectedTicker1 = tickers.First(a => a.dbname == value);
+        selectedTicker1 = tickers.FirstOrDefault(a => a.dbname == value);
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
@@ -442,7 +441,7 @@
     private void OnSelectedItemChangedHandler2(string value)
     {
         selectedValue2 = value;
-        selectedTicker2 = tickers.First(a => a.dbname == value);
+        selectedTicker2 = tickers.FirstOrDefault(a => a.dbname == value);
         if(walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();

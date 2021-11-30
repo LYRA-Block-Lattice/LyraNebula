@@ -4,7 +4,6 @@
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
 
-@using AntDesign
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Data.API
@@ -24,152 +23,125 @@
 @inject ILyraAPI lyraClient
 @using UserLibrary.Components;
 
+<Styled>
+    .cet {
+        display: inline-flex;
+        flex-wrap: wrap;
+		flex-flow: column wrap;
+		flex-direction: row;
+		gap: 25px;
+    }
+    .pad {
+        padding-top: 25px;
+		display: block;
+    }
+
+</Styled>
+
 @if (walletState.Value.IsLoading)
 {
-    <div class="spinner"></div>
+    <div style="z-index: 5;" class="spinner"></div>
 }
 
 @if (!string.IsNullOrEmpty(walletState.Value.error))
 {
     <p>
-        <AntDesign.Alert Type="@AlertType.Error"
+        <AntDesign.Alert Type="@AntDesign.AlertType.Error"
            Message="Wallet Operation Error"
            Description="@walletState.Value.error"
            ShowIcon="true" Closable OnClose="ClearError" />
     </p>
 }
 
-@if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Main)
+@if (walletState.Value.wallet != null)
 {
-    <div>
-        <Space Size=@(("8", "16")) Wrap>
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="Send">
-                    Send
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="Refresh">
-                    Receive
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="Staking">
-                    Staking
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="StartDex">
-                    DEX
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>&nbsp;</SpaceItem>
-
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="Settings">
-                    Settings
-                </button>
-            </SpaceItem>
-
-            <SpaceItem>
-                <button class="btn btn-primary" @onclick="CloseWallet">
-                    Close
-                </button>
-            </SpaceItem>
-
-        </Space>
-        &nbsp;&nbsp;&nbsp;
-        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
-        {
-            <span>
-                <button style="float: right;" class="btn btn-success" @onclick="FreeToken">
-                    Get Free Token
-                </button>
-            </span>
-        }
-    </div>
-    <hr />
-    <div>
-        <Space Size=@(("8", "16")) Wrap>
-            @if (walletState.Value.wallet.GetLatestBlock() != null)
+<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" 
+    Mode="TabsMode.LazyLoad"
+    Justified="true">
+    <Items>
+        <Tab Name="home">Home</Tab>
+		<Tab Name="send">Send</Tab>
+        <Tab Name="staking">Staking</Tab>
+		<Tab Name="dex">DEX</Tab>
+        <Tab Name="settings">Settings</Tab>
+		@if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent)
+			{				
+				<Tab Name="free">Free Token</Tab>
+			}
+			
+	</Items>
+    <Content>
+        <TabPanel Name="home">
+			<div class="cet">
+				<Button Color="Color.Primary" Block Clicked="@Refresh">Receive</Button>
+			@if (walletState.Value.wallet.GetLatestBlock() != null)
             {
                 @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
                 {
-                    <AntDesign.SpaceItem>
-                        <AntDesign.Card Title="@kvp.Key" Style="height:180px; width:280px;">
-                            <AntDesign.Extra>
-                                <AntDesign.Button Type="@AntDesign.ButtonType.Text" OnClick="@(async ()=>{ await SendX(kvp.Key); })">
-                                    Send
-                                </AntDesign.Button>
-                            </AntDesign.Extra>
-                            <AntDesign.Body>
-                                <p style="font-size: xx-large; text-align: right;4"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></p>
-                            </AntDesign.Body>
-                        </AntDesign.Card>
-                    </AntDesign.SpaceItem>
+					<Card Margin="Margin.Is4.OnY" Style="height:180px; width:280px;">
+					<CardHeader>
+						<CardTitle>@kvp.Key</CardTitle>
+					</CardHeader>
+						<CardBody>
+							<CardTitle Size="5"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></CardTitle>
+							<CardText>
+								
+							</CardText>
+							<Button Color="Color.Light" Clicked="@(async ()=>{ await SendX(kvp.Key); })">Send</Button>
+						</CardBody>
+					</Card>
                 }
 
-                    <AntDesign.SpaceItem Style="display: none">
-                        <AntDesign.Card Title="Your New Token" Style="height:180px; width:280px;">
-                            <AntDesign.Extra>
-                                <AntDesign.Button Type="@AntDesign.ButtonType.Text" >
-                                    ...
-                                </AntDesign.Button>
-                            </AntDesign.Extra>
-                            <AntDesign.Body>
-                                <p style="font-size: xx-large; text-align:center;"><b><AntDesign.Button Type="@AntDesign.ButtonType.Primary" 
-                                    Shape="@ButtonShape.Circle" Icon="@IconType.Outline.Plus" 
-                                    Size="@AntDesign.ButtonSize.Large"/>
-                                </b></p>
-                            </AntDesign.Body>
-                        </AntDesign.Card>
-                    </AntDesign.SpaceItem>
+					<Card Margin="Margin.Is4.OnY" Style="height:180px; width:280px;">
+					<CardHeader>
+						<CardTitle>Your New Token</CardTitle>
+					</CardHeader>
+						<CardBody>
+							<CardTitle Size="5"></CardTitle>
+							<CardText>
+								
+							</CardText>
+							<Button Color="Color.Primary" >Create</Button>
+						</CardBody>
+					</Card>
             }
+			</div>
 
+        </TabPanel>
+        <TabPanel Name="send">
+                <div class="pad">
+				<p>
+					Destination Wallet Address:<br />
+					<AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@dstAddr" /> 
+				</p>
+				<p>
+					Token Name:<br />
+					<AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@tokenName" /> 
+				</p>
+				<p>
+					Amount:<br />
+					<AntDesign.Input TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
+				</p>
+				<button class="btn btn-primary" @onclick="SendToken">Send Token</button>
+			</div>
+        </TabPanel>
+		        <TabPanel Name="staking">
+		@if(walletState.Value.brokerAccounts != null)
+		{
+					<Staking />
+				}
+				else
+				{
+					Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
+					<p>Refreshing...</p>
+				}
 
-        </Space>
-
-
-    </div>
-
-}
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.DEX)
-{
-    <div>
-        <button class="btn btn-primary" @onclick="CancelSave">Return</button>
-    </div>
-    <hr />
-    <h3>Lyra DEX</h3>
-    <hr />
-    <div>
-        <UserLibrary.Components.DexWallets></UserLibrary.Components.DexWallets>
-    </div>
-    <hr />
-    <div>
-        <button class="btn btn-primary" @onclick="CancelSave">Return</button>
-    </div>
-}
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Staking)
-{
-    <div>
-        <button class="btn btn-primary" @onclick="CancelSave">Return</button>
-    </div>
-    <hr />
-    <h3>Staking</h3>
-    <hr />
-    <Staking />
-        <hr />
-    <div>
-        <button class="btn btn-primary" @onclick="CancelSave">Return</button>
-    </div>
-}
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Settings)
-{
-    <h3>Settings</h3>
+        </TabPanel>
+        <TabPanel Name="dex">
+            <UserLibrary.Components.DexWallets />
+        </TabPanel>
+        <TabPanel Name="settings">
+                <h3>Settings</h3>
     <hr />
     <div>
         <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
@@ -179,7 +151,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Setti
 
         <p>
             Vote For Address:
-            <Input TValue="string" Placeholder="Address" @bind-Value="@voteAddr" /> 
+            <AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@voteAddr" /> 
         </p>
         <div>
             <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
@@ -188,41 +160,7 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Setti
                         <button class="btn btn-primary" @onclick="Transactions">
                     Transactions
                 </button>
-        <button class="btn btn-primary" @onclick="SaveSettings">Save</button>
-        <button class="btn btn-primary" @onclick="CancelSave">Cancel</button>
-    </div>
-}
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Send)
-{
-    <h3>Sending token</h3>
-    <hr />
-    <div>
-        <p>
-            Destination Wallet Address:<br />
-            <Input TValue="string" Placeholder="Address" @bind-Value="@dstAddr" /> 
-        </p>
-        <p>
-            Token Name:<br />
-            <Input TValue="string" Placeholder="Name" @bind-Value="@tokenName" /> 
-        </p>
-        <p>
-            Amount:<br />
-            <Input TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
-        </p>
-        <hr />
-        <button class="btn btn-primary" @onclick="SendToken">Send Token</button>
-        <button class="btn btn-primary" @onclick="CancelSend">Cancel</button>
-    </div>
-
-}
-else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Transactions)
-{
-    <h3>Transactions</h3>
-    <hr />
-    <div>
-        <button class="btn btn-primary" @onclick="Return">Return</button>
-    </div>
-    @if (walletState.Value.txs != null)
+		    @if (walletState.Value.txs != null)
     {
         <pre>
             @foreach (var tx in walletState.Value.txs)
@@ -231,16 +169,16 @@ else if (walletState.Value.IsOpening && walletState.Value.stage == UIStage.Trans
 
             }
                         </pre>
-        <div>
-            <button class="btn btn-primary" @onclick="Return">Return</button>
-        </div>
     }
-}
-else if(!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && walletState.Value.IsOpening && walletState.Value.stage == UIStage.FreeToken)
-{
-    <h3>Verify and get free LYR</h3>
-    <hr />
-    <div>
+        &nbsp;<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+		&nbsp;<button class="btn btn-primary" @onclick="CloseWallet">Close Wallet</button>
+    </div>
+        </TabPanel>
+
+		        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
+        {
+            <TabPanel Name="free">
+                    <div>
         <p>Current balance of faucet account: <em>@walletState.Value.faucetBalance</em> LYR</p>
     </div>
 
@@ -255,27 +193,15 @@ else if(!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && walletState.Va
         &nbsp;&nbsp;
         <button class="btn btn-primary" @onclick="Return">Return</button>
     </div>
+            </TabPanel>
+        }
+
+    </Content>
+</Tabs>
 }
 else
 {
     Navigation.NavigateTo("login");
-    @*    <div>
-        <button class="btn btn-primary" @onclick="CreateWallet">
-            Create New Wallet
-        </button>
-    </div>
-    <hr />*@
-@*    <div>
-        <p>Private Key:</p>
-        <p>
-            <Input TValue="string" Placeholder="Private Key" @bind-Value="@prvKey" />    
-        </p>
-        <p>
-            <button class="btn btn-primary" @onclick="RestoreWallet">
-                Restore Wallet
-            </button>
-        </p>
-    </div>*@
 }
 
 @code{
@@ -300,6 +226,15 @@ else
 		public string voteAddr { get; set; }
 
 		public string altDisplay { get; set; }
+
+	string selectedTab = "home";
+
+    private Task OnSelectedTabChanged( string name )
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
 
 		public WebWallet()
         {
@@ -352,7 +287,7 @@ else
             }
 		}
 
-		private void Refresh(MouseEventArgs e)
+		private void Refresh()
         {
 			Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
         }
@@ -366,12 +301,6 @@ else
 		{
 			Dispatcher.Dispatch(new WalletErrorResetAction());
 		}
-
-
-
-
-
-
 
 		private void OnSuccess()
 		{
@@ -464,6 +393,7 @@ else
 		private async Task SendX(string name)
 		{
 			tokenName = name;
+			selectedTab = "send";
 			if (walletState.Value.wallet.BaseBalance > 1)
 				Dispatcher.Dispatch(new WebWalletSendAction { });
 			else

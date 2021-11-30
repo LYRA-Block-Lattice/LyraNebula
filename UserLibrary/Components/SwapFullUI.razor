@@ -1,28 +1,49 @@
 ﻿@namespace UserLibrary.Components
 
-<div>
-    <div style="align-content: center">
-@*    <p>Total Value Locked</p>
-<h3>$10,000</h3>*@
-<h1>Swap</h1>
-</div>
+<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" 
+    Mode="TabsMode.LazyLoad" Class="cet"
+    Justified="true">
+    <Items>
+        <Tab Name="home">Swap</Tab>
+        <Tab Name="profile">Pool</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="home">
+            <div class="pad"><Swap /></div>
+            
+        </TabPanel>
+        <TabPanel Name="profile">
+            <div class="pad"><Pool /></div>
+            
+        </TabPanel>
+    </Content>
+</Tabs>
 
-<AntDesign.Tabs>
-	<AntDesign.TabPane Tab="Swap" Key="1">
-		<Swap />
-	</AntDesign.TabPane>
-	<AntDesign.TabPane Tab="Pool" Key="2">
-		<Pool />
-	</AntDesign.TabPane>
-	<AntDesign.TabPane Tab="DEX" Key="3">
-		<DexWallets />
-	</AntDesign.TabPane>
-</AntDesign.Tabs>
-</div>
+<Styled>
+    .cet {
+        display: inline-flex;
+        content-justify: center;
+    }
+    .pad {
+        display: flex;
+        padding-top: 35px;
+        align-content: center
+    }
+
+</Styled>
 
 
 @code
 {
 	[CascadingParameter]
 	public Error Error { get; set; }
+
+        string selectedTab = "profile";
+
+    private Task OnSelectedTabChanged( string name )
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
 }
