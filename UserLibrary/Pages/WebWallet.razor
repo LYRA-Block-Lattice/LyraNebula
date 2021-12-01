@@ -24,7 +24,7 @@
 @using UserLibrary.Components;
 
 <Styled>
-    .cet {
+	.cet {
 		padding-top: 25px;
         display: inline-flex;
         flex-wrap: wrap;
@@ -79,30 +79,32 @@
             {
                 @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
                 {
-					<Card Margin="Margin.Is4.OnY" Style="height:180px; width:280px;">
-					<CardHeader>
-						<CardTitle>@kvp.Key.Replace("tether/", "$")</CardTitle>
+					<Card Margin="Margin.Is4.OnY" Style="height:150px; width:280px;">
+					<CardHeader Style="display: flex; align-items: center; justify-content: space-between;">
+						<Div Style="font-size: large; font-weight:bolder;">
+							@kvp.Key.Replace("tether/", "$")
+						</Div>
+						<Button Color="Color.Light" 
+							Clicked="@(async ()=>{ await SendX(kvp.Key); })">Send</Button>
 					</CardHeader>
 						<CardBody>
 							<CardTitle Size="5"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></CardTitle>
 							<CardText>
 								
 							</CardText>
-							<Button Color="Color.Light" Clicked="@(async ()=>{ await SendX(kvp.Key); })">Send</Button>
+							
 						</CardBody>
 					</Card>
                 }
 
-					<Card Margin="Margin.Is4.OnY" Style="height:180px; width:280px;">
+					<Card Margin="Margin.Is4.OnY" Style="height:150px; width:280px;">
 					<CardHeader>
 						<CardTitle>Your New Token</CardTitle>
 					</CardHeader>
 						<CardBody>
-							<CardTitle Size="5"></CardTitle>
-							<CardText>
-								
-							</CardText>
-							<a href="mint"><Button Color="Color.Primary">Create</Button></a>
+							<Div Style="height: 100%; display: flex; align-items: center; justify-content: center">
+								<a href="mint"><Icon Name="@("fa-plus-circle")" IconSize="IconSize.x3" /></a>
+							</Div>
 						</CardBody>
 					</Card>
             }
@@ -212,34 +214,43 @@ else
 }
 
 @code{
-    		[Inject]
-		private IState<WebWalletState> walletState { get; set; }
+	[Inject]
+	private IState<WebWalletState> walletState { get; set; }
 
-		[Inject]
-		private IDispatcher Dispatcher { get; set; }
+	[Inject]
+	private IDispatcher Dispatcher { get; set; }
 
-		[Inject]
-		private IJSRuntime JS { get; set; }
+	[Inject]
+	private IJSRuntime JS { get; set; }
 
-		[Inject] INotificationService NotificationService { get; set; }
+	[Inject] INotificationService NotificationService { get; set; }
 
-        		public string prvKey { get; set; }
-		public bool selfVote { get; set; }
+	public string prvKey { get; set; }
+	public bool selfVote { get; set; }
 
-		// for send
-		public string dstAddr { get; set; }
-		public string tokenName { get; set; }
-		public decimal amount { get; set; }
+	// for send
+	public string dstAddr { get; set; }
+	public string tokenName { get; set; }
+	public decimal amount { get; set; }
 
-		// for settings
-		public string voteAddr { get; set; }
+	// for settings
+	public string voteAddr { get; set; }
 
-		public string altDisplay { get; set; }
+	public string altDisplay { get; set; }
 
 	string selectedTab = "home";
 
-    private Task OnSelectedTabChanged( string name )
-    {
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		if(walletState.Value.wallet == null)
+        {
+            Navigation.NavigateTo("wallet");
+        }
+	}
+
+	private Task OnSelectedTabChanged( string name )
+	{
         selectedTab = name;
 
         return Task.CompletedTask;
