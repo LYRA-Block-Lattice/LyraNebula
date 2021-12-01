@@ -1,0 +1,22 @@
+﻿@page "/mint"
+
+@using Fluxor
+@using Nebula.Store.WebWalletUseCase
+@inject NavigationManager Navigation
+
+<UserLibrary.Components.TokenMint />
+
+@code{
+    [Inject]
+    private IState<WebWalletState> walletState { get; set; }
+
+    [Inject]
+    private IDispatcher Dispatcher { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+
+
+        await base.OnInitializedAsync();
+    }
+}
