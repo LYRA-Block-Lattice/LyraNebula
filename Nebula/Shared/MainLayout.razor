@@ -3,14 +3,15 @@
 <PageTitle>Nebula for Lyra Pay</PageTitle>
 
 <div class="page">
-    <div class="sidebar">
+
+    <div class="@sidebar">
         <NavMenu />
     </div>
 
     <main>
-        <UserLibrary.Components.TopBar />
+        <UserLibrary.Components.TopBar OnToggle="@TB" />
 
-        <article class="content px-4 fw">
+        <article class="@artcss">
             <ErrorBoundary @ref="errorBoundary">
                 @Body
             </ErrorBoundary>            
@@ -21,9 +22,25 @@
 
 @code {
     private ErrorBoundary errorBoundary;
+    bool menuVisible = false;
+    string sidebar;
+    string artcss;
 
     protected override void OnParametersSet()
     {
         errorBoundary?.Recover();
+    }
+
+    protected override void OnInitialized()
+    {
+        TB();
+        base.OnInitialized();        
+    }
+
+    void TB()
+    {
+        menuVisible = !menuVisible; 
+        sidebar = menuVisible ? "sidebar" : "sidebarhide";
+        artcss = menuVisible ? "content px-4 fw" : "content px-4 fww";
     }
 }

@@ -5,7 +5,8 @@
 @using Nebula.Store.WebWalletUseCase
 
 <div class="top-row px-4">
-    <div>
+    <div class="tg">
+        <Icon Name="IconName.Bars" IconSize="IconSize.x2" Clicked="@toggle" />
         @banner
     </div>
     <div>
@@ -13,11 +14,20 @@
     </div>
 </div>
 
+<Styled>
+    .tg {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+</Styled>
 
 @code
 {
     [Inject]
     private IState<WebWalletState>? walletState { get; set; }
+
+    [Parameter] public EventCallback OnToggle { get; set; }
 
     RenderFragment? banner;
 
@@ -28,6 +38,14 @@
         walletState.StateChanged += this.WalletChanged;
 
         base.OnInitialized();
+    }
+
+    private async Task toggle()
+    {
+        if(OnToggle.HasDelegate)
+        {
+            await OnToggle.InvokeAsync();
+        }
     }
 
     private void WalletChanged(object sender, WebWalletState wallet)
