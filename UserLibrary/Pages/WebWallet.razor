@@ -25,6 +25,7 @@
 
 <Styled>
     .cet {
+		padding-top: 25px;
         display: inline-flex;
         flex-wrap: wrap;
 		flex-flow: column wrap;
@@ -80,7 +81,7 @@
                 {
 					<Card Margin="Margin.Is4.OnY" Style="height:180px; width:280px;">
 					<CardHeader>
-						<CardTitle>@kvp.Key</CardTitle>
+						<CardTitle>@kvp.Key.Replace("tether/", "$")</CardTitle>
 					</CardHeader>
 						<CardBody>
 							<CardTitle Size="5"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></CardTitle>
@@ -101,7 +102,7 @@
 							<CardText>
 								
 							</CardText>
-							<Button Color="Color.Primary" >Create</Button>
+							<Button Color="Color.Primary" Clicked="@CreateToken">Create</Button>
 						</CardBody>
 					</Card>
             }
@@ -141,8 +142,7 @@
             <UserLibrary.Components.DexWallets />
         </TabPanel>
         <TabPanel Name="settings">
-                <h3>Settings</h3>
-    <hr />
+
     <div>
         <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
         <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
@@ -197,11 +197,18 @@
         }
 
     </Content>
-</Tabs>
+	</Tabs>
 }
 else
 {
-    Navigation.NavigateTo("login");
+	try
+	{
+		Navigation.NavigateTo("login");
+	}
+    catch(Exception e)
+	{
+
+	}
 }
 
 @code{
@@ -213,6 +220,8 @@ else
 
 		[Inject]
 		private IJSRuntime JS { get; set; }
+
+		[Inject] INotificationService NotificationService { get; set; }
 
         		public string prvKey { get; set; }
 		public bool selfVote { get; set; }
@@ -254,6 +263,11 @@ else
 		{
 			Dispatcher.Dispatch(new WebWalletCloseAction());
             Navigation.NavigateTo("/login");
+		}
+
+		private void CreateToken()
+        {
+			NotificationService.Info( "Under construction. Will be avaliable soon!" );
 		}
 
 		private void CreateWallet(MouseEventArgs e)
