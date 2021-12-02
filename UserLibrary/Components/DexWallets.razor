@@ -51,12 +51,10 @@ else
     <DataGridColumn Caption="My Balance" TItem="WalletView" Field="MyBalance" />
     <DataGridColumn TItem="WalletView" Caption="Transfer">
         <DisplayTemplate>
-            <Button Color="Color.Primary" Clicked="@(async ()=>{ await OnTransferClick(context, false); })">
-                    <Icon Name="Blazorise.Icons.Material.MaterialIcons.KeyboardArrowLeft" />
-            </Button>
-            <Button Color="Color.Primary" Clicked="@(async ()=>{ await OnTransferClick(context, true); })">
-                    <Icon Name="Blazorise.Icons.Material.MaterialIcons.KeyboardArrowRight" />
-            </Button>
+             <Icon Name="@("fa-caret-square-left")" IconSize="IconSize.x2"
+                Clicked="@(async ()=>{ await OnTransferClick(context, false); })" />
+             <Icon Name="@("fa-caret-square-right")" IconSize="IconSize.x2"
+                Clicked="@(async ()=>{ await OnTransferClick(context, true); })" />
         </DisplayTemplate>        
     </DataGridColumn>  
     <DataGridColumn Caption="DEX Balance" TItem="WalletView" Field="DexBalance" />
@@ -101,8 +99,7 @@ else
             }
            </ModalBody>
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="@HandleCancel">Close</Button>
-                <Button Color="Color.Primary" Clicked="@HandleOk">Save Changes</Button>
+                <Button Color="Color.Primary" Clicked="@HandleOk">Close</Button>
             </ModalFooter>
        </ModalContent>
 </Modal>
@@ -123,7 +120,7 @@ else
            </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="@HandleCancel2">Close</Button>
-                <Button Color="Color.Primary" Clicked="@HandleOk2">Save Changes</Button>
+                <Button Color="Color.Primary" Clicked="@HandleOk2">Transfer</Button>
             </ModalFooter>
        </ModalContent>
 </Modal>
@@ -151,7 +148,7 @@ else
            </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="@HandleCancel3">Close</Button>
-                <Button Color="Color.Primary" Clicked="@StartWithdraw">Save Changes</Button>
+                <Button Color="Color.Primary" Clicked="@StartWithdraw">Withdraw</Button>
             </ModalFooter>
        </ModalContent>
 </Modal>

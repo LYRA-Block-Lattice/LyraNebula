@@ -20,10 +20,10 @@
     @if (ui == UI.entry)
     {
         <div class="mid">
-            <TextEdit Role="TextRole.Password" Size="Size.Large" @bind-Text="@txtValue1" />
+            <TextEdit Role="TextRole.Password" Placeholder="Password" Size="Size.Large" @bind-Text="@txtValue1" />
         </div>
         <div class="mid">
-            <TextEdit Role="TextRole.Password" Size="Size.Large" @bind-Text="@txtValue2" />
+            <TextEdit Role="TextRole.Password" Placeholder="Confirm Password" Size="Size.Large" @bind-Text="@txtValue2" />
         </div>
         <div class="mid">
             <TextEdit Size="Size.Large" Placeholder="Private Key" @bind-Text="@prvKey" />
