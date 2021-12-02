@@ -1,8 +1,8 @@
 ﻿@using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div>
+<div class="top-row ps-3 navbar navbar-dark" style="padding-top:initial;">
+    <div style="width: 100%; display: flex; justify-content: space-between">
             <a class="navbar-brand" href=""><img style="align-content:center; vertical-align: middle;" src="/images/nebula-logo.png" title="@Configuration["network"]" /></a>
 
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">

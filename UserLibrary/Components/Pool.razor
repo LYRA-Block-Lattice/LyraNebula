@@ -15,145 +15,162 @@
 
 <div class="swc">
 
-@if (ui == UI.Entry)
-{
+    @if (ui == UI.Entry)
+    {
         <div style="padding: 14px; width: 370px">
             <Button Color="Color.Primary" Block class="rounded-pill"
-                Clicked="@(async ()=>{ await OpenAddLiquidityUI(); })">Add Liquidity</Button>
-        <p>
-            <div>Your Liquidity</div>
-        </p>
-        <div>(TBA)</div>
+                Clicked="@(async ()=>{ await OpenAddLiquidityUI(); })">
+                Add Liquidity
+            </Button>
+            <p>
+                <div>Your Liquidity</div>
+            </p>
+            <div>(TBA)</div>
         </div>
-}
+    }
 
-@if (ui == UI.Adding)
-{
-    <div style="padding: 14px; width: 370px; display: flex; justify-content:left; align-items:center;">
-        <Icon Clicked="@BackEntry" Name="@("fa-arrow-alt-circle-left")" />
-        &nbsp;Add Liquidity
-    </div>
-    <div>
-        <table class="swt">
-            <tr>
-                <td>Input</td>
-                <td>Balance: @($"{balance1:N8}")</td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="round">
-                        <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;"  lang="en-us" DecimalsSeparator="."
-                            @bind-Value="@amount1" />
-                    </div>
-                </td>
-                <td>
-                    <div class="round">
-                <SelectList TItem="Ticker"
-                    TValue="string"
-                    Data="@tickers"
-                    TextField="@((item)=>item.Name)"
-                    ValueField="@((item)=>item.dbname)"
-                    SelectedValue="@selectedValue1"
-                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
-                    Style="width:200px; background: white; border:none;"
-                    DefaultItemText="Choose Token" />
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td align="center"><Icon Name="@("fa-plus")" /></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>Input</td>
-                <td>Balance: @($"{balance2:N8}")</td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="round">
-                        <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
-                            @bind-Value="@amount2" />
-                    </div>
-                </td>
-                <td>
-                    <div class="round">
-                <SelectList TItem="Ticker"
-                    TValue="string"
-                    Data="@tickers"
-                    TextField="@((item)=>item.Name)"
-                    ValueField="@((item)=>item.dbname)"
-                    SelectedValue="@selectedValue2"
-                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
-                    Style="width:200px; background: white; border:none;"
-                    DefaultItemText="Choose Token" />
-                    </div>
-                </td>
-            </tr>
-            @if(havepool)
-            {
-@*                <tr>
-                    <td>Token Pair</td>
-                    <td>@pairinfo</td>
-                </tr>*@
+    @if (ui == UI.Adding)
+    {
+        <div style="padding: 14px; width: 370px; display: flex; justify-content:left; align-items:center;">
+            <Icon Clicked="@BackEntry" Name="@("fa-arrow-alt-circle-left")" />
+            &nbsp;Add Liquidity
+        </div>
+        <div>
+            <table class="swt">
                 <tr>
-                    <td>Pool Liquidate</td>
-                    <td>@pairliquid</td>
+                    <td>Input</td>
+                    <td>Balance: @($"{balance1:N8}")</td>
                 </tr>
                 <tr>
-                    <td>Your Share</td>
-                    <td>@pairshare</td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <Button Color="Color.Primary" Block Disabled="@(!alenabled)"
-                            Clicked="@(async ()=>{ await PoolDeposit(); })" class="rounded-pill">
-                            Add Liquidate
-                        </Button>
+                    <td>
+                        <div class="round">
+                            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                                     @bind-Value="@amount1" />
+                        </div>
+                    </td>
+                    <td>
+                        <div class="round">
+                            <SelectList TItem="Ticker"
+                                    TValue="string"
+                                    Data="@tickers"
+                                    TextField="@((item)=>item.Name)"
+                                    ValueField="@((item)=>item.dbname)"
+                                    SelectedValue="@selectedValue1"
+                                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
+                                    Style="width:200px; background: white; border:none;"
+                                    DefaultItemText="Choose Token" />
+                        </div>
                     </td>
                 </tr>
-                @if(canremove)
+                <tr>
+                    <td align="center"><Icon Name="@("fa-plus")" /></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Input</td>
+                    <td>Balance: @($"{balance2:N8}")</td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="round">
+                            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                                     @bind-Value="@amount2" />
+                        </div>
+                    </td>
+                    <td>
+                        <div class="round">
+                            <SelectList TItem="Ticker"
+                                    TValue="string"
+                                    Data="@tickers"
+                                    TextField="@((item)=>item.Name)"
+                                    ValueField="@((item)=>item.dbname)"
+                                    SelectedValue="@selectedValue2"
+                                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
+                                    Style="width:200px; background: white; border:none;"
+                                    DefaultItemText="Choose Token" />
+                        </div>
+                    </td>
+                </tr>
+                @if (havepool)
                 {
-                <tr>
-                    <td colspan="2"><Divider>Or</Divider>
-                        <Button Disabled="@(!alenabled)" Block class="rounded-pill"
+                    @*                <tr>
+                        <td>Token Pair</td>
+                        <td>@pairinfo</td>
+                        </tr>*@
+                    <tr>
+                        <td>Pool Liquidate</td>
+                        <td>@pairliquid</td>
+                    </tr>
+                    <tr>
+                        <td>Your Share</td>
+                        <td>@pairshare</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            @if (walletState.Value.wallet == null)
+                            {
+                                <a href="/wallet">
+                                    <Button Block class="rounded-pill"
+                                Color="Color.Primary">
+                                        Open Wallet to Create a Pool
+                                    </Button>
+                                </a>
+                            }
+                            else
+                            {
+                                <Button Color="Color.Primary" Block Disabled="@(!alenabled)"
+                            Clicked="@(async ()=>{ await PoolDeposit(); })" class="rounded-pill">
+                                    Add Liquidate
+                                </Button>
+                            }
+
+                        </td>
+                    </tr>
+                    @if (canremove)
+                    {
+                        <tr>
+                            <td colspan="2">
+                                <Divider>Or</Divider>
+                                <Button Disabled="@(!alenabled)" Block class="rounded-pill"
                             Color="Color.Primary" Clicked="@(async ()=>{ await PoolWithdraw(); })">
-                            Remove All My Share
-                        </Button>  
-                    </td>
-                </tr>
+                                    Remove All My Share
+                                </Button>
+                            </td>
+                        </tr>
+                    }
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="2">No pool for selected pair.</td>
-                </tr>
-                <tr>
-                <td colspan="2" style="padding: 14px">
-                    @if(walletState.Value.wallet == null)
-                    {
-                        <a href="/webwallet">
-                            <Button Block class="rounded-pill"
-                            Color="Color.Primary">
-                            Open Wallet to Create a Pool
-                        </Button></a>
-                    }
-                    else
-                    {
-                       <Button Disabled="@(!clenabled)" Block class="rounded-pill"
+                else
+                {
+                    <tr>
+                        <td colspan="2">No pool for selected pair.</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="padding: 14px">
+                            @if (walletState.Value.wallet == null)
+                            {
+                                <a href="/wallet">
+                                    <Button Block class="rounded-pill"
+                                Color="Color.Primary">
+                                        Open Wallet to Create a Pool
+                                    </Button>
+                                </a>
+                            }
+                            else
+                            {
+                                <Button Disabled="@(!clenabled)" Block class="rounded-pill"
                             Color="Color.Primary" Clicked="@(async ()=>{ await CreateLiquidity(); })">
-                            Create Liquidity Pool
-                        </Button>  
-                    }
-                </td>
-            </tr>
+                                    Create Liquidity Pool
+                                </Button>
+                            }
+                        </td>
+                    </tr>
 
-            }
+                }
 
-        </table>
-    </div>
+            </table>
+        </div>
 
-}
+    }
 
 </div>
 
@@ -182,7 +199,7 @@
         }
         set
         {
-            if(_amount1 != value)
+            if (_amount1 != value)
             {
                 _amount1 = value;
                 updateBtn1(_amount1);
@@ -201,7 +218,7 @@
         }
         set
         {
-            if(_amount2 != value)
+            if (_amount2 != value)
             {
                 _amount2 = value;
                 updateBtn2(_amount2);
@@ -249,9 +266,9 @@
         {
             await snackbarStack.PushAsync($"Removing liquidate ...", SnackbarColor.Info);
             var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
-            if(result.Successful())
+            if (result.Successful())
             {
-                await snackbarStack.PushAsync($"Remove liquidate success.", SnackbarColor.Success);                
+                await snackbarStack.PushAsync($"Remove liquidate success.", SnackbarColor.Success);
 
                 await Task.Delay(2000);
                 await snackbarStack.PushAsync($"Updating pool...", SnackbarColor.Info);
@@ -265,11 +282,11 @@
                 await snackbarStack.PushAsync($"Success.", SnackbarColor.Info);
             }
             else
-            {                
+            {
                 await snackbarStack.PushAsync($"Failed remove liquidate. {result.ResultCode}", SnackbarColor.Danger);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
         }
@@ -280,7 +297,7 @@
         try
         {
             var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1.dbname, amount1, selectedTicker2.dbname, amount2);
-            if(result.Successful())
+            if (result.Successful())
             {
                 await snackbarStack.PushAsync($"Add liquidate success.", SnackbarColor.Success);
                 await Task.Delay(3000);
@@ -295,11 +312,11 @@
                 await snackbarStack.PushAsync($"Finished successfully.", SnackbarColor.Success);
             }
             else
-            {                
+            {
                 await snackbarStack.PushAsync($"Failed add liquidate. {result.ResultCode}", SnackbarColor.Danger);
-            }            
+            }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
         }
@@ -308,7 +325,7 @@
     private async Task CreateLiquidity()
     {
         var poolCreateResult = await walletState.Value.wallet.CreateLiquidatePoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
-        if(poolCreateResult.Successful())
+        if (poolCreateResult.Successful())
         {
             await Task.Delay(2000);
             await snackbarStack.PushAsync($"Waiting for pool be created...", SnackbarColor.Success);
@@ -341,10 +358,10 @@
                 {
                     dbname = a,
                     Name = a.Replace("tether/", "$")
-            })
+                })
             .OrderBy(a => a.Name)
             .ToList();
-        tickers.Insert(0, new Ticker{ dbname = "LYR", Name = "LYR" });
+        tickers.Insert(0, new Ticker { dbname = "LYR", Name = "LYR" });
 
         ui = UI.Adding;
     }
@@ -362,13 +379,17 @@
     }
     private void updateBtn(decimal a)
     {
-        if(selectedTicker1 != null && selectedTicker2 != null && selectedTicker1 != selectedTicker2)
+        if (selectedTicker1 != null && selectedTicker2 != null && selectedTicker1 != selectedTicker2)
         {
             _ = Task.Run(async () =>
             {
                 await RefreshPool(a);
                 await InvokeAsync(() => StateHasChanged());
             });
+        }
+        else
+        {
+            havepool = false;
         }
 
         clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
@@ -377,95 +398,96 @@
 
     private async Task RefreshPool(decimal a)
     {
-                     var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-                var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
-                if (existspool.PoolAccountId != null)
-                {
-                    havepool = true;
+        var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+        var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
+        if (existspool.PoolAccountId != null)
+        {
+            havepool = true;
 
-                    var info = $"{existspool.Token0} vs {existspool.Token1}";
-                    pairinfo = 
+            var info = $"{existspool.Token0} vs {existspool.Token1}";
+            pairinfo =
     @<p>@info</p>
     ;
-                    var latestret = await lc.GetLastBlockAsync(existspool.PoolAccountId);
-                    if(latestret.Successful())
-                    {
-                        var latestblk = latestret.GetBlock() as TransactionBlock;
-                        poolblk = latestblk;
+            var latestret = await lc.GetLastBlockAsync(existspool.PoolAccountId);
+            if (latestret.Successful())
+            {
+                var latestblk = latestret.GetBlock() as TransactionBlock;
+                poolblk = latestblk;
 
-                        if(latestblk.Balances.ContainsKey(selectedTicker1.dbname) && latestblk.Balances[selectedTicker1.dbname] > 0)
-                        {
-                            if(a > 0 && a == amount1)
-                            {
-                                //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
-                                //    existspool.Token0, amount1, 0);
-
-                                var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
-                                amount2 = Math.Round(amount1 / poolRito, 8);
-                            }
-                            else if(a > 0 && a == amount2)
-                            {
-                                //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
-                                //    existspool.Token1, amount2, 0);
-
-                                var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
-                                amount1 = Math.Round(amount2 * poolRito, 8);
-                            }
-                        }
-
-
-                        var line1 = $"{latestblk.Balances[existspool.Token0].ToBalanceDecimal()} {GN(existspool.Token0)}";
-                        var line2 = $"{latestblk.Balances[existspool.Token1].ToBalanceDecimal()} {GN(existspool.Token1)}";
-                        pairliquid = 
-    @<p>@line1<br />
-@line2
-    </p>
-    ;
-                        var pool = latestblk as IPool;
-                        if(walletState.Value.wallet != null && pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
-                        {
-                            canremove = true;
-                            var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";
-                            pairshare =
-    @<p>@shareinfo</p>
-    ;
-                        }
-                        else
-                        {
-                            canremove = false;
-                            pairshare =
-    @<p>No Share in Pool</p>
-    ;
-                        }
-                    }
-                    else
-                    {                        
-                        pairliquid =
-    @<p>No Liquidate in Pool</p>
-    ;
-                            pairshare =
-    @<p>No Share in Pool</p>
-    ;
-                    }
-                    
-                }                    
-                else
+                if (latestblk.Balances.ContainsKey(selectedTicker1.dbname) && latestblk.Balances[selectedTicker1.dbname] > 0)
                 {
-                    havepool = false;
-                    pairinfo = 
-    @<p>Pool Not Exists.</p>
-    ;
+                    if (a > 0 && a == amount1)
+                    {
+                        //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
+                        //    existspool.Token0, amount1, 0);
+
+                        var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
+                        amount2 = Math.Round(amount1 / poolRito, 8);
+                    }
+                    else if (a > 0 && a == amount2)
+                    {
+                        //var swapcal = new SwapCalculator(existspool.Token0, existspool.Token1, poolblk,
+                        //    existspool.Token1, amount2, 0);
+
+                        var poolRito = latestblk.Balances[selectedTicker1.dbname].ToBalanceDecimal() / latestblk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
+                        amount1 = Math.Round(amount2 * poolRito, 8);
+                    }
                 }
 
-                clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
-                alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
+
+                var line1 = $"{latestblk.Balances[existspool.Token0].ToBalanceDecimal()} {GN(existspool.Token0)}";
+                var line2 = $"{latestblk.Balances[existspool.Token1].ToBalanceDecimal()} {GN(existspool.Token1)}";
+                pairliquid =
+    @<p>
+        @line1<br />
+        @line2
+    </p>
+    ;
+                var pool = latestblk as IPool;
+                if (walletState.Value.wallet != null && pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
+                {
+                    canremove = true;
+                    var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";
+                    pairshare =
+    @<p>@shareinfo</p>
+    ;
+                }
+                else
+                {
+                    canremove = false;
+                    pairshare =
+    @<p>No Share in Pool</p>
+    ;
+                }
+            }
+            else
+            {
+                pairliquid =
+    @<p>No Liquidate in Pool</p>
+    ;
+                pairshare =
+    @<p>No Share in Pool</p>
+    ;
+            }
+
+        }
+        else
+        {
+            havepool = false;
+            pairinfo =
+    @<p>Pool Not Exists.</p>
+    ;
+        }
+
+        clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
+        alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
     }
 
     private void OnSelectedItemChangedHandler1(string value)
     {
         selectedValue1 = value;
         selectedTicker1 = tickers.FirstOrDefault(a => a.dbname == value);
-        if(walletState.Value.wallet != null)
+        if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
             if (blk != null && blk.Balances.ContainsKey(value))
@@ -482,7 +504,7 @@
     {
         selectedValue2 = value;
         selectedTicker2 = tickers.FirstOrDefault(a => a.dbname == value);
-        if(walletState.Value.wallet != null)
+        if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
             if (blk != null && blk.Balances.ContainsKey(value))
@@ -498,7 +520,7 @@
 
     private void UpdateBalance()
     {
-        if(walletState.Value.wallet != null)
+        if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
             if (blk != null && blk.Balances.ContainsKey(selectedTicker1.dbname))

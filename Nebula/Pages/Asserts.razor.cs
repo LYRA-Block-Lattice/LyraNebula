@@ -53,7 +53,7 @@ namespace Nebula.Pages
         public void SwapToken(string token)
         {
             walletState.Value.stage = UIStage.SwapToken;
-            navigationManager.NavigateTo("/webwallet/swap/" + token.Replace("/", "%2F"));
+            navigationManager.NavigateTo("/swap/" + token.Replace("/", "%2F"));
         }
     }
 }

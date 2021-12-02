@@ -249,6 +249,15 @@ else
 	{
         selectedTab = name;
 
+		if(name == "free")
+		{
+			Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
+                        {
+                            wallet = walletState.Value.wallet,
+                            faucetPvk = Configuration["faucetPvk"]
+                        });
+		}
+
         return Task.CompletedTask;
     }
 
