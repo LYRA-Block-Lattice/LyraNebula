@@ -32,10 +32,9 @@
 		flex-direction: row;
 		gap: 25px;
     }
-    .pad {
-        padding-top: 25px;
-		display: block;
-    }
+	.simp {
+		padding-top: 25px;
+	}
 
 </Styled>
 
@@ -47,10 +46,7 @@
 @if (!string.IsNullOrEmpty(walletState.Value.error))
 {
     <p>
-        <AntDesign.Alert Type="@AntDesign.AlertType.Error"
-           Message="Wallet Operation Error"
-           Description="@walletState.Value.error"
-           ShowIcon="true" Closable OnClose="ClearError" />
+        @walletState.Value.error
     </p>
 }
 
@@ -112,18 +108,18 @@
 
         </TabPanel>
         <TabPanel Name="send" Margin="Margin.Is4.OnY">
-                <div class="pad">
+                <div class="simp">
 				<p>
 					Destination Wallet Address:<br />
-					<AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@dstAddr" /> 
+					<TextEdit TValue="string" Placeholder="Address" @bind-Text="@dstAddr" /> 
 				</p>
 				<p>
 					Token Name:<br />
-					<AntDesign.Input TValue="string" Placeholder="Name" @bind-Value="@tokenName" /> 
+					<TextEdit TValue="string" Placeholder="Name" @bind-Text="@tokenName" /> 
 				</p>
 				<p>
 					Amount:<br />
-					<AntDesign.Input TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
+					<NumericEdit TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
 				</p>
 				<button class="btn btn-primary" @onclick="SendToken">Send Token</button>
 			</div>
@@ -153,7 +149,7 @@
 
         <p>
             Vote For Address:
-            <AntDesign.Input TValue="string" Placeholder="Address" @bind-Value="@voteAddr" /> 
+            <TextEdit TValue="string" Placeholder="Address" @bind-Text="@voteAddr" /> 
         </p>
         <div>
             <p style="color: red">Please save private key properly if you want to open this wallet again.</p>

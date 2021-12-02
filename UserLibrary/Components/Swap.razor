@@ -1,7 +1,8 @@
 ﻿@namespace UserLibrary.Components
 
-@using AntDesign
 @using Blazorise.Components
+@using Blazorise.Icons
+@using Blazorise.Snackbar
 @using CoinGecko.Clients
 @using CoinGecko.Interfaces
 @using Fluxor
@@ -14,164 +15,178 @@
 @using UserLibrary.Data
 @inject IConfiguration _config
 @inject ILyraAPI lyraClient
-@inject AntDesign.MessageService _message
+
+@if (busy)
+{
+    <div style="z-index: 5;" class="spinner"></div>
+}
 
 <div class="swc">
 
-<table cellspacing="0" cellpadding="0" class="swt">
+    <table cellspacing="0" cellpadding="0" class="swt">
 
 
-    <tr>
-        <td>From</td> 
-        <td>Balance: @($"{balance1:N8}")</td>
-    </tr>
-    <tr>
-        <td><div class="round">
-            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="." 
-                @bind-Value="@amount1" />
-            </div>
-        </td>
-        <td>
-            <div class="round">
-                <SelectList TItem="Ticker"
-                    TValue="string"
-                    Data="@tickers"
-                    TextField="@((item)=>item.Name)"
-                    ValueField="@((item)=>item.dbname)"
-                    SelectedValue="@selectedValue1"
-                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
-                    Style="width:200px; background: white; border:none;"
-                    DefaultItemText="Choose Token" />
+        <tr>
+            <td>From</td>
+            <td>Balance: @($"{balance1:N8}")</td>
+        </tr>
+        <tr>
+            <td>
+                <div class="round">
+                    <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                                 @bind-Value="@amount1" />
+                </div>
+            </td>
+            <td>
+                <div class="round">
+                    <SelectList TItem="Ticker"
+                                TValue="string"
+                                Data="@tickers"
+                                TextField="@((item)=>item.Name)"
+                                ValueField="@((item)=>item.dbname)"
+                                SelectedValue="@selectedValue1"
+                                SelectedValueChanged="@OnSelectedItemChangedHandler1"
+                                Style="width:200px; background: white; border:none;"
+                                DefaultItemText="Choose Token" />
 
-            </div>
-        </td>
-    </tr>
-    <tr>
-        <td><AntDesign.Button Type="@AntDesign.ButtonType.Text" Shape="@AntDesign.ButtonShape.Circle"           
-            OnClick="@DoSwapTicker">
-            <AntDesign.Icon Type="sync" Theme="outline" Style="font-size: x-large;"/>   
-        </AntDesign.Button>
-        </td>
-        <td align="right"><AntDesign.Icon Type="setting" Theme="outline" Style="font-size: x-large;" /></td>
-    </tr>
-    <tr>
-        <td>To</td>
-        <td>Balance: @($"{balance2:N8}")</td>
-    </tr>
-    <tr>
-        <td><div class="round">
-            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
-                @bind-Value="@amount2" />
-            </div>
-        </td>
-        <td>
-            <div class="round">
-                <SelectList TItem="Ticker"
-                    TValue="string"
-                    Data="@tickers"
-                    TextField="@((item)=>item.Name)"
-                    ValueField="@((item)=>item.dbname)"
-                    SelectedValue="@selectedValue2"
-                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
-                    Style="width:200px; background: white; border:none;"
-                    DefaultItemText="Choose Token" />
-            </div>
-        </td>
-    </tr>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+                <Icon Clicked="@DoSwapTicker" Name="@("fa-arrows-alt-v")" />
+            </td>
+            <td align="right"></td>
+        </tr>
+        <tr>
+            <td>To</td>
+            <td>Balance: @($"{balance2:N8}")</td>
+        </tr>
+        <tr>
+            <td>
+                <div class="round">
+                    <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                                 @bind-Value="@amount2" />
+                </div>
+            </td>
+            <td>
+                <div class="round">
+                    <SelectList TItem="Ticker"
+                                TValue="string"
+                                Data="@tickers"
+                                TextField="@((item)=>item.Name)"
+                                ValueField="@((item)=>item.dbname)"
+                                SelectedValue="@selectedValue2"
+                                SelectedValueChanged="@OnSelectedItemChangedHandler2"
+                                Style="width:200px; background: white; border:none;"
+                                DefaultItemText="Choose Token" />
+                </div>
+            </td>
+        </tr>
 
-    @if (haspoolinfo && dispswap)
-    {
+        @if (haspoolinfo && dispswap)
+        {
+            <tr style="height: 10px">
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td>Estimated Price</td>
+                <td>@calprice</td>
+            </tr>
+            <tr>
+                <td>You will sell</td>
+                <td>@calsell</td>
+            </tr>
+            <tr>
+                <td>You will get</td>
+                <td>@calget</td>
+            </tr>
+            <tr>
+                <td>Price Impact</td>
+                <td>@calimpact</td>
+            </tr>
+            <tr>
+                <td>Pool Fee</td>
+                <td>@calprofee</td>
+            </tr>
+            <tr>
+                <td>Network Fee</td>
+                <td>@calnodfee</td>
+            </tr>
+        }
+
         <tr style="height: 10px">
             <td colspan="2"></td>
         </tr>
         <tr>
-            <td>Estimated Price</td>
-            <td>@calprice</td>
-        </tr>
-        <tr>
-            <td>You will sell</td>
-            <td>@calsell</td>
-        </tr>
-        <tr>
-            <td>You will get</td>
-            <td>@calget</td>
-        </tr>
-        <tr>
-            <td>Price Impact</td>
-            <td>@calimpact</td>
-        </tr>
-        <tr>
-            <td>Pool Fee</td>
-            <td>@calprofee</td>
-        </tr>
-        <tr>
-            <td>Network Fee</td>
-            <td>@calnodfee</td>
-        </tr>
-    }
 
-        <tr style="height: 10px">
-            <td colspan="2"></td>
-        </tr>
-    <tr>
-
-        <td colspan="2">
-            @if(walletState.Value.wallet == null)
-            {
-                <a href="/webwallet"> <AntDesign.Button Block Shape="@AntDesign.ButtonShape.Round"
-                    Size="AntDesign.ButtonSize.Large" Icon="@AntDesign.IconType.Outline.Unlock"
-                    Type="@AntDesign.ButtonType.Primary">Open Wallet</AntDesign.Button></a>
-            }
-            else
-            {
-                            <AntDesign.Button Block Disabled="@(!canswap)" Type="@AntDesign.ButtonType.Primary" 
-            Icon="@AntDesign.IconType.Outline.Swap" Size="ButtonSize.Large" 
-            OnClick="@(async ()=>{ await DoSwap(); })"
-            Loading="@swapping"
-            Shape="@AntDesign.ButtonShape.Round">Swap</AntDesign.Button>
-            }
+            <td colspan="2">
+                @if (walletState.Value.wallet == null)
+                {
+                    <a href="/webwallet">
+                    <Button Block Color="Color.Primary" class="rounded-pill">
+                        <Icon Name="IconName.Unlock" />
+                        Open Wallet
+                    </Button>
+                    </a>
+                }
+                else
+                {
+                    <Button Block Loading="@swapping" Disabled="@(!canswap)" Color="Color.Primary" Clicked="@DoSwap" class="rounded-pill">
+                        <Icon Name="IconName.SyncAlt" />
+                        Swap
+                    </Button>
+                }
 
 
-        </td>
-    </tr>
+            </td>
+        </tr>
 
         @if (haspoolinfo)
-    {
-        <tr style="height: 10px">
-            <td colspan="2"></td>
-        </tr>
-        <tr>
-            <td>Token Pair</td>
-            <td>@pairinfo</td>
-        </tr>
-        <tr>
-            <td>Total Liquidate</td>
-            <td>@pairliquid</td>
-        </tr>
+        {
+            <tr style="height: 10px">
+                <td colspan="2"></td>
+            </tr>
+            <tr>
+                <td>Token Pair</td>
+                <td>@pairinfo</td>
+            </tr>
+            <tr>
+                <td>Total Liquidate</td>
+                <td>@pairliquid</td>
+            </tr>
 
-        <tr>
-            <td>Your Share</td>
-            <td>@pairshare</td>
-        </tr>
-    }
-    else
-    {
-        <tr>
-            <td colspan="2">Please select a token pair</td>
-        </tr>
+            <tr>
+                <td>Your Share</td>
+                <td>@pairshare</td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">Please select a token pair</td>
+            </tr>
 
-    }
+        }
 
 
-</table>
+    </table>
 
 </div>
+
+<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
+
 @code {
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
 
     [Inject]
     private IDispatcher Dispatcher { get; set; }
+
+    SnackbarStack snackbarStack;
+    double intervalBeforeMsgClose = 2000;
+
+    bool busy;
 
     private decimal _amount1;
     public decimal amount1
@@ -182,7 +197,7 @@
         }
         set
         {
-            if(_amount1 != value)
+            if (_amount1 != value)
             {
                 _amount1 = value;
                 updateBtn1(_amount1);
@@ -201,7 +216,7 @@
         }
         set
         {
-            if(_amount2 != value)
+            if (_amount2 != value)
             {
                 _amount2 = value;
                 updateBtn2(_amount2);
@@ -248,22 +263,32 @@
     private async Task DoSwap()
     {
         swapping = true;
-        var result = await walletState.Value.wallet.SwapTokenAsync(token0, token1, 
+        busy = true;
+        var result = await walletState.Value.wallet.SwapTokenAsync(token0, token1,
             selectedTicker1.dbname, amount1, minrecv);
 
-        if(result.Successful())
+        if (result.Successful())
         {
-            await _message.Success($"Token Swap Success!");
+            await snackbarStack.PushAsync("Token Swap Success! Waiting for pool updating...", SnackbarColor.Success);
+            await Task.Delay(3000);
+
+            await snackbarStack.PushAsync("Refresh pool and wallet...", SnackbarColor.Info);
             await walletState.Value.wallet.SyncAsync(null);
 
             var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
             var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
             if (existspool.Successful())
             {
+                await snackbarStack.PushAsync("Updated.", SnackbarColor.Success);
+            
                 poollatest = existspool.GetBlock() as TransactionBlock;
                 token0 = existspool.Token0;
                 token1 = existspool.Token1;
                 CreatePoolInfo(poollatest);
+            }
+            else
+            {
+                await snackbarStack.PushAsync($" Pool refresh failed: {existspool.ResultCode}", SnackbarColor.Danger);
             }
 
             updateBtn1(amount1);
@@ -272,9 +297,10 @@
             swapping = false;
         }
         else
-            await _message.Error($"Error Swap Token: {result.ResultCode}");
+            await snackbarStack.PushAsync($"Error Swap Token: {result.ResultCode}", SnackbarColor.Danger);
 
         swapping = false;
+        busy = false;
     }
 
     private void updateBtn1(decimal? a)
@@ -287,7 +313,7 @@
             amount2 = swapcal.MinimumReceived;
 
             dispswap = amount1 > 0;
-            canswap = amount1 > 0 && amount1 <= balance1                
+            canswap = amount1 > 0 && amount1 <= balance1
             && selectedTicker1 != null && selectedTicker2 != null
                 && selectedTicker1 != selectedTicker2;
 
@@ -296,7 +322,7 @@
         else
         {
             canswap = false;
-        }        
+        }
     }
 
     private void updateBtn2(decimal? a)
@@ -310,7 +336,7 @@
             amount1 = swapcal.MinimumReceived;
 
             dispswap = amount2 > 0;
-            canswap = amount2 > 0 && amount2 < balance2 
+            canswap = amount2 > 0 && amount2 < balance2
                 && selectedTicker1 != null && selectedTicker2 != null
                 && selectedTicker1 != selectedTicker2;
 
@@ -379,30 +405,47 @@
     private void ChangePool()
     {
         if (selectedTicker1 != null && selectedTicker2 != null && selectedTicker1 != selectedTicker2)
+        {
+            busy = true;
             _ = Task.Run(async () =>
             {
                 var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
-                var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
-                if (existspool.Successful())
+                try
                 {
-                    poollatest = existspool.GetBlock() as TransactionBlock;
-                    token0 = existspool.Token0;
-                    token1 = existspool.Token1;
+                    var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
+                    if (existspool.Successful())
+                    {
+                        poollatest = existspool.GetBlock() as TransactionBlock;
+                        token0 = existspool.Token0;
+                        token1 = existspool.Token1;
+                    }
+                    else
+                    {
+                        poollatest = null;
+                        token0 = null;
+                        token1 = null;
+                    }
+
+                    CreatePoolInfo(poollatest);
+
+                    updateBtn1(amount1);
+                    UpdateBalance();
+
                 }
-                else
+                catch (Exception ex)
                 {
-                    poollatest = null;
-                    token0 = null;
-                    token1 = null;
+
+                }
+                finally
+                {
+                    busy = false;
+                    await InvokeAsync(() => StateHasChanged());
+
                 }
 
-                CreatePoolInfo(poollatest);
-
-                updateBtn1(amount1);
-                UpdateBalance();
-                await InvokeAsync(() => StateHasChanged());
             });
+        }
         else
             haspoolinfo = false;
 
@@ -436,6 +479,7 @@
 
     private async Task OpenSwapUI()
     {
+        busy = true;
         var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 
         // for api sign only
@@ -453,15 +497,16 @@
                 {
                     dbname = a,
                     Name = a.Replace("tether/", "$")
-            })
+                })
             .OrderBy(a => a.Name)
             .ToList();
-        tickers.Insert(0, new Ticker{ dbname = "LYR", Name = "LYR" });
+        tickers.Insert(0, new Ticker { dbname = "LYR", Name = "LYR" });
 
         ICoinGeckoClient _client = CoinGeckoClient.Instance;
         const string vsCurrencies = "usd";
         var prices = await _client.SimpleClient.GetSimplePrice(new[] { "lyra" }, new[] { vsCurrencies });
         lyraprice = (decimal)prices["lyra"]["usd"];
+        busy = false;
     }
 
     protected override async Task OnInitializedAsync()

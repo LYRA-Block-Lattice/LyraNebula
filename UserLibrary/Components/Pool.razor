@@ -1,6 +1,7 @@
 ﻿@namespace UserLibrary.Components
 
 @using Blazorise.Components
+@using Blazorise.Snackbar
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Core.Blocks
@@ -11,7 +12,6 @@
 @using UserLibrary.Data
 @inject IConfiguration Configuration
 @inject ILyraAPI lyraClient
-@inject AntDesign.MessageService _message
 
 <div class="swc">
 
@@ -29,10 +29,8 @@
 
 @if (ui == UI.Adding)
 {
-    <div style="padding: 14px; width: 370px">
-        <AntDesign.Button Type="@AntDesign.ButtonType.Primary" Shape="@AntDesign.ButtonShape.Circle"
-            Icon="@AntDesign.IconType.Outline.ArrowLeft"
-            OnClick="BackEntry" />
+    <div style="padding: 14px; width: 370px; display: flex; justify-content:left; align-items:center;">
+        <Icon Clicked="@BackEntry" Name="@("fa-arrow-alt-circle-left")" />
         &nbsp;Add Liquidity
     </div>
     <div>
@@ -63,7 +61,7 @@
                 </td>
             </tr>
             <tr>
-                <td><AntDesign.Icon Type="plus-circle" Theme="outline" Style="font-size: x-large;" /></td>
+                <td><Icon Name="Blazorise.Icons.Material.MaterialIcons.PlusOne" /></td>
                 <td></td>
             </tr>
             <tr>
@@ -107,18 +105,20 @@
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
-                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-                        OnClick="@(async ()=>{ await PoolDeposit(); })">Add Liquidate</AntDesign.Button>
+                        <Button Color="Color.Primary" Block Disabled="@(!alenabled)"
+                            Clicked="@(async ()=>{ await PoolDeposit(); })" class="rounded-pill">
+                            Add Liquidate
+                        </Button>
                     </td>
                 </tr>
                 @if(canremove)
                 {
                 <tr>
-                    <td colspan="2"><AntDesign.Divider>Or</AntDesign.Divider>
-                    <AntDesign.Button Disabled="@(!alenabled)" Block Type="@AntDesign.ButtonType.Primary" 
-                    Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-                    OnClick="@(async ()=>{ await PoolWithdraw(); })">Remove All Your Share</AntDesign.Button>    
+                    <td colspan="2"><Divider>Or</Divider>
+                        <Button Disabled="@(!alenabled)" Block class="rounded-pill"
+                            Color="Color.Primary" Clicked="@(async ()=>{ await PoolWithdraw(); })">
+                            Remove All My Share
+                        </Button>  
                     </td>
                 </tr>
                 }
@@ -132,15 +132,18 @@
                 <td colspan="2" style="padding: 14px">
                     @if(walletState.Value.wallet == null)
                     {
-                        <a href="/webwallet"> <AntDesign.Button Block Type="@AntDesign.ButtonType.Primary"
-                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-                        >Open Wallet to Create a Pool</AntDesign.Button></a>
+                        <a href="/webwallet">
+                            <Button Block class="rounded-pill"
+                            Color="Color.Primary">
+                            Open Wallet to Create a Pool
+                        </Button></a>
                     }
                     else
                     {
-                        <AntDesign.Button Disabled="@(!clenabled)" Block Type="@AntDesign.ButtonType.Primary" 
-                        Size="ButtonSize.Large" Shape="@AntDesign.ButtonShape.Round"
-                        OnClick="@(async ()=>{ await CreateLiquidity(); })">Create Liquidity Pool</AntDesign.Button>
+                       <Button Disabled="@(!clenabled)" Block class="rounded-pill"
+                            Color="Color.Primary" Clicked="@(async ()=>{ await CreateLiquidity(); })">
+                            Create Liquidity Pool
+                        </Button>  
                     }
                 </td>
             </tr>
@@ -154,6 +157,8 @@
 
 </div>
 
+<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
+
 @code {
 
     [Inject]
@@ -161,6 +166,9 @@
 
     [Inject]
     private IDispatcher Dispatcher { get; set; }
+
+    SnackbarStack snackbarStack;
+    double intervalBeforeMsgClose = 2000;
 
     enum UI { Entry, Adding }
     UI ui;
@@ -237,35 +245,63 @@
 
     private async Task PoolWithdraw()
     {
-        var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
-        if(result.Successful())
+        try
         {
-            await _message.Success($"Remove liquidate success.");
-            updateBtn1(amount1);
+            await snackbarStack.PushAsync($"Removing liquidate ...", SnackbarColor.Info);
+            var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
+            if(result.Successful())
+            {
+                await snackbarStack.PushAsync($"Remove liquidate success.", SnackbarColor.Success);                
 
-            await walletState.Value.wallet.SyncAsync(null);
-            UpdateBalance();
+                await Task.Delay(2000);
+                await snackbarStack.PushAsync($"Updating pool...", SnackbarColor.Info);
+
+                updateBtn1(amount1);
+                await Task.Delay(2000);
+
+                await snackbarStack.PushAsync($"Updating balance...", SnackbarColor.Info);
+                await walletState.Value.wallet.SyncAsync(null);
+                UpdateBalance();
+                await snackbarStack.PushAsync($"Success.", SnackbarColor.Info);
+            }
+            else
+            {                
+                await snackbarStack.PushAsync($"Failed remove liquidate. {result.ResultCode}", SnackbarColor.Danger);
+            }
         }
-        else
-        {                
-            _message.Error($"Failed remove liquidate. {result.ResultCode}");
+        catch(Exception ex)
+        {
+            await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
         }
     }
 
     private async Task PoolDeposit()
     {
-        var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1.dbname, amount1, selectedTicker2.dbname, amount2);
-        if(result.Successful())
+        try
         {
-            await _message.Success($"Add liquidate success.");
-            updateBtn1(amount1);
+            var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1.dbname, amount1, selectedTicker2.dbname, amount2);
+            if(result.Successful())
+            {
+                await snackbarStack.PushAsync($"Add liquidate success.", SnackbarColor.Success);
+                await Task.Delay(3000);
 
-            await walletState.Value.wallet.SyncAsync(null);
-            UpdateBalance();
+                await snackbarStack.PushAsync($"Updating pool...", SnackbarColor.Info);
+                updateBtn1(amount1);
+
+                await snackbarStack.PushAsync($"Updating balance...", SnackbarColor.Info);
+                await walletState.Value.wallet.SyncAsync(null);
+                UpdateBalance();
+
+                await snackbarStack.PushAsync($"Finished successfully.", SnackbarColor.Success);
+            }
+            else
+            {                
+                await snackbarStack.PushAsync($"Failed add liquidate. {result.ResultCode}", SnackbarColor.Danger);
+            }            
         }
-        else
-        {                
-            _message.Error($"Failed add liquidate. {result.ResultCode}");
+        catch(Exception ex)
+        {
+            await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
         }
     }
 
@@ -274,14 +310,14 @@
         var poolCreateResult = await walletState.Value.wallet.CreateLiquidatePoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
         if(poolCreateResult.Successful())
         {
-            await Task.Delay(5000);
-            await _message.Success($"Waiting for pool be created...");
-            await Task.Delay(5000);
+            await Task.Delay(2000);
+            await snackbarStack.PushAsync($"Waiting for pool be created...", SnackbarColor.Success);
+            await Task.Delay(3000);
             await PoolDeposit();
         }
         else
         {
-            _message.Error($"Pool created failed. {poolCreateResult.ResultCode}");
+            await snackbarStack.PushAsync($"Pool created failed. {poolCreateResult.ResultCode}", SnackbarColor.Danger);
         }
 
     }
@@ -330,7 +366,18 @@
         {
             _ = Task.Run(async () =>
             {
-                var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+                await RefreshPool(a);
+                await InvokeAsync(() => StateHasChanged());
+            });
+        }
+
+        clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
+        alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
+    }
+
+    private async Task RefreshPool(decimal a)
+    {
+                     var lc = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
                 var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
                 if (existspool.PoolAccountId != null)
                 {
@@ -412,13 +459,6 @@
 
                 clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
                 alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
-
-                await InvokeAsync(() => StateHasChanged());
-            });
-        }
-
-        clenabled = amount1 > 0 && amount2 > 0 && balance1 > 0 && balance2 > 0 && selectedTicker1 != selectedTicker2;
-        alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
     }
 
     private void OnSelectedItemChangedHandler1(string value)

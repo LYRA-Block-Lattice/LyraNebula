@@ -2,7 +2,6 @@
 @using Blazored.LocalStorage
 @using DexServer.Ext
 @using System.ComponentModel
-@using AntDesign.TableModels
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Core.Accounts
@@ -39,7 +38,7 @@
             <Button Color="Color.Primary" Clicked="@RestoreWallet">Restore Wallet</Button>
         </div>
         <div class="mid">
-            <AntDesign.Divider Style="width: 0px; height: 0px" />
+            <Divider Style="width: 0px; height: 0px" />
         </div>
         <div class="mid">
         <a href="/login">
@@ -132,10 +131,6 @@
     RenderFragment extrafail =
     @<Button Color="Color.Primary">Retry</Button>;
 
-    RenderFragment actionSetting(Func<Task> clickActionAsync, Dictionary<string, object> iconAttributes) =>
-    @<AntDesign.Icon @attributes="@iconAttributes" OnClick="@clickActionAsync" />
-    ;
-
     private string txtValue1 { get; set; }
     private string txtValue2 { get; set; }
     private bool visible = false;
@@ -159,29 +154,6 @@
 
         await base.OnInitializedAsync();
     }
-
-    Func<AntDesign.ModalClosingEventArgs, Task> onOk = (e) =>
-    {
-        var storeName = "nebstor";
-        //Dispatcher.Dispatch(new WebWalletRestoreAction
-        //        {
-        //            store = storeName,
-        //            name = "default",
-        //            password = txtValue1,
-        //            privateKey = prvKey
-        //        });
-        //OnFinished.InvokeAsync();
-        e.Cancel = false;
-        return Task.CompletedTask;
-    };
-    Func<AntDesign.ModalClosingEventArgs, Task> onCancel = (e) =>
-    {
-        Console.WriteLine("Cancel");
-        return Task.CompletedTask;
-    };
-    RenderFragment icon = 
-    @<AntDesign.Icon Type="exclamation-circle" Theme="outline"></AntDesign.Icon>
-    ;
 
     private async Task RestoreWallet()
     {

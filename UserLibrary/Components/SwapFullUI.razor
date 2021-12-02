@@ -27,6 +27,7 @@
     .pad {
         display: flex;
         padding-top: 35px;
+        width: 100%;
         align-content: center;
         justify-content: center;
     }
@@ -39,7 +40,7 @@
 	[CascadingParameter]
 	public Error Error { get; set; }
 
-        string selectedTab = "profile";
+    string selectedTab = "home";
 
     private Task OnSelectedTabChanged( string name )
     {

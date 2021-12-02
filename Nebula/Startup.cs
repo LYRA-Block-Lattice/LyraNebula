@@ -89,7 +89,6 @@ namespace Nebula
             var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
 
-            services.AddAntDesign();
             services.AddBlazorStyled();
 
             services
@@ -101,6 +100,7 @@ namespace Nebula
               })
               .AddBootstrap5Providers()
               .AddFontAwesomeIcons();
+              //.AddMaterialIcons();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

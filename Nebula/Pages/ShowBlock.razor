@@ -5,7 +5,7 @@
 
 <h2 style="text-align: center">Search by Hash or Account ID</h2>
 <p style="text-align: center">
-    <AntDesign.Input TValue="string" Placeholder="Hash or Account ID" @bind-Value="@search" OnChange="@oninput" />
+    <TextEdit TValue="string" Placeholder="Hash or Account ID" TextChanged="@oninput" />
 </p>
 
 @if (searchState.Value.IsLoading)

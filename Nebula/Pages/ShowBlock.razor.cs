@@ -36,10 +36,11 @@ namespace Nebula.Pages
 			await base.OnParametersSetAsync();
         }
 
-        public void oninput()
+        public Task oninput(string value)
 		{
-			hash = search;
+			hash = value;
 			Dispatcher.Dispatch(new BlockSearchAction(hash, height));
+			return Task.CompletedTask;
 		}
 	}
 }

@@ -1,5 +1,7 @@
 ﻿@namespace UserLibrary.Components
 
+@using Blazorise.DataGrid
+@using Blazorise.Snackbar
 @using DexServer.Ext
 @using System.ComponentModel
 @using Fluxor
@@ -14,7 +16,6 @@
 @using Nebula.Store.WebWalletUseCase
 @using UserLibrary.Data
 @inject IConfiguration Configuration
-@inject AntDesign.NotificationService _notice
 
 <style>
     .ant-progress-circle-wrap,
@@ -39,48 +40,50 @@ else
 }
 else
 {
-    <AntDesign.Table TItem="WalletView" DataSource="@tokens">
-    <AntDesign.Column @bind-Field="@context.Name">
-        <a href="@context.Url">@context.Name</a>
-    </AntDesign.Column>
-    <AntDesign.Column @bind-Field="@context.Symbol">
-    </AntDesign.Column>
-    <AntDesign.Column Title="Network Provider" @bind-Field="@context.NetworkProvider">
-    </AntDesign.Column>
-    <AntDesign.Column Title="My Balance" @bind-Field="@context.MyBalance"></AntDesign.Column>
-        <AntDesign.ActionColumn Align="AntDesign.ColumnAlign.Center" Title="Transfer">
-            <AntDesign.Space Size=@("middle")>
-                <AntDesign.SpaceItem>
-                    <AntDesign.Button Icon="@AntDesign.IconType.Outline.ArrowLeft" Type="@AntDesign.ButtonType.Primary"
-                         OnClick="@(async ()=>{ await OnTransferClick(context, false); })"></AntDesign.Button>
-                </AntDesign.SpaceItem>
-                <AntDesign.SpaceItem>
-                    <AntDesign.Button Icon="@AntDesign.IconType.Outline.ArrowRight" Type="@AntDesign.ButtonType.Primary"
-                        OnClick="@(async ()=>{ await OnTransferClick(context, true); })"></AntDesign.Button>
-                </AntDesign.SpaceItem>
-            </AntDesign.Space>
-        </AntDesign.ActionColumn>
-    <AntDesign.Column Title="DEX Balance" @bind-Field="@context.DexBalance"></AntDesign.Column>
-    <AntDesign.ActionColumn Title="Action">
-        <AntDesign.Space Size=@("middle")>
-            <AntDesign.SpaceItem>
-                <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(()=>{ OnDepositClick(context); })">Deposit</AntDesign.Button>
-            </AntDesign.SpaceItem>
-            <AntDesign.SpaceItem>
-                <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(()=>{ OnWithdrawClick(context); })">Withdraw</AntDesign.Button>
-            </AntDesign.SpaceItem>
-        </AntDesign.Space>
-    </AntDesign.ActionColumn>
-</AntDesign.Table>
+    <DataGrid TItem="WalletView" Data="@tokens" @bind-SelectedRow="@selectedrow" Responsive>
+    <DataGridColumn TItem="WalletView" Field="Name">
+        <DisplayTemplate>
+            <a href="@context.Url">@context.Name</a>
+        </DisplayTemplate>        
+    </DataGridColumn>
+    <DataGridColumn TItem="WalletView" Field="Symbol" />
+    <DataGridColumn Caption="Network Provider" TItem="WalletView" Field="NetworkProvider" />
+    <DataGridColumn Caption="My Balance" TItem="WalletView" Field="MyBalance" />
+    <DataGridColumn TItem="WalletView" Caption="Transfer">
+        <DisplayTemplate>
+            <Button Color="Color.Primary" Clicked="@(async ()=>{ await OnTransferClick(context, false); })">
+                    <Icon Name="Blazorise.Icons.Material.MaterialIcons.KeyboardArrowLeft" />
+            </Button>
+            <Button Color="Color.Primary" Clicked="@(async ()=>{ await OnTransferClick(context, true); })">
+                    <Icon Name="Blazorise.Icons.Material.MaterialIcons.KeyboardArrowRight" />
+            </Button>
+        </DisplayTemplate>        
+    </DataGridColumn>  
+    <DataGridColumn Caption="DEX Balance" TItem="WalletView" Field="DexBalance" />
+    <DataGridColumn TItem="WalletView" Caption="Action">
+        <DisplayTemplate>
+            <Button Color="Color.Primary" Clicked="@(()=>{ OnDepositClick(context); })">
+                    Deposit
+            </Button>
+            <Button Color="Color.Primary" Clicked="@(()=>{ OnWithdrawClick(context); })">
+                    Withdraw
+            </Button>
+        </DisplayTemplate>        
+    </DataGridColumn> 
+</DataGrid>
 <div>
-    <AntDesign.Button Type="@AntDesign.ButtonType.Primary" OnClick="@(async ()=>{ await RefreshAllWallets(); })">Refresh All Balance</AntDesign.Button>
+    <Button Color="Color.Primary" Clicked="@RefreshAllWallets">Refresh All Balance</Button>
 </div>
-<AntDesign.Modal Title="@title"
-       Visible="@visible"
-       Draggable="@(true)"
-       OnOk="@HandleOk"
-       OnCancel="@HandleCancel">
-    <h3><b>@symbol</b></h3>
+
+@*Depositon Dialog*@
+<Modal Visible="@visible">
+       <ModalContent>
+           <ModalHeader>
+               <ModalTitle>@title</ModalTitle>
+               <CloseButton />
+           </ModalHeader>
+           <ModalBody>
+                   <h3><b>@symbol</b></h3>
     <p>Provider: @provider</p>
     <p>Contract: @contract</p>
     <p>Depositon Address: </p>
@@ -89,53 +92,75 @@ else
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
-    <p>Confirmation: @token.ConfirmationInfo</p>
+    <p>Confirmation: @token?.ConfirmationInfo</p>
     @if(crwalletshow)
             {
                         <div>
-        <AntDesign.Progress Type="AntDesign.ProgressType.Circle" Percent="@crwalletprogress" Status="@crwalletstatus" />
+        <Progress Value="@crwalletprogress" />
     </div>
             }
+           </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@HandleCancel">Close</Button>
+                <Button Color="Color.Primary" Clicked="@HandleOk">Save Changes</Button>
+            </ModalFooter>
+       </ModalContent>
+</Modal>
 
-</AntDesign.Modal>
+@*Transfer Dialog*@
+<Modal Visible="@transferVisible">
+       <ModalContent>
+           <ModalHeader>
+               <ModalTitle>@transferTitle</ModalTitle>
+               <CloseButton />
+           </ModalHeader>
+           <ModalBody>
+               <h3>Amount you want to transfer:</h3>
+               <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
+                    Min="@transferMin" Max="@transferMax"
+                    ValueChanged="@((e) => {transferAmount = e.Value;})" />
+               &nbsp;@symbol
+           </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@HandleCancel2">Close</Button>
+                <Button Color="Color.Primary" Clicked="@HandleOk2">Save Changes</Button>
+            </ModalFooter>
+       </ModalContent>
+</Modal>
+   
+@*Withdraw Dialog*@
+<Modal Visible="@withdrawVisible">
+       <ModalContent>
+           <ModalHeader>
+               <ModalTitle>@withdrawTitle</ModalTitle>
+               <CloseButton />
+           </ModalHeader>
+           <ModalBody>
+                <h3><b>@symbol</b></h3>
+                <p>Provider: @provider</p>
+                <p>Contract: @contract</p>
+                <p>&nbsp;</p>
+               <h3>Address you want to withdraw:</h3>
+               <TextEdit Placeholder="Withdraw to address" @bind-Text="@withdrawAddress" />
+               <h3>Amount:</h3>
+                      <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
+                    Min="@withdrawMin" Max="@withdrawMax"
+                    ValueChanged="@((e) => {withdrawAmount = e.Value;})" />
 
+               &nbsp;@symbol
+           </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="@HandleCancel3">Close</Button>
+                <Button Color="Color.Primary" Clicked="@StartWithdraw">Save Changes</Button>
+            </ModalFooter>
+       </ModalContent>
+</Modal>
 
-<AntDesign.Modal Title="@transferTitle"
-       Visible="@transferVisible"
-       ConfirmLoading="@_confirmLoading"
-       OnOk="@HandleOk2"
-       OnCancel="@HandleCancel2">
-    
-       <h3>Amount you want to transfer:</h3>
-       <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
-            Min="@transferMin" Max="@transferMax"
-            ValueChanged="@((e) => {transferAmount = e.Value;})" />
-       &nbsp;@symbol
-</AntDesign.Modal>
-
-<AntDesign.Modal Title="@withdrawTitle"
-       Visible="@withdrawVisible"
-       OnOk="@StartWithdraw"
-       OnCancel="@HandleCancel3">
-    
-        <h3><b>@symbol</b></h3>
-        <p>Provider: @provider</p>
-        <p>Contract: @contract</p>
-        <p>&nbsp;</p>
-       <h3>Address you want to withdraw:</h3>
-       <TextEdit Placeholder="Withdraw to address" @bind-Text="@withdrawAddress" />
-       <h3>Amount:</h3>
-              <NumericEdit TValue="decimal?" Style="background: white; font-size:large;" 
-            Min="@withdrawMin" Max="@withdrawMax"
-            ValueChanged="@((e) => {withdrawAmount = e.Value;})" />
-
-       &nbsp;@symbol
-</AntDesign.Modal>
 }
 
 }
 
-
+<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
 
 
 @code {
@@ -149,6 +174,11 @@ else
     [CascadingParameter]
     public Error Err { get; set; }
 
+    SnackbarStack snackbarStack;
+    double intervalBeforeMsgClose = 2000;
+
+    WalletView selectedrow;
+
     string withdrawTitle;
     bool withdrawVisible = false;
     string withdrawAddress;
@@ -156,7 +186,6 @@ else
     decimal withdrawMin, withdrawMax, withdrawDefault;
 
     int crwalletprogress;
-    AntDesign.ProgressStatus crwalletstatus;
     bool crwalletshow;
 
     List<WalletView> tokens;
@@ -189,42 +218,22 @@ else
             if(row.DexWalletID == null)
             {
                 // user have not create wallet yet.
-                await _notice.Open(new AntDesign.NotificationConfig()
-                {
-                    Message = $"You don't have a DEX wallet for {row.Symbol} yet.",
-                    Description = "Creating a DEX wallet for you",
-                    NotificationType = AntDesign.NotificationType.Info
-                });
+                await snackbarStack.PushAsync("Creating a DEX wallet for you", SnackbarColor.Info);
 
                 var wallet = walletState.Value.wallet;
                 await wallet.SyncAsync(null);
                 var crdexret = await wallet.CreateDexWalletAsync(row.Symbol, row.NetworkProvider);
                 if(crdexret.Successful())
                 {
-                    await _notice.Open(new AntDesign.NotificationConfig()
-                {
-                    Message = $"Success! ",
-                    Description = $"DEX Wallet for {row.Symbol} has been created. Refreshing...",
-                    NotificationType = AntDesign.NotificationType.Success
-                });
+                    await snackbarStack.PushAsync($"DEX Wallet for {row.Symbol} has been created. Refreshing...", SnackbarColor.Success);
 
                     await RefreshAllWallets();
 
-                    await _notice.Open(new AntDesign.NotificationConfig()
-                {
-                    Message = $"Success! ",
-                    Description = $"Refreshed.",
-                    NotificationType = AntDesign.NotificationType.Success
-                });
+                    await snackbarStack.PushAsync($"Refreshed.", SnackbarColor.Success);
                 }
                 else
                 {
-                    await _notice.Open(new AntDesign.NotificationConfig()
-                {
-                    Message = $"Error! ",
-                    Description = $"DEX Wallet for {row.Symbol} was not created.",
-                    NotificationType = AntDesign.NotificationType.Warning
-                });
+                    await snackbarStack.PushAsync($"DEX Wallet for {row.Symbol} was not created.", SnackbarColor.Warning);
                 }
             }
             else
@@ -297,7 +306,7 @@ else
                                 address = token.Address;
 
                                 crwalletprogress = 100;
-                                crwalletstatus = AntDesign.ProgressStatus.Success;
+
                                 await InvokeAsync(() => StateHasChanged());   
 
                                 break;
@@ -305,22 +314,14 @@ else
                         }
                         else
                         {
-                            crwalletstatus = AntDesign.ProgressStatus.Exception;
+                            crwalletprogress = 0;
                         }
                         await InvokeAsync(() => StateHasChanged());
                     });
             }
             else
             {
-                crwalletstatus = AntDesign.ProgressStatus.Exception;
-                Task.Run(async () => { 
-                    await _notice.Open(new AntDesign.NotificationConfig()
-                        {
-                            Message = "Unable to create DEX wallet",
-                            Description = $"You need at least 11 LYR to create a DEX wallet.",
-                            NotificationType = AntDesign.NotificationType.Error
-                    });
-                });
+                snackbarStack.PushAsync($"You need at least 11 LYR to create a DEX wallet.", SnackbarColor.Danger);
                 return;
             }         
         }
@@ -356,18 +357,11 @@ else
         }
         else
         {
-            Task.Run(async () => { 
-                await _notice.Open(new AntDesign.NotificationConfig()
-                    {
-                        Message = "Unable to withdraw funds.",
-                        Description = $"No Token found.",
-                        NotificationType = AntDesign.NotificationType.Error
-                });
-            });
+            snackbarStack.PushAsync($"No Token found.", SnackbarColor.Danger);
         }
     }
 
-    private async Task StartWithdraw(MouseEventArgs e)
+    private async Task StartWithdraw()
     {
         withdrawVisible = false;
 
@@ -375,12 +369,7 @@ else
 
         var wallet = walletState.Value.wallet;
         var wdwret = await wallet.DexWithdrawTokenAsync(dexWalletId, withdrawAddress, withdrawAmount);
-        await _notice.Open(new AntDesign.NotificationConfig()
-            {
-                Message = "Withdraw Result",
-                Description = wdwret.ResultCode.ToString(),
-                NotificationType = wdwret.Successful() ? AntDesign.NotificationType.Success : AntDesign.NotificationType.Error
-            });
+        await snackbarStack.PushAsync(wdwret.ResultCode.ToString(), wdwret.Successful() ? SnackbarColor.Success : SnackbarColor.Danger);
 
         if(wdwret.Successful())
         {
@@ -391,7 +380,7 @@ else
         StateHasChanged();
     }
 
-    private void HandleCancel3(MouseEventArgs e)
+    private void HandleCancel3()
     {
         withdrawVisible = false;
     }
@@ -461,17 +450,17 @@ else
         }
     }
 
-    private void HandleOk(MouseEventArgs e)
+    private void HandleOk()
     {
         visible = false;
     }
 
-    private void HandleCancel(MouseEventArgs e)
+    private void HandleCancel()
     {
         visible = false;
     }
 
-    private async Task HandleOk2(MouseEventArgs e)
+    private async Task HandleOk2()
     {
         _confirmLoading = true;
         transferVisible = false;
@@ -495,12 +484,7 @@ else
 
         _confirmLoading = false;        
 
-        await _notice.Open(new AntDesign.NotificationConfig()
-        {
-            Message = "Transfer Result",
-            Description = ret.ResultCode.ToString(),
-            NotificationType = ret.Successful() ? AntDesign.NotificationType.Success : AntDesign.NotificationType.Error
-        });
+        await snackbarStack.PushAsync(ret.ResultCode.ToString(), ret.Successful() ? SnackbarColor.Success : SnackbarColor.Danger);
 
         if(ret.Successful())
         {
@@ -518,7 +502,7 @@ else
         }
     }
 
-    private void HandleCancel2(MouseEventArgs e)
+    private void HandleCancel2()
     {
         transferVisible = false;
     }
