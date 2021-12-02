@@ -5,7 +5,11 @@
 @using Nebula.Store.WebWalletUseCase
 @inject NavigationManager Navigation
 
-@if(src == "key")
+@if (busy)
+{
+    <div style="z-index: 5;" class="spinner"></div>
+}
+else if(src == "key")
 {
     <UserLibrary.Components.CreateWithPrivateKey OnFinished="@(() => {hasStore = true; Navigation.NavigateTo("/login");})" />
 }
@@ -19,8 +23,8 @@ else
 }
 
 @code{
-      [Parameter]
-  public string src { get; set; }
+    [Parameter]
+    public string src { get; set; }
 
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
@@ -31,7 +35,8 @@ else
     [Inject]
     public ILocalStorageService _localStorage { get; set; }
 
-    bool hasStore;
+    bool hasStore = false;
+    bool busy = true;
 
     protected async override Task OnInitializedAsync()
     {
@@ -41,12 +46,15 @@ else
         }
 
         var storeName = "nebstor";
+        busy = true;
+        StateHasChanged();
 
         if (await _localStorage.ContainKeyAsync(storeName))
             hasStore = true;
         else
             hasStore = false;
 
+        busy = false;
         await base.OnInitializedAsync();
     }
 }

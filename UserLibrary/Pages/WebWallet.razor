@@ -72,14 +72,14 @@
 			
 	</Items>
     <Content>
-        <TabPanel Name="home">
-			<div class="cet">
-				<Button Color="Color.Primary" Block Clicked="@Refresh">Receive</Button>
+        <TabPanel Name="home" Margin="Margin.Is4.OnY">
+			<Button Color="Color.Primary" Block Clicked="@Refresh">Receive</Button>
+			<div class="cet">				
 			@if (walletState.Value.wallet.GetLatestBlock() != null)
             {
                 @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
                 {
-					<Card Margin="Margin.Is4.OnY" Style="height:150px; width:280px;">
+					<Card Style="height:150px; width:280px;">
 					<CardHeader Style="display: flex; align-items: center; justify-content: space-between;">
 						<Div Style="font-size: large; font-weight:bolder;">
 							@kvp.Key.Replace("tether/", "$")
@@ -97,7 +97,7 @@
 					</Card>
                 }
 
-					<Card Margin="Margin.Is4.OnY" Style="height:150px; width:280px;">
+					<Card Style="height:150px; width:280px;">
 					<CardHeader>
 						<CardTitle>Your New Token</CardTitle>
 					</CardHeader>
@@ -111,7 +111,7 @@
 			</div>
 
         </TabPanel>
-        <TabPanel Name="send">
+        <TabPanel Name="send" Margin="Margin.Is4.OnY">
                 <div class="pad">
 				<p>
 					Destination Wallet Address:<br />
@@ -128,7 +128,7 @@
 				<button class="btn btn-primary" @onclick="SendToken">Send Token</button>
 			</div>
         </TabPanel>
-		        <TabPanel Name="staking">
+		        <TabPanel Name="staking" Margin="Margin.Is4.OnY">
 		@if(walletState.Value.brokerAccounts != null)
 		{
 					<Staking />
@@ -140,10 +140,10 @@
 				}
 
         </TabPanel>
-        <TabPanel Name="dex">
+        <TabPanel Name="dex" Margin="Margin.Is4.OnY">
             <UserLibrary.Components.DexWallets />
         </TabPanel>
-        <TabPanel Name="settings">
+        <TabPanel Name="settings" Margin="Margin.Is4.OnY">
 
     <div>
         <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
@@ -179,7 +179,7 @@
 
 		        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
         {
-            <TabPanel Name="free">
+            <TabPanel Name="free" Margin="Margin.Is4.OnY">
                     <div>
         <p>Current balance of faucet account: <em>@walletState.Value.faucetBalance</em> LYR</p>
     </div>
