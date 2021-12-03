@@ -85,8 +85,9 @@ else
     <p>Provider: @provider</p>
     <p>Contract: @contract</p>
     <p>Depositon Address: </p>
-    <TextEdit Size="Size.Large" Placeholder="Deposition address" @bind-Text="@address" ReadOnly
-        Style="font-weight: bold;"/>
+    <p style="width:100%">
+        <CopyToClipboard Text="@address" />
+    </p>
     <p>&nbsp;</p>
     <p>Minimal Deposit: @mindep @symbol</p>
     <p>Deposition Fee: 0 %</p>
