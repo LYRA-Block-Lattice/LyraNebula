@@ -1,0 +1,12 @@
+﻿.cet {
+    padding-top: 25px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    flex-flow: column wrap;
+    flex-direction: row;
+    gap: 25px;
+}
+
+.simp {
+    padding-top: 25px;
+}

@@ -23,21 +23,6 @@
 @inject ILyraAPI lyraClient
 @using UserLibrary.Components;
 
-<Styled>
-	.cet {
-		padding-top: 25px;
-        display: inline-flex;
-        flex-wrap: wrap;
-		flex-flow: column wrap;
-		flex-direction: row;
-		gap: 25px;
-    }
-	.simp {
-		padding-top: 25px;
-	}
-
-</Styled>
-
 @if (walletState.Value.IsLoading)
 {
     <div style="z-index: 5;" class="spinner"></div>

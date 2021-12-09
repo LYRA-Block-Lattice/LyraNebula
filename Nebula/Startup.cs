@@ -20,7 +20,6 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
-using BlazorStyled;
 using Blazorise;
 using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
@@ -88,8 +87,6 @@ namespace Nebula
             var currentAssembly = typeof(Startup).Assembly;
             var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
             services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
-
-            services.AddBlazorStyled();
 
             services
               .AddBlazorise(options =>

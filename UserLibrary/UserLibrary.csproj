@@ -9,6 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Pages\WebWallet.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Pages\WebWallet.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -24,7 +32,6 @@
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.1" />
     <PackageReference Include="Blazorise.Icons.Material" Version="0.9.5.1" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.5.1" />
-    <PackageReference Include="BlazorStyled" Version="3.1.0" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.5.0" />
     <PackageReference Include="Converto" Version="2.1.0" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="4.2.1" />
