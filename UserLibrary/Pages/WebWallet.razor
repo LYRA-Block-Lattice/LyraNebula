@@ -23,9 +23,10 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStore
 @inject ILogger<WebWallet> logger
 @inject ILyraAPI lyraClient
-@using UserLibrary.Components;
+@using UserLibrary.Components
+@using Blazorise.Snackbar
 
-@if (walletState.Value.IsLoading || busy)
+@if (walletState.Value.IsLoading || busy || busysend)
 {
     <div style="z-index: 5;" class="spinner"></div>
 }
@@ -81,7 +82,7 @@
 						Amount:<br />
 						<NumericEdit TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
 					</p>
-					<Button Color="Color.Primary" Loading="@busysend" Clicked="@SendToken">Send Token</Button>
+					<Button Color="Color.Primary" Loading="@busysend" Clicked="@SendTokenAsync">Send Token</Button>
 				</div>
 
 				<Divider />
@@ -200,6 +201,8 @@
 
     </Content>
 	</Tabs>
+
+	<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
 }
 else
 {
@@ -211,243 +214,4 @@ else
 	{
 
 	}
-}
-
-@code{
-	[Inject]
-	private IState<WebWalletState> walletState { get; set; }
-
-	[Inject]
-	private IDispatcher Dispatcher { get; set; }
-
-	[Inject]
-	private IJSRuntime JS { get; set; }
-
-	[Inject] INotificationService NotificationService { get; set; }
-
-	[Parameter]
-	public string action {  get;  set; }
-	[Parameter]
-	public string target {  get;  set; }
-
-	bool busy, busysend;
-	bool showsend;
-
-	public string prvKey { get; set; }
-	public bool selfVote { get; set; }
-
-	// for send
-	public string dstAddr { get; set; }
-	public string tokenName { get; set; }
-	public decimal amount { get; set; }
-
-	// for settings
-	public string voteAddr { get; set; }
-
-	public string altDisplay { get; set; }
-
-	string selectedTab = "home";
-
-	protected override void OnInitialized()
-	{		
-		base.OnInitialized();
-		if(walletState.Value.wallet == null)
-		{
-			Navigation.NavigateTo("login");
-		}
-
-		if(action != null && action != "send")
-		{
-			selectedTab = action;
-		}
-
-		if(action == "send" && target != null)
-		{
-			dstAddr = target;
-			showsend = true;
-		}		
-
-		walletState.StateChanged += this.WalletChanged;
-	}
-
-	public void Dispose()
-	{
-		walletState.StateChanged -= this.WalletChanged;
-	}
-
-	private void WalletChanged(object sender, WebWalletState wallet)
-	{
-		busy = false;
-		busysend = false;
-	}
-
-	private Task OnSelectedTabChanged( string name )
-	{
-		selectedTab = name;
-
-		if(name == "free")
-		{
-			Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
-                        {
-                            wallet = walletState.Value.wallet,
-                            faucetPvk = Configuration["faucetPvk"]
-                        });
-		}
-
-		if(name == "send")
-		{
-			dstAddr = target;
-		}
-
-		return Task.CompletedTask;
-	}
-
-	public WebWallet()
-	{
-		tokenName = "LYR";
-		altDisplay = "************";			
-	}
-
-	private void ToggleKey(MouseEventArgs e)
-	{
-		if (altDisplay == "************")
-			altDisplay = walletState?.Value?.wallet?.PrivateKey;
-		else
-			altDisplay = "************";
-	}
-
-	private void CloseWallet(MouseEventArgs e)
-	{
-		Dispatcher.Dispatch(new WebWalletCloseAction());
-		Navigation.NavigateTo("/login");
-	}
-
-	private void CreateToken()
-	{
-		NotificationService.Info( "Under construction. Will be avaliable soon!" );
-	}
-
-	private void CreateWallet(MouseEventArgs e)
-	{
-		altDisplay = "************";
-
-		Dispatcher.Dispatch(new WebWalletCreateAction{name = "tmp", password = "tmp"});
-	}
-
-	private async void RestoreWallet(MouseEventArgs e)
-	{
-		altDisplay = "************";
-
-		if (string.IsNullOrWhiteSpace(prvKey))
-		{
-			await JS.InvokeAsync<object>("alert", "Private Key can't be empty.");
-			return;
-		}
-		else
-		{
-			try
-			{
-				Base58Encoding.DecodePrivateKey(prvKey);
-				Dispatcher.Dispatch(new WebWalletRestoreAction { privateKey = prvKey, selfVote = this.selfVote });
-			}
-			catch (Exception)
-			{
-				await JS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
-				return;
-			}
-		}
-	}
-
-	private void ToggleSend()
-	{
-		showsend = !showsend;
-	}
-
-	private void Refresh()
-	{
-		busy = true;
-		Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
-	}
-
-	private void Staking(MouseEventArgs e)
-	{
-		Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
-	}
-
-	private void ClearError()
-	{
-		Dispatcher.Dispatch(new WalletErrorResetAction());
-	}
-
-	private void OnSuccess()
-	{
-		Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = true });
-	}
-
-	private void OnExpired()
-	{
-		Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = false });
-	}
-
-	private async Task OnClickPost()
-	{
-		Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
-			{
-				wallet = walletState.Value.wallet,
-				faucetPvk = Configuration["faucetPvk"]
-			});
-		return;
-}
-
-
-
-
-
-		private async Task SendX(string name)
-		{
-			tokenName = name;
-			showsend = true;
-		}
-
-		private void SendToken()
-		{
-			busysend = true;
-			Dispatcher.Dispatch(new WebWalletSendTokenAction { DstAddr = dstAddr, TokenName = tokenName, Amount = amount, wallet = walletState.Value.wallet });
-		}
-
-		private void CancelSend(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletCancelSendAction ());
-		}
-
-		private void Settings(MouseEventArgs e)
-		{
-			voteAddr = walletState.Value.wallet.VoteFor;
-			Dispatcher.Dispatch(new WebWalletSettingsAction { });
-		}
-
-		private void SaveSettings(MouseEventArgs e)
-        {
-			Dispatcher.Dispatch(new WebWalletSaveSettingsAction { VoteFor = voteAddr });
-        }
-
-		private void CancelSave(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletCancelSaveSettingsAction { });
-		}
-
-		private void Transactions(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletTransactionsAction { wallet = walletState.Value.wallet });
-		}
-
-		private void Return(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletCancelSaveSettingsAction { });
-		}
-
-		private void FreeToken(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletFreeTokenAction { faucetPvk = Configuration["faucetPvk"] });
-		}
 }
