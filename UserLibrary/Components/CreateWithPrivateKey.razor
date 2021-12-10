@@ -16,6 +16,11 @@
 @using UserLibrary.Data
 @inject IConfiguration Configuration
 
+@if (busy)
+{
+    <div style="z-index: 5;" class="spinner"></div>
+}
+
 <div class="flex-container">
     @if (ui == UI.entry)
     {
@@ -35,7 +40,7 @@
             </div>            
         }
         <div class="mid">
-            <Button Color="Color.Primary" Clicked="@RestoreWallet">Restore Wallet</Button>
+            <Button Color="Color.Primary" Loading="@busy" Clicked="@RestoreWallet">Restore Wallet</Button>
         </div>
         <div class="mid">
             <Divider Style="width: 0px; height: 0px" />
@@ -73,6 +78,8 @@
     [Parameter]
     public EventCallback OnFinished { get; set; }
 
+    bool busy;
+
     enum UI { entry, success, failed }
     UI ui = UI.entry;
 
@@ -102,7 +109,8 @@
     </a>;
 
     RenderFragment extrafail =
-    @<Button Color="Color.Primary">Retry</Button>;
+    @<Button Color="Color.Primary">Retry</Button>
+    ;
 
     private string txtValue1 { get; set; }
     private string txtValue2 { get; set; }
@@ -123,7 +131,7 @@
             hasStore = false;
             act = "Create new";
         }
-        
+
 
         await base.OnInitializedAsync();
     }
@@ -144,6 +152,7 @@
             }
             else
             {
+                busy = true;
                 var storeName = NebulaConsts.NebulaStorName;
                 Dispatcher.Dispatch(new WebWalletRestoreAction
                     {
