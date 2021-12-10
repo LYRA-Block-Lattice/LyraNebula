@@ -25,7 +25,7 @@
 @inject ILyraAPI lyraClient
 @using UserLibrary.Components;
 
-@if (walletState.Value.IsLoading)
+@if (walletState.Value.IsLoading || busy)
 {
     <div style="z-index: 5;" class="spinner"></div>
 }
@@ -44,7 +44,6 @@
     Justified="true">
     <Items>
         <Tab Name="home">Home</Tab>
-		<Tab Name="send">Send</Tab>
         <Tab Name="staking">Staking</Tab>
 		<Tab Name="dex">DEX</Tab>
         <Tab Name="settings">Settings</Tab>
@@ -56,7 +55,38 @@
 	</Items>
     <Content>
         <TabPanel Name="home" Margin="Margin.Is4.OnY">
-			<Button Color="Color.Primary" Block Clicked="@Refresh">Receive</Button>
+
+			<Buttons Role="ButtonsRole.Toolbar">
+				<Buttons>
+					<Button Loading="@busy" Color="Color.Success" Clicked="@Refresh">Receive</Button>
+					<Button Color="Color.Info" Clicked="@ToggleSend">Transfer</Button>
+				</Buttons>
+			</Buttons>
+
+			@if(showsend)
+			{
+				<div class="simp">
+					<p>
+						Destination Wallet Address:<br />
+						<TextEdit TValue="string" Placeholder="Address" @bind-Text="@dstAddr" /> 						
+						<a href="/scan">
+							<Button Color="Color.Primary">Scan QR-Code</Button>	
+						</a>
+					</p>
+					<p>
+						Token Name:<br />
+						<TextEdit TValue="string" Placeholder="Name" @bind-Text="@tokenName" /> 
+					</p>
+					<p>
+						Amount:<br />
+						<NumericEdit TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
+					</p>
+					<Button Color="Color.Primary" Loading="@busysend" Clicked="@SendToken">Send Token</Button>
+				</div>
+
+				<Divider />
+			}
+
 			<div class="cet">				
 			@if (walletState.Value.wallet.GetLatestBlock() != null)
             {
@@ -95,29 +125,7 @@
 			</div>
 
         </TabPanel>
-        <TabPanel Name="send" Margin="Margin.Is4.OnY">
-                <div class="simp">
-					<p>
-						<a href="/scan">
-							<Button Color="Color.Primary" Block>Scan</Button>	
-						</a>
-					</p>
-				<p>
-					Destination Wallet Address:<br />
-					<TextEdit TValue="string" Placeholder="Address" @bind-Text="@dstAddr" /> 
-				</p>
-				<p>
-					Token Name:<br />
-					<TextEdit TValue="string" Placeholder="Name" @bind-Text="@tokenName" /> 
-				</p>
-				<p>
-					Amount:<br />
-					<NumericEdit TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
-				</p>
-				<button class="btn btn-primary" @onclick="SendToken">Send Token</button>
-			</div>
-        </TabPanel>
-		        <TabPanel Name="staking" Margin="Margin.Is4.OnY">
+		<TabPanel Name="staking" Margin="Margin.Is4.OnY">
 		@if(walletState.Value.brokerAccounts != null)
 		{
 					<Staking />
@@ -222,6 +230,9 @@ else
 	[Parameter]
 	public string target {  get;  set; }
 
+	bool busy, busysend;
+	bool showsend;
+
 	public string prvKey { get; set; }
 	public bool selfVote { get; set; }
 
@@ -238,19 +249,33 @@ else
 	string selectedTab = "home";
 
 	protected override void OnInitialized()
-	{
-		base.OnInitialized();
+	{		
 		if(walletState.Value.wallet == null)
 		{
 			Navigation.NavigateTo("login");
 		}
 
-		if(action != null)
+		if(action != null && action != "send")
 		{
 			selectedTab = action;
 		}
 
 		dstAddr = target;
+
+		walletState.StateChanged += this.WalletChanged;
+
+		base.OnInitialized();
+	}
+
+	public void Dispose()
+	{
+		walletState.StateChanged -= this.WalletChanged;
+	}
+
+	private void WalletChanged(object sender, WebWalletState wallet)
+	{
+		busy = false;
+		busysend = false;
 	}
 
 	private Task OnSelectedTabChanged( string name )
@@ -271,180 +296,119 @@ else
 			dstAddr = target;
 		}
 
-        return Task.CompletedTask;
-    }
+		return Task.CompletedTask;
+	}
 
-		public WebWallet()
-        {
-			tokenName = "LYR";
-			altDisplay = "************";			
-		}
+	public WebWallet()
+	{
+		tokenName = "LYR";
+		altDisplay = "************";			
+	}
 
-        private void ToggleKey(MouseEventArgs e)
-		{
-			if (altDisplay == "************")
-				altDisplay = walletState?.Value?.wallet?.PrivateKey;
-			else
-				altDisplay = "************";
-		}
-
-		private void CloseWallet(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletCloseAction());
-            Navigation.NavigateTo("/login");
-		}
-
-		private void CreateToken()
-        {
-			NotificationService.Info( "Under construction. Will be avaliable soon!" );
-		}
-
-		private void CreateWallet(MouseEventArgs e)
-        {
+	private void ToggleKey(MouseEventArgs e)
+	{
+		if (altDisplay == "************")
+			altDisplay = walletState?.Value?.wallet?.PrivateKey;
+		else
 			altDisplay = "************";
+	}
 
-			Dispatcher.Dispatch(new WebWalletCreateAction{name = "tmp", password = "tmp"});
-		}
+	private void CloseWallet(MouseEventArgs e)
+	{
+		Dispatcher.Dispatch(new WebWalletCloseAction());
+		Navigation.NavigateTo("/login");
+	}
 
-		private async void RestoreWallet(MouseEventArgs e)
+	private void CreateToken()
+	{
+		NotificationService.Info( "Under construction. Will be avaliable soon!" );
+	}
+
+	private void CreateWallet(MouseEventArgs e)
+	{
+		altDisplay = "************";
+
+		Dispatcher.Dispatch(new WebWalletCreateAction{name = "tmp", password = "tmp"});
+	}
+
+	private async void RestoreWallet(MouseEventArgs e)
+	{
+		altDisplay = "************";
+
+		if (string.IsNullOrWhiteSpace(prvKey))
 		{
-			altDisplay = "************";
-
-			if (string.IsNullOrWhiteSpace(prvKey))
-            {
-				await JS.InvokeAsync<object>("alert", "Private Key can't be empty.");
+			await JS.InvokeAsync<object>("alert", "Private Key can't be empty.");
+			return;
+		}
+		else
+		{
+			try
+			{
+				Base58Encoding.DecodePrivateKey(prvKey);
+				Dispatcher.Dispatch(new WebWalletRestoreAction { privateKey = prvKey, selfVote = this.selfVote });
+			}
+			catch (Exception)
+			{
+				await JS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
 				return;
 			}
-            else
-            {
-				try
-                {
-					Base58Encoding.DecodePrivateKey(prvKey);
-					Dispatcher.Dispatch(new WebWalletRestoreAction { privateKey = prvKey, selfVote = this.selfVote });
-				}
-				catch (Exception)
-                {
-					await JS.InvokeAsync<object>("alert", "Private Key specified is not valid.");
-					return;
-				}
-            }
 		}
+	}
 
-		private void Refresh()
-        {
-			Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
-        }
+	private void ToggleSend()
+	{
+		showsend = !showsend;
+	}
 
-		private void Staking(MouseEventArgs e)
-		{
-			Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
-		}
+	private void Refresh()
+	{
+		busy = true;
+		Dispatcher.Dispatch(new WebWalletRefreshBalanceAction { wallet = walletState.Value.wallet });
+	}
 
-		private void ClearError()
-		{
-			Dispatcher.Dispatch(new WalletErrorResetAction());
-		}
+	private void Staking(MouseEventArgs e)
+	{
+		Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
+	}
 
-		private void OnSuccess()
-		{
-			Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = true });
-		}
+	private void ClearError()
+	{
+		Dispatcher.Dispatch(new WalletErrorResetAction());
+	}
 
-		private void OnExpired()
-		{
-			Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = false });
-		}
+	private void OnSuccess()
+	{
+		Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = true });
+	}
 
-		private async Task OnClickPost()
-		{
-			Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
+	private void OnExpired()
+	{
+		Dispatcher.Dispatch(new WebWalletReCAPTCHAValidAction { ValidReCAPTCHA = false });
+	}
+
+	private async Task OnClickPost()
+	{
+		Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
 			{
 				wallet = walletState.Value.wallet,
 				faucetPvk = Configuration["faucetPvk"]
 			});
-			return;
+		return;
+}
 
-			/*        if (walletState.Value.ValidReCAPTCHA)
-					{
-						var response = await reCAPTCHAComponent.GetResponseAsync();
-						try
-						{
-							Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = true });
 
-							var result = await SampleAPI.Post(response);
-							if (result.Success)
-							{
-								Dispatcher.Dispatch(new WebWalletSendMeFreeTokenAction
-									{
-										wallet = walletState.Value.wallet,
-										faucetPvk = Configuration["faucetPvk"]
-									});
-								//Navigation.NavigateTo("/valid");
-							}
-							else
-							{
-								await JS.InvokeAsync<object>("alert", string.Join(", ", result.ErrorCodes));
 
-								Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
-							}
-						}
-						catch (HttpRequestException e)
-						{
-							await JS.InvokeAsync<object>("alert", e.Message);
 
-							Dispatcher.Dispatch(new WebWalletReCAPTCHAServerAction { ServerVerificatiing = false });
-						}
-					}*/
-		}
-
-		//protected override async Task OnAfterRenderAsync(bool firstRender)
-		//{
-		//	var key = Configuration["network"] + "freelyr";
-		//	if (walletState.Value.freeTokenTimes.HasValue)
-		//	{
-		//		// if it need save
-		//		var oldValue = await localStore.GetItemAsync<string>(key);
-		//		int oldCount;
-		//		if (oldValue == null || (int.TryParse(oldValue, out oldCount) && oldCount < walletState.Value.freeTokenTimes))
-		//		{
-		//			await localStore.SetItemAsync(key, walletState.Value.freeTokenTimes.ToString());
-		//		}
-		//	}
-		//	else
-		//	{
-		//		var oldValue = await localStore.GetItemAsync<string>(key);
-		//		int oldCount;
-		//		if (oldValue != null && int.TryParse(oldValue, out oldCount))
-		//		{
-		//			walletState.Value.freeTokenTimes = oldCount;
-		//		}
-		//		else
-		//		{
-		//			walletState.Value.freeTokenTimes = 0;
-		//		}
-		//	}
-		//}
-
-		private async Task Send(MouseEventArgs e)
-		{
-			if(walletState.Value.wallet.BaseBalance > 1)
-				Dispatcher.Dispatch(new WebWalletSendAction {   });
-			else
-				await JS.InvokeAsync<object>("alert", "Nothing to send.");
-		}
 
 		private async Task SendX(string name)
 		{
 			tokenName = name;
-			selectedTab = "send";
-			if (walletState.Value.wallet.BaseBalance > 1)
-				Dispatcher.Dispatch(new WebWalletSendAction { });
-			else
-				await JS.InvokeAsync<object>("alert", "Nothing to send.");
+			showsend = true;
 		}
 
-		private void SendToken(MouseEventArgs e)
+		private void SendToken()
 		{
+			busysend = true;
 			Dispatcher.Dispatch(new WebWalletSendTokenAction { DstAddr = dstAddr, TokenName = tokenName, Amount = amount, wallet = walletState.Value.wallet });
 		}
 
@@ -482,10 +446,5 @@ else
 		private void FreeToken(MouseEventArgs e)
 		{
 			Dispatcher.Dispatch(new WebWalletFreeTokenAction { faucetPvk = Configuration["faucetPvk"] });
-		}
-
-		private void StartDex(MouseEventArgs e)
-		{		
-			Dispatcher.Dispatch(new WebWalletStartDexAction());
 		}
 }
