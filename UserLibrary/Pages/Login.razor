@@ -3,6 +3,7 @@
 @using Blazored.LocalStorage
 @using Fluxor
 @using Nebula.Store.WebWalletUseCase
+@using UserLibrary.Data
 @inject NavigationManager Navigation
 
 @if (busy)
@@ -45,7 +46,7 @@ else
             Navigation.NavigateTo("wallet");
         }
 
-        var storeName = "nebstor";
+        var storeName = NebulaConsts.NebulaStorName;
         busy = true;
         StateHasChanged();
 

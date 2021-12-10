@@ -189,27 +189,17 @@ namespace Nebula.Store.WebWalletUseCase
 			if(config["localstore"] == "yes")
             {
 				// maui app. save data encrypted
-				using (var ms = new MemoryStream())
-                {
-					using (var ss = new SecuredWalletStore(ms))
-					{
-						Wallet.Create(ss, action.name, action.password, config["network"]);
-					}
-					// sws will flush.
-					var data = ms.GetBuffer();
-					await _localStorage.SetItemAsync(action.store, data);
-				}	
-				
-				//// open it
-				//var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));	
-				//var ss2 = new SecuredWalletStore(ms2);
-				//wallet = Wallet.Open(ss2, action.name, action.password);
+
+				var aib = new AccountInBuffer();
+				Wallet.Create(aib, action.name, action.password, config["network"]);
+				var data = aib.GetBuffer(action.password);
+				await _localStorage.SetItemAsync(action.store, data);
             }
 			else
             {
-				var store = new AccountInMemoryStorage();
-				Wallet.Create(store, action.name, action.password, config["network"]);
-				wallet = Wallet.Open(store, action.name, action.password);
+				//var store = new AccountInMemoryStorage();
+				//Wallet.Create(store, action.name, action.password, config["network"]);
+				//wallet = Wallet.Open(store, action.name, action.password);
 			}
 
 			//await wallet.SyncAsync(client);
@@ -221,9 +211,9 @@ namespace Nebula.Store.WebWalletUseCase
 		{
 			try
             {
-				var ms2 = new MemoryStream(await _localStorage.GetItemAsync<byte[]>(action.store));
-				var ss2 = new SecuredWalletStore(ms2);
-				var wallet = Wallet.Open(ss2, action.name, action.password);
+				var buff = await _localStorage.GetItemAsync<byte[]>(action.store);
+				var aib = new AccountInBuffer(buff, action.password);
+				var wallet = Wallet.Open(aib, action.name, action.password);
 
 				await wallet.SyncAsync(client);
 				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
@@ -244,27 +234,10 @@ namespace Nebula.Store.WebWalletUseCase
 				if (await _localStorage.ContainKeyAsync(action.store))
 					await _localStorage.RemoveItemAsync(action.store);
 
-				using (var ms = new MemoryStream())
-				{
-					using (var ss = new SecuredWalletStore(ms))
-					{
-						Wallet.Create(ss, action.name, action.password, config["network"], action.privateKey);
-					}
-					// sws will flush.
-					var data = ms.GetBuffer();
-					await _localStorage.SetItemAsync(action.store, data);
-				}
-				//var store = new AccountInMemoryStorage();
-				//var name = Guid.NewGuid().ToString();
-				//Wallet.Create(store, name, "", config["network"], action.privateKey);
-
-				//var wallet = Wallet.Open(store, name, "");
-				//if (action.selfVote)
-				//	wallet.SetVoteFor(wallet.AccountId);
-
-				//await wallet.SyncAsync(client);
-
-				//dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
+				var aib = new AccountInBuffer();
+				Wallet.Create(aib, action.name, action.password, config["network"], action.privateKey);
+				var data = aib.GetBuffer(action.password);
+				await _localStorage.SetItemAsync(action.store, data);
 			}
 			catch(Exception ex)
             {

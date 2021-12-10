@@ -111,7 +111,7 @@
 
     protected async override Task OnInitializedAsync()
     {
-        var storeName = "nebstor";
+        var storeName = NebulaConsts.NebulaStorName;
 
         if (await _localStorage.ContainKeyAsync(storeName))
         {
@@ -144,7 +144,7 @@
             }
             else
             {
-                var storeName = "nebstor";
+                var storeName = NebulaConsts.NebulaStorName;
                 Dispatcher.Dispatch(new WebWalletRestoreAction
                     {
                         store = storeName,
