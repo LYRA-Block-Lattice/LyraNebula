@@ -250,6 +250,7 @@ else
 
 	protected override void OnInitialized()
 	{		
+		base.OnInitialized();
 		if(walletState.Value.wallet == null)
 		{
 			Navigation.NavigateTo("login");
@@ -260,11 +261,13 @@ else
 			selectedTab = action;
 		}
 
-		dstAddr = target;
+		if(action == "send" && target != null)
+		{
+			dstAddr = target;
+			showsend = true;
+		}		
 
 		walletState.StateChanged += this.WalletChanged;
-
-		base.OnInitialized();
 	}
 
 	public void Dispose()
