@@ -6,19 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <Platforms>AnyCPU;x86</Platforms>
+    <Version>1.0.2</Version>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Pages\WebWallet.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Pages\WebWallet.razor.css" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\MyFeature\Pages\" />
@@ -32,23 +21,16 @@
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.2" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.5.2" />
     <PackageReference Include="BlazorZXingJs" Version="0.5.13" />
-    <PackageReference Include="CoinGeckoAsyncApi" Version="1.5.0" />
+    <PackageReference Include="CoinGeckoAsyncApi" Version="1.5.1" />
     <PackageReference Include="Converto" Version="2.1.0" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="4.2.1" />
+    <PackageReference Include="Lyra.Data" Version="3.0.4.5" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.14.1" />
     <PackageReference Include="MongoDB.Driver" Version="2.14.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Lyra.Data">
-      <HintPath>..\..\LyraNetwork\Core\Lyra.Data\bin\Debug\net6.0\Lyra.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="lyra.shared">
-      <HintPath>..\..\LyraNetwork\Core\Lyra.Shared\bin\Debug\net6.0\lyra.shared.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>

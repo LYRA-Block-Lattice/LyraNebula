@@ -5,6 +5,7 @@
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
 
+@using BlazorZXingJs
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Data.API
@@ -96,6 +97,11 @@
         </TabPanel>
         <TabPanel Name="send" Margin="Margin.Is4.OnY">
                 <div class="simp">
+					<p>
+						<a href="/scan">
+							<Button Color="Color.Primary" Block>Scan</Button>	
+						</a>
+					</p>
 				<p>
 					Destination Wallet Address:<br />
 					<TextEdit TValue="string" Placeholder="Address" @bind-Text="@dstAddr" /> 
@@ -129,6 +135,9 @@
         <TabPanel Name="settings" Margin="Margin.Is4.OnY">
 
     <div>
+		<h3>Scan to Pay Me</h3>
+		<p><QRCodeWriter Text="@walletState.Value.wallet.AccountId" Width="300" Heigth="300"></QRCodeWriter></p>
+		<Divider />
         <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
         <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
         <p>Your wallet's balance is: @walletState.Value.balanceString</p>

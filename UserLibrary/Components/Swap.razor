@@ -529,7 +529,7 @@
         {
             var info = $"{GN(token0)} vs {GN(token1)}";
             pairinfo =
-    @<p>@info</p>
+    @<div>@info</div>
     ;
 
             if (platest.Balances.ContainsKey(token0))
@@ -546,18 +546,18 @@
             else
             {
                 pairliquid =
-    @<p>No Liquidate in Pool</p>
+    @<div>No Liquidate in Pool</div>
     ;
             }
         }
         else
         {
             pairinfo =
-    @<p>No pool for selected token pair.</p>
+    @<div>No pool for selected token pair.</div>
     ;
 
             pairliquid =
-    @<p>No Liquidate in Pool</p>
+    @<div>No Liquidate in Pool</div>
     ;
         }
 
@@ -569,20 +569,20 @@
             {
                 var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";
                 pairshare =
-    @<p>@shareinfo</p>
+    @<div>@shareinfo</div>
     ;
             }
             else
             {
                 pairshare =
-    @<p>You don't have Share in Pool</p>
+    @<div>No Share in Pool</div>
     ;
             }
         }
         else
         {
             pairshare =
-    @<p>No Share in Pool</p>
+    @<div>No Share in Pool</div>
     ;
         }
 

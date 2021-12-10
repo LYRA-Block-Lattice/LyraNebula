@@ -406,7 +406,7 @@
 
             var info = $"{existspool.Token0} vs {existspool.Token1}";
             pairinfo =
-    @<p>@info</p>
+    @<div>@info</div>
     ;
             var latestret = await lc.GetLastBlockAsync(existspool.PoolAccountId);
             if (latestret.Successful())
@@ -438,10 +438,10 @@
                 var line1 = $"{latestblk.Balances[existspool.Token0].ToBalanceDecimal()} {GN(existspool.Token0)}";
                 var line2 = $"{latestblk.Balances[existspool.Token1].ToBalanceDecimal()} {GN(existspool.Token1)}";
                 pairliquid =
-    @<p>
+    @<div>
         @line1<br />
         @line2
-    </p>
+    </div>
     ;
                 var pool = latestblk as IPool;
                 if (walletState.Value.wallet != null && pool.Shares.ContainsKey(walletState.Value.wallet.AccountId))
@@ -449,24 +449,24 @@
                     canremove = true;
                     var shareinfo = $"{Math.Round(pool.Shares[walletState.Value.wallet.AccountId].ToRitoDecimal() * 100, 4)} %";
                     pairshare =
-    @<p>@shareinfo</p>
+    @<div>@shareinfo</div>
     ;
                 }
                 else
                 {
                     canremove = false;
                     pairshare =
-    @<p>No Share in Pool</p>
+    @<div>No Share in Pool</div>
     ;
                 }
             }
             else
             {
                 pairliquid =
-    @<p>No Liquidate in Pool</p>
+    @<div>No Liquidate in Pool</div>
     ;
                 pairshare =
-    @<p>No Share in Pool</p>
+    @<div>No Share in Pool</div>
     ;
             }
 
@@ -475,7 +475,7 @@
         {
             havepool = false;
             pairinfo =
-    @<p>Pool Not Exists.</p>
+    @<div>Pool Not Exists.</div>
     ;
         }
 
