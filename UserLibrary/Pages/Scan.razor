@@ -1,0 +1,144 @@
+﻿@page "/scan"
+
+@using BlazorZXingJs
+
+<div id="formatSelectPanel">
+    <label for="zxingFormatSelect">Format reader:</label>
+    <select id="zxingFormatSelect" value="@_codeFormat" @onchange="ChangeCodeFormat">
+        <option value="AUTO">Auto</option>
+        <option value="EAN_13">EAN_13</option>
+        <option value="EAN">EAN_8,EAN_13</option>
+        <option value="QR">QR</option>
+    </select>
+</div>
+
+<MultiFormatReader
+    @ref="_barcodereader"
+    Format="@FormatList"
+    VideoDeviceId="@_inputDevice"
+    VideoHeight="480"
+    VideoWidth="640"
+    VideoProperties="@_videoProperties"
+    OnStartVideo="StartVideo"
+    OnBarcodeRead="BarcodeRead"
+    style="width: 100%; max-width: 320px; height: auto;"
+    class="blazorbarcodereader">
+
+    <VideoForbidden>
+        <h4>no permission for videodevice</h4>
+    </VideoForbidden>
+
+    <NoVideoDevices>
+        <h4>no devices available</h4>
+    </NoVideoDevices>
+
+    <VideoError>
+        <h4>DOM Exception: @context</h4>
+    </VideoError>
+</MultiFormatReader>
+
+@if (_domException == null)
+{
+    <h4>device @_inputDevice</h4>
+
+    @if (_devices != null)
+    {
+        if (_devices.Count > 1)
+        {
+            <button @onclick="ToggleDevice">toggle device</button>
+        }
+
+        <div id="sourceSelectPanel">
+            <label for="zxingSourceSelect">Change video source:</label>
+            <select id="zxingSourceSelect" value="@_inputDevice" @onchange="ChangeVideoInputSource">
+                @foreach (var device in _devices)
+                {
+                    <option value="@device.DeviceId">@device.Label</option>
+                }
+            </select>
+        </div>
+
+        <label for="zxingTorch">Torch</label>
+        <button id="zxingTorch" @onclick="ToggleTorch">Torch on/off</button>
+    }
+
+    <p>Result : @_localBarcodeText</p>
+
+    <QRCodeWriter Text="@_localBarcodeText" Width="200" Heigth="200"></QRCodeWriter>
+}
+
+@code
+{
+    private static string DefaultCodeFormat = "EAN";
+
+    private static BarcodeFormat[] GetFormatList(string format)
+    {
+        if (format == "EAN")
+        {
+            return new BarcodeFormat[] {BarcodeFormat.EAN_8, BarcodeFormat.EAN_13};
+        }
+        else
+        if (format == "EAN_13")
+        {
+            return new BarcodeFormat[] {BarcodeFormat.EAN_13};
+        }
+        else
+        if (format == "QR")
+        {
+            return new BarcodeFormat[] {BarcodeFormat.QR_CODE};
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private MultiFormatReader _barcodereader;
+    private string _codeFormat = DefaultCodeFormat;
+    private List<MediaDeviceInfo> _devices = null;
+    private BarcodeFormat[] FormatList = GetFormatList(DefaultCodeFormat);
+    private MediaTrackConstraints _videoProperties = new MediaTrackConstraints();
+    private string _localBarcodeText;
+    private string _domException;
+    private string _inputDevice;
+
+    private void StartVideo(MultiFormatReaderStartEventArgs args)
+    {
+        _domException = args.DOMExceptionName;
+        _devices = args.DeviceList;
+
+        if (args.DeviceId != null)
+        {
+            _inputDevice = args.DeviceId;
+        }
+    }
+
+    private void BarcodeRead(string code)
+    {
+        _localBarcodeText = code;
+    }
+
+    private void ChangeCodeFormat(ChangeEventArgs args)
+    {
+        _codeFormat = args.Value.ToString();
+        FormatList = GetFormatList(_codeFormat);
+    }
+
+    private void ChangeVideoInputSource(ChangeEventArgs args)
+    {
+        _inputDevice = args.Value.ToString();
+    }
+
+    private async Task ToggleDevice(MouseEventArgs args)
+    {
+        if (_barcodereader != null)
+        {
+            await _barcodereader.ToggleDevice();
+        }
+    }
+
+    private void ToggleTorch(MouseEventArgs args)
+    {
+        _videoProperties.Torch = !_videoProperties.Torch;
+    }
+}

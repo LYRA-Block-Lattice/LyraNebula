@@ -31,6 +31,7 @@
     <PackageReference Include="Blazorise.DataGrid" Version="0.9.5.2" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.5.2" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.5.2" />
+    <PackageReference Include="BlazorZXingJs" Version="0.5.13" />
     <PackageReference Include="CoinGeckoAsyncApi" Version="1.5.0" />
     <PackageReference Include="Converto" Version="2.1.0" />
     <PackageReference Include="Fluxor.Blazor.Web" Version="4.2.1" />

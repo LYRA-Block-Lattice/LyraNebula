@@ -89,6 +89,7 @@
 						</CardBody>
 					</Card>
             }
+
 			</div>
 
         </TabPanel>
@@ -226,7 +227,7 @@ else
 		base.OnInitialized();
 		if(walletState.Value.wallet == null)
         {
-            Navigation.NavigateTo("wallet");
+            Navigation.NavigateTo("login");
         }
 	}
 
