@@ -1,6 +1,7 @@
 ﻿@namespace UserLibrary.Pages
 @page "/webwallet"
 @page "/wallet"
+@page "/wallet/{action}/{target}"
 
 @inherits Fluxor.Blazor.Web.Components.FluxorComponent
 
@@ -207,6 +208,11 @@ else
 
 	[Inject] INotificationService NotificationService { get; set; }
 
+	[Parameter]
+	public string action {  get;  set; }
+	[Parameter]
+	public string target {  get;  set; }
+
 	public string prvKey { get; set; }
 	public bool selfVote { get; set; }
 
@@ -226,14 +232,19 @@ else
 	{
 		base.OnInitialized();
 		if(walletState.Value.wallet == null)
-        {
-            Navigation.NavigateTo("login");
-        }
+		{
+			Navigation.NavigateTo("login");
+		}
+
+		if(action != null)
+		{
+			selectedTab = action;
+		}
 	}
 
 	private Task OnSelectedTabChanged( string name )
 	{
-        selectedTab = name;
+		selectedTab = name;
 
 		if(name == "free")
 		{
@@ -242,6 +253,11 @@ else
                             wallet = walletState.Value.wallet,
                             faucetPvk = Configuration["faucetPvk"]
                         });
+		}
+
+		if(name == "send")
+		{
+			dstAddr = target;
 		}
 
         return Task.CompletedTask;
