@@ -6,15 +6,9 @@
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using Nebula.Store.WebWalletUseCase
-@inject IMessageService MessageService
 
-<Tabs SelectedTab="@selectedTab1" SelectedTabChanged="@OnSelectedTabChanged1">
-    <Items>
-        <Tab Name="staking">My staking accounts</Tab>
-        <Tab Name="profiting">My profiting accounts</Tab>
-    </Items>
-    <Content>
-        <TabPanel Name="staking">
+<MudTabs SelectedTab="@selectedTab1">
+        <MudTabPanel Text="Staking Accounts">
             <table class="table">
                 <thead>
                     <tr>
@@ -50,14 +44,14 @@
                             <td>
                                 <a href="" @onclick="@((e) => AddStkAsync(e, stk.AccountID))" @onclick:preventDefault><u>Add Staking</u></a>
                                 &nbsp;
-                                <Button Clicked="@(async () => {await UnstakingConfirm(stk.AccountID);})">Unstaking</Button>
+                                <MudButton OnClick="@(async () => {await UnstakingConfirm(stk.AccountID);})">Unstaking</MudButton>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        </TabPanel>
-        <TabPanel Name="profiting">
+        </MudTabPanel>
+        <MudTabPanel Text="Profiting Accounts">
             <table class="table">
                 <thead>
                     <tr>
@@ -84,30 +78,24 @@
                     }
                 </tbody>
             </table>
-        </TabPanel>
-    </Content>
-</Tabs>
+        </MudTabPanel>
+</MudTabs>
 
-<Divider />
+<MudDivider />
 
-<Tabs SelectedTab="@selectedTab2" SelectedTabChanged="@OnSelectedTabChanged2">
-    <Items>
-        <Tab Name="crstk">Create new staking account</Tab>
-        <Tab Name="crpft">Create new profiting account</Tab>
-    </Items>
-    <Content>
-        <TabPanel Name="crstk">
+<MudTabs SelectedTab="@selectedTab2">
+        <MudTabPanel Text="Create Staking Account">
             <p>
                 Name:
-                <TextEdit Placeholder="Name" @bind-Text="@stkName" />
+                <MudTextField Label="Name" @bind-Value="@stkName" />
             </p>
             <p>
                 Staking For Address:
-                <TextEdit Placeholder="Address" @bind-Text="@stkVoting" />
+                <MudTextField Label="Address" @bind-Value="@stkVoting" />
             </p>
             <p>
                 Days of staking:
-                <TextEdit Placeholder="Days" @bind-Text="@stkDays" />
+                <MudTextField Label="Days" @bind-Value="@stkDays" />
             </p>
             <p>
                 Compound staking mode:
@@ -116,11 +104,11 @@
             <div>
                 <button class="btn btn-primary" @onclick="StakingCreate">Create Staking</button>
             </div>
-        </TabPanel>
-        <TabPanel Name="crpft">
+        </MudTabPanel>
+        <MudTabPanel Text="Create Profiting Account">
             <p>
                 Name:
-                <TextEdit Placeholder="Name" @bind-Text="@pftName" />
+                <MudTextField Label="Name" @bind-Value="@pftName" />
             </p>
             <p>
                 Type:
@@ -133,19 +121,17 @@
             </p>
             <p>
                 Ratio to share to staking (0% - 100%):
-                <TextEdit Placeholder="Ratio" @bind-Text="@pftShare" />
+                <MudTextField Label="Ratio" @bind-Value="@pftShare" />
             </p>
             <p>
                 Number of staking (0 - 100):
-                <TextEdit Placeholder="Max number" @bind-Text="@pftSeats" />
+                <MudTextField Label="Max number" @bind-Value="@pftSeats" />
             </p>
             <div>
                 <button class="btn btn-primary" @onclick="ProfitingCreate">Create Profiting Account</button>
             </div>
-        </TabPanel>
-    </Content>
-
-</Tabs>
+        </MudTabPanel>
+</MudTabs>
 
 @code {
     [Inject]
@@ -156,6 +142,9 @@
 
     [Inject]
     private IJSRuntime JS { get; set; }
+
+    [Inject] private IDialogService DialogService { get; set; }
+    [Inject] ISnackbar Snackbar { get; set; }
 
     string selectedTab1 = "staking";
 
@@ -206,13 +195,18 @@
 
     async Task UnstakingConfirm(string actid)
     {
-        if (await MessageService.Confirm("Unstaking within the promised staking period will pay 0.8% panalise fee. Are you sure you want to confirm?", "Confirmation"))
+        bool? result = await DialogService.ShowMessageBox(
+            "Warning", 
+            "Unstaking within the promised staking period will pay 0.8% panalise fee. Are you sure you want to confirm?", 
+            yesText:"Confirm!", cancelText:"Cancel");
+
+        if (result.Value)
         {
             RmStk(actid);
         }
         else
         {
-            await MessageService.Info("Nothing changed.");
+            Snackbar.Add("Nothing changed.", Severity.Normal);
         }
     }
 

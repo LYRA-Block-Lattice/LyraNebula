@@ -1,10 +1,9 @@
-﻿using Blazorise;
-using Blazorise.Snackbar;
-using Fluxor;
+﻿using Fluxor;
 using Lyra.Data.Crypto;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using MudBlazor;
 using Nebula.Store.WebWalletUseCase;
 using System;
 using System.Collections.Generic;
@@ -25,14 +24,12 @@ namespace UserLibrary.Pages
         [Inject]
         private IJSRuntime JS { get; set; }
 
-        [Inject] INotificationService NotificationService { get; set; }
+        [Inject] ISnackbar Snackbar { get; set; }
 
         [Parameter]
         public string action { get; set; }
         [Parameter]
         public string target { get; set; }
-
-        SnackbarStack snackbarStack;
 
         bool busy, busysend;
         bool showsend;
@@ -81,7 +78,8 @@ namespace UserLibrary.Pages
             busy = false;
             busysend = false;
 
-            snackbarStack?.PushAsync("Wallet Updated.", SnackbarColor.Info);
+            if(walletState.Value.wallet != null)
+                Snackbar.Add("Wallet Updated.", Severity.Info);
         }
 
         private Task OnSelectedTabChanged(string name)
@@ -155,7 +153,7 @@ namespace UserLibrary.Pages
         private void SendTokenAsync()
         {
             busysend = true;
-            snackbarStack.PushAsync("Sending token...", SnackbarColor.Info);
+            Snackbar.Add("Sending token...", Severity.Info);
 
             Dispatcher.Dispatch(new WebWalletSendTokenAction { DstAddr = dstAddr, TokenName = tokenName, Amount = amount, wallet = walletState.Value.wallet });
         }

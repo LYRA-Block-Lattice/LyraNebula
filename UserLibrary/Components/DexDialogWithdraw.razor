@@ -1,0 +1,47 @@
+﻿@using UserLibrary.Data
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            @Args.title
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+                <h3><b>@Args.view.Symbol</b></h3>
+                <p>Provider: @Args.view.NetworkProvider</p>
+                <p>Contract: @Args.view.Contract</p>
+                <p>Withdraw Fee: @Args.view.WithdrawFee @Args.view.Symbol</p>
+                <p>&nbsp;</p>
+               <h3>Address you want to withdraw:</h3>
+               <MudTextField Label="Withdraw to address" @bind-Value="@Args.address" />
+               <h3>Amount:</h3>
+                      <MudNumericField T="decimal?" Style="background: white; font-size:large;" 
+                    Min="@Args.min" Max="@Args.max"
+                    ValueChanged="@((e) => {Args.amount = e.Value;})" />
+
+               &nbsp;@Args.view.Symbol
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteServer">Withdraw</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public DexWithdrawArgs Args { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteServer()
+    {
+        //In a real world scenario this bool would probably be a service to delete the item from api/database
+        Snackbar.Add("Server Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(Args.amount));
+    }
+}

@@ -1,9 +1,6 @@
 ﻿<Fluxor.Blazor.Web.StoreInitializer />
 
-<Error>
-    <Router AppAssembly="@typeof(App).Assembly"
-        AdditionalAssemblies="new[] { typeof(UserLibrary.Pages.WebWallet).Assembly }"
-    >
+    <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -15,9 +12,9 @@
             </LayoutView>
         </NotFound>
     </Router>
-</Error>
 
-<MessageAlert />
-<Blazorise.Components.NotificationAlert />
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 

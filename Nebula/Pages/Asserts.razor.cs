@@ -4,7 +4,6 @@ using Lyra.Core.API;
 using Microsoft.AspNetCore.Components;
 using Nebula.Data;
 using Nebula.Data.Lyra;
-using Nebula.Store.WebWalletUseCase;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +18,6 @@ namespace Nebula.Pages
 
 		[Inject]
 		private ILiteDbContext dbCtx { get; set; }
-
-        [Inject]
-        private IState<WebWalletState> walletState { get; set; }
 
         [Inject]
         public NavigationManager navigationManager { get; set; }
@@ -52,8 +48,8 @@ namespace Nebula.Pages
 
         public void SwapToken(string token)
         {
-            walletState.Value.stage = UIStage.SwapToken;
-            navigationManager.NavigateTo("/swap/" + token.Replace("/", "%2F"));
+            //walletState.Value.stage = UIStage.SwapToken;
+            //navigationManager.NavigateTo("/swap/" + token.Replace("/", "%2F"));
         }
     }
 }

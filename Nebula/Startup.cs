@@ -20,9 +20,7 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
-using Blazorise;
-using Blazorise.Bootstrap5;
-using Blazorise.Icons.FontAwesome;
+using MudBlazor.Services;
 
 namespace Nebula
 {
@@ -41,9 +39,9 @@ namespace Nebula
         {
             services.AddBlazoredLocalStorage();
 
-            services.Configure<reCAPTCHAVerificationOptions>(Configuration.GetSection("reCAPTCHA"));
-            services.Configure<SwapOptions>(Configuration.GetSection("Swap"));
-            services.AddTransient<SampleAPI>();
+            //services.Configure<reCAPTCHAVerificationOptions>(Configuration.GetSection("reCAPTCHA"));
+            //services.Configure<SwapOptions>(Configuration.GetSection("Swap"));
+            //services.AddTransient<SampleAPI>();
 
             services.AddRazorPages();
             services.AddServerSideBlazor().AddCircuitOptions(e => {
@@ -85,19 +83,10 @@ namespace Nebula
             services.AddHostedService<IncentiveProgram>();
 
             var currentAssembly = typeof(Startup).Assembly;
-            var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
-            services.AddFluxor(options => options.ScanAssemblies(libAssembly, currentAssembly));
+            //var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
+            services.AddFluxor(options => options.ScanAssemblies(currentAssembly));
 
-            services
-              .AddBlazorise(options =>
-              {
-                  options.ChangeTextOnKeyPress = false; // optional
-                  options.DelayTextOnKeyPress = true;
-                  options.DelayTextOnKeyPressInterval = 300;
-              })
-              .AddBootstrap5Providers()
-              .AddFontAwesomeIcons();
-              //.AddMaterialIcons();
+            services.AddMudServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

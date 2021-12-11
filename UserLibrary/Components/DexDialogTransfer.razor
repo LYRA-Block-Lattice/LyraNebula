@@ -1,0 +1,39 @@
+﻿@using UserLibrary.Data
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            @Args.title
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Amount you want to transfer:</MudText>
+               <MudNumericField T="decimal?" Style="background: white; font-size:large;" 
+                    Min="@Args.min" Max="@Args.max"
+                    ValueChanged="@((e) => {Args.val = e.Value;})" />
+               &nbsp;@Args.symbol
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteServer">Transfer</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public DexTransferArgs Args { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void DeleteServer()
+    {
+        //In a real world scenario this bool would probably be a service to delete the item from api/database
+        Snackbar.Add("Server Deleted", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(Args.val));
+    }
+}

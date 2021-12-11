@@ -25,29 +25,39 @@
     @if (ui == UI.entry)
     {
         <div class="mid">
-            <TextEdit Role="TextRole.Password" Placeholder="Password" Size="Size.Large" @bind-Text="@txtValue1" />
+            <MudTextField InputType="InputType.Password" Label="Password" Size="Size.Large" @bind-Value="@txtValue1" />
         </div>
         <div class="mid">
-            <TextEdit Role="TextRole.Password" Placeholder="Confirm Password" Size="Size.Large" @bind-Text="@txtValue2" />
+            <MudTextField InputType="InputType.Password" Label="Confirm Password" Size="Size.Large" @bind-Value="@txtValue2" />
         </div>
         <div class="mid">
-            <TextEdit Size="Size.Large" Placeholder="Private Key" @bind-Text="@prvKey" />
+            <MudTextField Size="Size.Large" Label="Private Key" @bind-Value="@prvKey" />
         </div>
         @if(hasStore)
         {
             <div class="mid">
-                <Check TValue="bool" @bind-Checked="@confirmdelete">Confirm delete existing wallet</Check>
+                <MudSwitch T="bool" @bind-Checked="@confirmdelete">Confirm delete existing wallet</MudSwitch>
             </div>            
         }
         <div class="mid">
-            <Button Color="Color.Primary" Loading="@busy" Clicked="@RestoreWallet">Restore Wallet</Button>
+            <MudButton Color="Color.Primary" OnClick="@RestoreWallet">
+                @if (busy)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                    <MudText Class="ms-2">Processing</MudText>
+                }
+                else
+                {
+                    <MudText>Restore Wallet</MudText>
+                }
+            </MudButton>
         </div>
         <div class="mid">
-            <Divider Style="width: 0px; height: 0px" />
+            <MudDivider Style="width: 0px; height: 0px" />
         </div>
         <div class="mid">
         <a href="/login">
-            <Button>@act with password</Button></a>
+            <MudButton>@act with password</MudButton></a>
         </div>
     }
 
@@ -73,10 +83,10 @@
     [Inject]
     public ILocalStorageService _localStorage { get; set; }
 
-    [Inject] IMessageService MessageService { get; set; }
-
     [Parameter]
     public EventCallback OnFinished { get; set; }
+
+    [Inject] ISnackbar Snackbar { get; set; }
 
     bool busy;
 
@@ -105,11 +115,11 @@
 
     RenderFragment extraok =
     @<a href="login">
-        <Button Color="Color.Primary">Login</Button>
+        <MudButton Color="Color.Primary">Login</MudButton>
     </a>;
 
     RenderFragment extrafail =
-    @<Button Color="Color.Primary">Retry</Button>
+    @<MudButton Color="Color.Primary">Retry</MudButton>
     ;
 
     private string txtValue1 { get; set; }
@@ -142,7 +152,7 @@
         {
             if(!Signatures.ValidatePrivateKey(prvKey))
             {
-                await MessageService.Info( "Invalid private key.", "Notice" );
+                Snackbar.Add("Invalid private key.", Severity.Warning);
                 return;
             }
             // warn if wallet exists
@@ -168,7 +178,7 @@
 
         else
         {
-            await MessageService.Info( "Passwords not match.", "Notice" );
+            Snackbar.Add("Passwords not match.", Severity.Warning);
         }
     }
 
@@ -176,7 +186,7 @@
     {
         if(ck)
         {
-            MessageService.Info( "Your current wallet will be overwritten!!! Please make sure you want to do this.", "Warnning" );
+            Snackbar.Add("Your current wallet will be overwritten!!! Please make sure you want to do this.", Severity.Warning);
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿@namespace UserLibrary.Components
 
-@using Blazorise.Components
-@using Blazorise.Snackbar
 @using Fluxor
 @using Lyra.Core.API
 @using Lyra.Core.Blocks
@@ -18,10 +16,10 @@
     @if (ui == UI.Entry)
     {
         <div style="padding: 14px; width: 370px">
-            <Button Color="Color.Primary" Block class="rounded-pill"
-                Clicked="@(async ()=>{ await OpenAddLiquidityUI(); })">
+            <MudButton FullWidth="true" Color="Color.Primary" class="rounded-pill"
+                OnClick="@(async ()=>{ await OpenAddLiquidityUI(); })">
                 Add Liquidity
-            </Button>
+            </MudButton>
             <p>
                 <div>Your Liquidity</div>
             </p>
@@ -32,7 +30,7 @@
     @if (ui == UI.Adding)
     {
         <div style="padding: 14px; width: 370px; display: flex; justify-content:left; align-items:center;">
-            <Icon Clicked="@BackEntry" Name="@("fa-arrow-alt-circle-left")" />
+            <Icon OnClick="@BackEntry" Name="@("fa-arrow-alt-circle-left")" />
             &nbsp;Add Liquidity
         </div>
         <div>
@@ -44,22 +42,16 @@
                 <tr>
                     <td>
                         <div class="round">
-                            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                            <MudNumericField T="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
                                      @bind-Value="@amount1" />
                         </div>
                     </td>
                     <td>
                         <div class="round">
-                            <SelectList TItem="Ticker"
-                                    TValue="string"
-                                    Data="@tickers"
-                                    TextField="@((item)=>item.Name)"
-                                    ValueField="@((item)=>item.dbname)"
-                                    SelectedValue="@selectedValue1"
-                                    SelectedValueChanged="@OnSelectedItemChangedHandler1"
-                                    Style="width:200px; background: white; border:none;"
-                                    DefaultItemText="Choose Token" />
-                        </div>
+                            <TokenSelect Style="width:200px; background: white; border:none;"
+                                Tokens="@tickers"
+                                @bind-Selected="@selectedTicker1" OnSelect="@OnSelectedItemChangedHandler1" />
+                         </div>
                     </td>
                 </tr>
                 <tr>
@@ -73,21 +65,15 @@
                 <tr>
                     <td>
                         <div class="round">
-                            <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                            <MudNumericField T="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
                                      @bind-Value="@amount2" />
                         </div>
                     </td>
                     <td>
                         <div class="round">
-                            <SelectList TItem="Ticker"
-                                    TValue="string"
-                                    Data="@tickers"
-                                    TextField="@((item)=>item.Name)"
-                                    ValueField="@((item)=>item.dbname)"
-                                    SelectedValue="@selectedValue2"
-                                    SelectedValueChanged="@OnSelectedItemChangedHandler2"
-                                    Style="width:200px; background: white; border:none;"
-                                    DefaultItemText="Choose Token" />
+                            <TokenSelect Style="width:200px; background: white; border:none;"
+                                Tokens="@tickers"
+                                @bind-Selected="@selectedTicker2" OnSelect="@OnSelectedItemChangedHandler2" />
                         </div>
                     </td>
                 </tr>
@@ -110,18 +96,18 @@
                             @if (walletState.Value.wallet == null)
                             {
                                 <a href="/wallet">
-                                    <Button Block class="rounded-pill"
+                                    <MudButton FullWidth="true" class="rounded-pill"
                                 Color="Color.Primary">
                                         Open Wallet to Create a Pool
-                                    </Button>
+                                    </MudButton>
                                 </a>
                             }
                             else
                             {
-                                <Button Color="Color.Primary" Block Disabled="@(!alenabled)"
-                            Clicked="@(async ()=>{ await PoolDeposit(); })" class="rounded-pill">
+                                <MudButton FullWidth="true" Color="Color.Primary" Disabled="@(!alenabled)"
+                            OnClick="@(async ()=>{ await PoolDeposit(); })" class="rounded-pill">
                                     Add Liquidate
-                                </Button>
+                                </MudButton>
                             }
 
                         </td>
@@ -130,11 +116,11 @@
                     {
                         <tr>
                             <td colspan="2">
-                                <Divider>Or</Divider>
-                                <Button Block class="rounded-pill"
-                            Color="Color.Primary" Clicked="@(async ()=>{ await PoolWithdraw(); })">
+                                <MudDivider>Or</MudDivider>
+                                <MudButton FullWidth="true" class="rounded-pill"
+                            Color="Color.Primary" OnClick="@(async ()=>{ await PoolWithdraw(); })">
                                     Remove All My Share
-                                </Button>
+                                </MudButton>
                             </td>
                         </tr>
                     }
@@ -149,18 +135,18 @@
                             @if (walletState.Value.wallet == null)
                             {
                                 <a href="/wallet">
-                                    <Button Block class="rounded-pill"
+                                    <MudButton FullWidth="true" class="rounded-pill"
                                 Color="Color.Primary">
                                         Open Wallet to Create a Pool
-                                    </Button>
+                                    </MudButton>
                                 </a>
                             }
                             else
                             {
-                                <Button Disabled="@(!clenabled)" Block class="rounded-pill"
-                            Color="Color.Primary" Clicked="@(async ()=>{ await CreateLiquidity(); })">
+                                <MudButton FullWidth="true" Disabled="@(!clenabled)" class="rounded-pill"
+                            Color="Color.Primary" OnClick="@(async ()=>{ await CreateLiquidity(); })">
                                     Create Liquidity Pool
-                                </Button>
+                                </MudButton>
                             }
                         </td>
                     </tr>
@@ -174,8 +160,6 @@
 
 </div>
 
-<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
-
 @code {
 
     [Inject]
@@ -184,7 +168,7 @@
     [Inject]
     private IDispatcher Dispatcher { get; set; }
 
-    SnackbarStack snackbarStack;
+    [Inject] ISnackbar Snackbar { get; set; }
     double intervalBeforeMsgClose = 2000;
 
     enum UI { Entry, Adding }
@@ -231,8 +215,6 @@
     List<Ticker> tickers;
     Ticker selectedTicker1;
     Ticker selectedTicker2;
-    string selectedValue1;
-    string selectedValue2;
 
     bool havepool;
     bool clenabled;
@@ -264,31 +246,31 @@
     {
         try
         {
-            await snackbarStack.PushAsync($"Removing liquidate ...", SnackbarColor.Info);
+            Snackbar.Add($"Removing liquidate ...", Severity.Info);
             var result = await walletState.Value.wallet.RemoveLiquidateFromPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
             if (result.Successful())
             {
-                await snackbarStack.PushAsync($"Remove liquidate success.", SnackbarColor.Success);
+                Snackbar.Add($"Remove liquidate success.", Severity.Success);
 
                 await Task.Delay(2000);
-                await snackbarStack.PushAsync($"Updating pool...", SnackbarColor.Info);
+                Snackbar.Add($"Updating pool...", Severity.Info);
 
                 updateBtn1(amount1);
                 await Task.Delay(2000);
 
-                await snackbarStack.PushAsync($"Updating balance...", SnackbarColor.Info);
+                Snackbar.Add($"Updating balance...", Severity.Info);
                 await walletState.Value.wallet.SyncAsync(null);
                 UpdateBalance();
-                await snackbarStack.PushAsync($"Success.", SnackbarColor.Info);
+                Snackbar.Add($"Success.", Severity.Info);
             }
             else
             {
-                await snackbarStack.PushAsync($"Failed remove liquidate. {result.ResultCode}", SnackbarColor.Danger);
+                Snackbar.Add($"Failed remove liquidate. {result.ResultCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
+            Snackbar.Add($"Unexpected Error: {ex}", Severity.Error);
         }
     }
 
@@ -299,26 +281,26 @@
             var result = await walletState.Value.wallet.AddLiquidateToPoolAsync(selectedTicker1.dbname, amount1, selectedTicker2.dbname, amount2);
             if (result.Successful())
             {
-                await snackbarStack.PushAsync($"Add liquidate success.", SnackbarColor.Success);
+                Snackbar.Add($"Add liquidate success.", Severity.Success);
                 await Task.Delay(3000);
 
-                await snackbarStack.PushAsync($"Updating pool...", SnackbarColor.Info);
+                Snackbar.Add($"Updating pool...", Severity.Info);
                 updateBtn1(amount1);
 
-                await snackbarStack.PushAsync($"Updating balance...", SnackbarColor.Info);
+                Snackbar.Add($"Updating balance...", Severity.Info);
                 await walletState.Value.wallet.SyncAsync(null);
                 UpdateBalance();
 
-                await snackbarStack.PushAsync($"Finished successfully.", SnackbarColor.Success);
+                Snackbar.Add($"Finished successfully.", Severity.Success);
             }
             else
             {
-                await snackbarStack.PushAsync($"Failed add liquidate. {result.ResultCode}", SnackbarColor.Danger);
+                Snackbar.Add($"Failed add liquidate. {result.ResultCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            await snackbarStack.PushAsync($"Unexpected Error: {ex}", SnackbarColor.Danger);
+            Snackbar.Add($"Unexpected Error: {ex}", Severity.Error);
         }
     }
 
@@ -328,13 +310,13 @@
         if (poolCreateResult.Successful())
         {
             await Task.Delay(2000);
-            await snackbarStack.PushAsync($"Waiting for pool be created...", SnackbarColor.Success);
+            Snackbar.Add($"Waiting for pool be created...", Severity.Success);
             await Task.Delay(3000);
             await PoolDeposit();
         }
         else
         {
-            await snackbarStack.PushAsync($"Pool created failed. {poolCreateResult.ResultCode}", SnackbarColor.Danger);
+            Snackbar.Add($"Pool created failed. {poolCreateResult.ResultCode}", Severity.Error);
         }
 
     }
@@ -483,15 +465,13 @@
         alenabled = amount1 > 0 && amount2 > 0 && amount1 <= balance1 && amount2 <= balance2;
     }
 
-    private void OnSelectedItemChangedHandler1(string value)
+    private void OnSelectedItemChangedHandler1()
     {
-        selectedValue1 = value;
-        selectedTicker1 = tickers.FirstOrDefault(a => a.dbname == value);
         if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk != null && blk.Balances.ContainsKey(value))
-                balance1 = blk.Balances[value].ToBalanceDecimal();
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker1.dbname))
+                balance1 = blk.Balances[selectedTicker1.dbname].ToBalanceDecimal();
             else
                 balance1 = 0;
         }
@@ -500,15 +480,13 @@
 
         updateBtn(0);
     }
-    private void OnSelectedItemChangedHandler2(string value)
+    private void OnSelectedItemChangedHandler2()
     {
-        selectedValue2 = value;
-        selectedTicker2 = tickers.FirstOrDefault(a => a.dbname == value);
         if (walletState.Value.wallet != null)
         {
             var blk = walletState.Value.wallet.GetLatestBlock();
-            if (blk != null && blk.Balances.ContainsKey(value))
-                balance2 = blk.Balances[value].ToBalanceDecimal();
+            if (blk != null && blk.Balances.ContainsKey(selectedTicker2.dbname))
+                balance2 = blk.Balances[selectedTicker2.dbname].ToBalanceDecimal();
             else
                 balance2 = 0;
         }

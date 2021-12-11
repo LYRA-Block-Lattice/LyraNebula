@@ -1,8 +1,5 @@
 ﻿@namespace UserLibrary.Components
 
-@using Blazorise.Components
-@using Blazorise.Icons
-@using Blazorise.Snackbar
 @using CoinGecko.Clients
 @using CoinGecko.Interfaces
 @using Fluxor
@@ -33,28 +30,24 @@
         <tr>
             <td>
                 <div class="round">
-                    <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                    <MudNumericField T="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
                                  @bind-Value="@amount1" />
                 </div>
             </td>
             <td>
                 <div class="round">
-                    <SelectList TItem="Ticker"
-                                TValue="string"
-                                Data="@tickers"
-                                TextField="@((item)=>item.Name)"
-                                ValueField="@((item)=>item.dbname)"
-                                SelectedValue="@selectedValue1"
-                                SelectedValueChanged="@OnSelectedItemChangedHandler1"
-                                Style="width:200px; background: white; border:none;"
-                                DefaultItemText="Choose Token" />
+                            <TokenSelect Style="width:200px; background: white; border:none;"
+                                Tokens="@tickers"
+                                @bind-Selected="@selectedTicker1" OnSelect="@OnSelectedItemChangedHandler1" />
 
                 </div>
             </td>
         </tr>
         <tr>
             <td align="center">
-                <Icon Clicked="@DoSwapTicker" Name="@("fa-arrows-alt-v")" />
+                <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Secondary" 
+                    OnClick="@DoSwapTicker"
+                    aria-label="add to favorite"></MudIconButton>
             </td>
             <td align="right"></td>
         </tr>
@@ -65,21 +58,15 @@
         <tr>
             <td>
                 <div class="round">
-                    <NumericEdit TValue="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
+                    <MudNumericField T="decimal" Style="width: 100px; background: white; border:none;" lang="en-us" DecimalsSeparator="."
                                  @bind-Value="@amount2" />
                 </div>
             </td>
             <td>
                 <div class="round">
-                    <SelectList TItem="Ticker"
-                                TValue="string"
-                                Data="@tickers"
-                                TextField="@((item)=>item.Name)"
-                                ValueField="@((item)=>item.dbname)"
-                                SelectedValue="@selectedValue2"
-                                SelectedValueChanged="@OnSelectedItemChangedHandler2"
-                                Style="width:200px; background: white; border:none;"
-                                DefaultItemText="Choose Token" />
+                            <TokenSelect Style="width:200px; background: white; border:none;"
+                                Tokens="@tickers"
+                                @bind-Selected="@selectedTicker2" OnSelect="@OnSelectedItemChangedHandler2" />
                 </div>
             </td>
         </tr>
@@ -124,18 +111,26 @@
                 @if (walletState.Value.wallet == null)
                 {
                     <a href="/wallet">
-                    <Button Block Color="Color.Primary" class="rounded-pill">
+                    <MudButton FullWidth="true" Color="Color.Primary" class="rounded-pill">
                         <Icon Name="IconName.Unlock" />
                         Open Wallet
-                    </Button>
+                    </MudButton>
                     </a>
                 }
                 else
                 {
-                    <Button Block Loading="@swapping" Disabled="@(!canswap)" Color="Color.Primary" Clicked="@DoSwap" class="rounded-pill">
-                        <Icon Name="IconName.SyncAlt" />
-                        Swap
-                    </Button>
+                    <MudButton FullWidth="true" Disabled="@(!canswap)" Color="Color.Primary" OnClick="@DoSwap" class="rounded-pill">
+                        <Icon Name="IconName.SyncAlt" />                        
+                        @if (swapping)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                            <MudText Class="ms-2">Processing</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Swap</MudText>
+                        }
+                    </MudButton>
                 }
 
 
@@ -174,8 +169,6 @@
 
 </div>
 
-<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
-
 @code {
     [Inject]
     private IState<WebWalletState> walletState { get; set; }
@@ -183,7 +176,7 @@
     [Inject]
     private IDispatcher Dispatcher { get; set; }
 
-    SnackbarStack snackbarStack;
+    [Inject] ISnackbar Snackbar { get; set; }
     double intervalBeforeMsgClose = 2000;
 
     bool busy;
@@ -230,8 +223,6 @@
     List<Ticker> tickers;
     Ticker selectedTicker1;
     Ticker selectedTicker2;
-    string selectedValue1;
-    string selectedValue2;
 
     RenderFragment pairinfo, pairliquid, pairshare;
     bool haspoolinfo = false;
@@ -249,7 +240,6 @@
     private void DoSwapTicker()
     {
         (selectedTicker1, selectedTicker2) = (selectedTicker2, selectedTicker1);
-        (selectedValue1, selectedValue2) = (selectedValue2, selectedValue1);
         (amount1, amount2) = (amount2, amount1);
         UpdateBalance();
         updateBtn1(amount1);
@@ -269,17 +259,17 @@
 
         if (result.Successful())
         {
-            await snackbarStack.PushAsync("Token Swap Success! Waiting for pool updating...", SnackbarColor.Success);
+            Snackbar.Add("Token Swap Success! Waiting for pool updating...", Severity.Success);
             await Task.Delay(3000);
 
-            await snackbarStack.PushAsync("Refresh pool and wallet...", SnackbarColor.Info);
+            Snackbar.Add("Refresh pool and wallet...", Severity.Info);
             await walletState.Value.wallet.SyncAsync(null);
 
             var lc = LyraRestClient.Create(_config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
             var existspool = await lc.GetPoolAsync(selectedTicker1.dbname, selectedTicker2.dbname);
             if (existspool.Successful())
             {
-                await snackbarStack.PushAsync("Updated.", SnackbarColor.Success);
+                Snackbar.Add("Updated.", Severity.Success);
             
                 poollatest = existspool.GetBlock() as TransactionBlock;
                 token0 = existspool.Token0;
@@ -288,7 +278,7 @@
             }
             else
             {
-                await snackbarStack.PushAsync($" Pool refresh failed: {existspool.ResultCode}", SnackbarColor.Danger);
+                Snackbar.Add($" Pool refresh failed: {existspool.ResultCode}", Severity.Error);
             }
 
             updateBtn1(amount1);
@@ -297,7 +287,7 @@
             swapping = false;
         }
         else
-            await snackbarStack.PushAsync($"Error Swap Token: {result.ResultCode}", SnackbarColor.Danger);
+            Snackbar.Add($"Error Swap Token: {result.ResultCode}", Severity.Error);
 
         swapping = false;
         busy = false;
@@ -387,17 +377,13 @@
         }
     }
 
-    private void OnSelectedItemChangedHandler1(string value)
+    private void OnSelectedItemChangedHandler1()
     {
-        selectedValue1 = value;
-        selectedTicker1 = tickers.FirstOrDefault(a => a.dbname == value);
         UpdateBalance();
         ChangePool();
     }
-    private void OnSelectedItemChangedHandler2(string value)
+    private void OnSelectedItemChangedHandler2()
     {
-        selectedValue2 = value;
-        selectedTicker2 = tickers.FirstOrDefault(a => a.dbname == value);
         UpdateBalance();
         ChangePool();
     }

@@ -1,60 +1,63 @@
 ﻿@using Fluxor
 @using Nebula.Store.WebWalletUseCase
 
-<Jumbotron Background="Background.Light" Margin="Margin.Is4.FromBottom">
-    <JumbotronTitle Size="JumbotronTitleSize.Is4">Hello, My new token!</JumbotronTitle>
-    <JumbotronSubtitle>
-        Mint your own Token with just a few clicks.
-    </JumbotronSubtitle>
-    <Divider></Divider>
-    <Paragraph>
-        Note: Every token mint costs 10,000 LYR.
-    </Paragraph>
-</Jumbotron>
+<div>
+    <h1>Hello, My new token!</h1>
+    <MudText>Mint your own Token with just a few clicks.</MudText>
+    <MudText>Note: Every token mint costs 10,000 LYR.</MudText>
+</div>
+
 
 <div>
     <p>
         <h3>Token Name</h3>
-        <TextEdit @bind-Text="@name" Placeholder="minimum 2 characters" />
+        <MudTextField @bind-Value="@name" Label="minimum 2 characters" />
     </p>
     <p>
         <h3>Domain</h3>
-        <TextEdit @bind-Text="@domain" Placeholder="minimum 6 characters" />
+        <MudTextField @bind-Value="@domain" Label="minimum 6 characters" />
     </p>
     <p>
         <h3>Description</h3>
-        <TextEdit @bind-Text="@desc" Placeholder="optional" />
+        <MudTextField @bind-Value="@desc" Label="optional" />
     </p>
     <p>
         <h3>Supply (maximum 90,000,000,000)</h3>
-        <NumericEdit TValue="Int64"
+        <MudNumericField T="Int64"
                      @bind-Value="@supply"/>
     </p>
     <p>
         <h3>Precision (0 - 8)</h3>
-        <NumericEdit TValue="Int64"
+        <MudNumericField T="Int64"
                      @bind-Value="@precision" />
     </p>
     <p>
         <h3>Owner</h3>
-        <TextEdit @bind-Text="@owner" Placeholder="optional" />
+        <MudTextField @bind-Value="@owner" Label="optional" />
     </p>
     <p>
         <h3>Address</h3>
-        <TextEdit @bind-Text="@address" Placeholder="optional" />
+        <MudTextField @bind-Value="@address" Label="optional" />
     </p>
     <p>
         @if (walletState.Value.wallet == null)
         {
-            <a href="wallet"><Button Block Color="Color.Primary">Open wallet to create token</Button></a>
+            <a href="wallet"><MudButton FullWidth="true" Color="Color.Primary">Open wallet to create token</MudButton></a>
         }
         else
         {
-            <Button Block Color="Color.Primary" @ref="@btn"
-                Loading="@loading"
-                Clicked="@mint">
-                Mint!
-            </Button>
+            <MudButton FullWidth="true" Color="Color.Primary" @ref="@btn"
+                OnClick="@mint">
+                @if (loading)
+                {
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Processing</MudText>
+                }
+                else
+                {
+                    <MudText>Mint</MudText>
+                }
+            </MudButton>
         }
 
     </p>
@@ -79,7 +82,7 @@
 
     string name, domain, desc, owner, address;
     Int64 supply, precision;
-    Button btn;
+    MudButton btn;
     bool loading;
     string errmsg;
     bool success;

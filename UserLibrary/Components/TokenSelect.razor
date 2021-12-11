@@ -1,0 +1,25 @@
+﻿@using UserLibrary.Data
+
+<MudSelect T="Ticker" Placeholder="Choose Token"
+    SelectedValuesChanged="@OnSelect"
+    @bind-Value="Selected"
+           Style="width:200px; background: white; border:none;">
+       
+@foreach(var token in Tokens)
+    {
+        <MudSelectItem T="String" Value="@token.Name" />
+    }
+
+</MudSelect>
+            
+
+@code {
+    [Parameter]
+    public List<Ticker> Tokens {  get;  set; }
+
+    [Parameter] 
+    public EventCallback OnSelect { get; set; }
+
+    [Parameter] 
+    public Ticker Selected {  get;  set; }
+}

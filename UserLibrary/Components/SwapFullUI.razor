@@ -1,29 +1,16 @@
 ﻿@namespace UserLibrary.Components
 
-<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" 
-    Mode="TabsMode.LazyLoad" Class="cet"
-    Justified="true">
-    <Items>
-        <Tab Name="home">Swap</Tab>
-        <Tab Name="profile">Pool</Tab>
-    </Items>
-    <Content>
-        <TabPanel Name="home">
-            <div class="pad"><Swap /></div>
-            
-        </TabPanel>
-        <TabPanel Name="profile">
-            <div class="pad"><Pool /></div>
-            
-        </TabPanel>
-    </Content>
-</Tabs>
+<MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="Color.Dark">
+    <MudTabPanel Text="Swap">
+        <div class="pad"><Swap /></div>
+    </MudTabPanel>
+    <MudTabPanel Test="Pool">
+        <div class="pad"><Pool /></div>
+    </MudTabPanel>
+</MudTabs>
 
 @code
 {
-	[CascadingParameter]
-	public Error Error { get; set; }
-
     string selectedTab = "home";
 
     private Task OnSelectedTabChanged( string name )

@@ -2,5 +2,12 @@
 @page "/swap"
 
 
-<UserLibrary.Components.SwapFullUI />
+<MudTabs Elevation="2" Rounded="true" Centered="true" Class="my-6" Color="Color.Dark">
+    <MudTabPanel Text="Swap">
+        <div class="pad"><Swap /></div>
+    </MudTabPanel>
+    <MudTabPanel Text="Pool">
+        <div class="pad"><Pool /></div>
+    </MudTabPanel>
+</MudTabs>
 

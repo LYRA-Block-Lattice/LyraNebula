@@ -24,7 +24,6 @@
 @inject ILogger<WebWallet> logger
 @inject ILyraAPI lyraClient
 @using UserLibrary.Components
-@using Blazorise.Snackbar
 
 @if (walletState.Value.IsLoading || busy || busysend)
 {
@@ -40,178 +39,187 @@
 
 @if (walletState.Value.wallet != null)
 {
-<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged" 
-    Mode="TabsMode.LazyLoad"
-    Justified="true">
-    <Items>
-        <Tab Name="home">Home</Tab>
-        <Tab Name="staking">Staking</Tab>
-		<Tab Name="dex">DEX</Tab>
-        <Tab Name="settings">Settings</Tab>
-		@if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent)
-			{				
-				<Tab Name="free">Free Token</Tab>
-			}
-			
-	</Items>
-    <Content>
-        <TabPanel Name="home" Margin="Margin.Is4.OnY">
-
-			<Buttons Role="ButtonsRole.Toolbar">
-				<Buttons>
-					<Button Loading="@busy" Color="Color.Success" Clicked="@Refresh">Receive</Button>
-					<Button Color="Color.Info" Clicked="@ToggleSend">Transfer</Button>
-				</Buttons>
-			</Buttons>
-
-			@if(showsend)
-			{
-				<div class="simp">
-					<p>
-						Destination Wallet Address:<br />
-						<TextEdit TValue="string" Placeholder="Address" @bind-Text="@dstAddr" /> 						
-						<a href="/scan">
-							<Button Color="Color.Primary">Scan QR-Code</Button>	
-						</a>
-					</p>
-					<p>
-						Token Name:<br />
-						<TextEdit TValue="string" Placeholder="Name" @bind-Text="@tokenName" /> 
-					</p>
-					<p>
-						Amount:<br />
-						<NumericEdit TValue="decimal" Placeholder="Amount" @bind-Value="@amount" /> 
-					</p>
-					<Button Color="Color.Primary" Loading="@busysend" Clicked="@SendTokenAsync">Send Token</Button>
-				</div>
-
-				<Divider />
-			}
-
-			<div class="cet">				
-			@if (walletState.Value.wallet.GetLatestBlock() != null)
-            {
-                @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
+    <MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Home">
+            <MudButton Color="Color.Success" OnClick="@Refresh">
+                @if (busy)
                 {
-					<Card Style="height:150px; width:280px;">
-					<CardHeader Style="display: flex; align-items: center; justify-content: space-between;">
-						<Div Style="font-size: large; font-weight:bolder;">
-							@kvp.Key.Replace("tether/", "$")
-						</Div>
-						<Button Color="Color.Light" 
-							Clicked="@(async ()=>{ await SendX(kvp.Key); })">Send</Button>
-					</CardHeader>
-						<CardBody>
-							<CardTitle Size="5"><b>@($"{kvp.Value.ToBalanceDecimal():N4}")</b></CardTitle>
-							<CardText>
-								
-							</CardText>
-							
-						</CardBody>
-					</Card>
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                    <MudText Class="ms-2">Processing</MudText>
+                }
+                else
+                {
+                    <MudText>Receive</MudText>
+                }
+            </MudButton>
+            <MudButton Color="Color.Info" OnClick="@ToggleSend">Transfer</MudButton>
+
+            @if (showsend)
+            {
+                <div class="simp">
+                    <p>
+                        Destination Wallet Address:<br />
+                        <MudTextField T="string" Label="Address" @bind-Value="@dstAddr" />
+                        <a href="/scan">
+                            <MudButton Color="Color.Primary">Scan QR-Code</MudButton>
+                        </a>
+                    </p>
+                    <p>
+                        Token Name:<br />
+                        <MudTextField T="string" Label="Name" @bind-Value="@tokenName" />
+                    </p>
+                    <p>
+                        Amount:<br />
+                        <MudNumericField T="decimal" Label="Amount" @bind-Value="@amount" />
+                    </p>
+                    <MudButton Color="Color.Primary" OnClick="@SendTokenAsync">
+                        @if (busysend)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Processing</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Send Token</MudText>
+                        }
+                    </MudButton>
+                </div>
+
+                <MudDivider />
+            }
+
+            <div class="cet">
+                @if (walletState.Value.wallet.GetLatestBlock() != null)
+                {
+                    @foreach (var kvp in walletState.Value.wallet.GetLatestBlock().Balances)
+                    {
+                        <MudCard>
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">@kvp.Key.Replace("tether/", "$")</MudText>
+                                </CardHeaderContent>
+                                <CardHeaderActions>
+                                    <MudButton Color="Color.Primary"
+                                   OnClick="@(async ()=>{ await SendX(kvp.Key); })">Send</MudButton>
+                                </CardHeaderActions>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudText>This day everything happend.</MudText>
+                                <MudText Typo="Typo.body2">@($"{kvp.Value.ToBalanceDecimal():N4}")</MudText>
+                            </MudCardContent>
+                        </MudCard>
+                    }
+
+                    <MudCard>
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">Your New Token</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div style="height: 100%; display: flex; align-items: center; justify-content: center">
+                                <a href="mint">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Secondary" aria-label="add to favorite"></MudIconButton>
+                                </a>
+                            </div>
+                        </MudCardContent>
+                    </MudCard>
                 }
 
-					<Card Style="height:150px; width:280px;">
-					<CardHeader>
-						<CardTitle>Your New Token</CardTitle>
-					</CardHeader>
-						<CardBody>
-							<Div Style="height: 100%; display: flex; align-items: center; justify-content: center">
-								<a href="mint"><Icon Name="@("fa-plus-circle")" IconSize="IconSize.x3" /></a>
-							</Div>
-						</CardBody>
-					</Card>
+            </div>
+
+        </MudTabPanel>
+
+        <MudTabPanel Text="Staking">
+            @if (walletState.Value.brokerAccounts != null)
+            {
+                <Staking />
+            }
+            else
+            {
+                Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
+                <p>Refreshing...</p>
             }
 
-			</div>
-
-        </TabPanel>
-		<TabPanel Name="staking" Margin="Margin.Is4.OnY">
-		@if(walletState.Value.brokerAccounts != null)
-		{
-					<Staking />
-				}
-				else
-				{
-					Dispatcher.Dispatch(new WebWalletStakingAction { wallet = walletState.Value.wallet });
-					<p>Refreshing...</p>
-				}
-
-        </TabPanel>
-        <TabPanel Name="dex" Margin="Margin.Is4.OnY">
+        </MudTabPanel>
+        <MudTabPanel Text="DEX">
             <UserLibrary.Components.DexWallets />
-        </TabPanel>
-        <TabPanel Name="settings" Margin="Margin.Is4.OnY">
+        </MudTabPanel>
+        <MudTabPanel Text="Settings">
 
-    <div>
-		<h3>Scan to Pay Me</h3>
-		<p><QRCodeWriter Text="@walletState.Value.wallet.AccountId" Width="300" Heigth="300"></QRCodeWriter></p>
-		<Divider />
-        <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
-        <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
-        <p>Your wallet's balance is: @walletState.Value.balanceString</p>
-        <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>
+            <div>
+                <h3>Scan to Pay Me</h3>
+                <p><QRCodeWriter Text="@walletState.Value.wallet.AccountId" Width="300" Heigth="300"></QRCodeWriter></p>
+                <MudDivider />
+                <p><span title="Click to toggle to display" @onclick="ToggleKey">Your wallet's private key is (click to unhide/hide): </span><span>@altDisplay</span></p>
+                <p>Your wallet's address is: <a href="/showblock/@walletState.Value.wallet.AccountId">@walletState.Value.wallet.AccountId</a></p>
+                <p>Your wallet's balance is: @walletState.Value.balanceString</p>
+                <p>Your are now voting for: @walletState.Value.wallet.VoteFor</p>
 
-        <p>
-            Vote For Address:
-            <TextEdit TValue="string" Placeholder="Address" @bind-Text="@voteAddr" /> 
-        </p>
-        <div>
-            <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
-        </div>
-        <hr />
-                        <button class="btn btn-primary" @onclick="Transactions">
+                <p>
+                    Vote For Address:
+                    <MudTextField T="string" Label="Address" @bind-Value="@voteAddr" />
+                </p>
+                <div>
+                    <p style="color: red">Please save private key properly if you want to open this wallet again.</p>
+                </div>
+                <hr />
+                <button class="btn btn-primary" @onclick="Transactions">
                     Transactions
                 </button>
-		    @if (walletState.Value.txs != null)
-    {
-        <pre>
-            @foreach (var tx in walletState.Value.txs)
-            {
-                @tx <br />
+                @if (walletState.Value.txs != null)
+                {
+                    <pre>
+                        @foreach (var tx in walletState.Value.txs)
+                        {
+                            @tx <br />
 
-            }
-                        </pre>
-    }
-        &nbsp;<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
-		&nbsp;<button class="btn btn-primary" @onclick="CloseWallet">Close Wallet</button>
-    </div>
-        </TabPanel>
+                        }
+                                </pre>
+                }
+                &nbsp;<button class="btn btn-primary" @onclick="SaveSettings">Save</button>
+                &nbsp;<button class="btn btn-primary" @onclick="CloseWallet">Close Wallet</button>
+            </div>
+        </MudTabPanel>
 
-		        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
+        @if (!string.IsNullOrWhiteSpace(Configuration["faucetPvk"]) && Configuration["network"] != "mainnet" && walletState.Value.wallet.BaseBalance == 0m && !walletState.Value.freeTokenSent) //&& walletState.Value.freeTokenTimes < 3
         {
-            <TabPanel Name="free" Margin="Margin.Is4.OnY">
-                    <div>
-        <p>Current balance of faucet account: <em>@walletState.Value.faucetBalance</em> LYR</p>
-    </div>
+            <MudTabPanel Text="Free Token">
+                <div>
+                    <p>Current balance of faucet account: <em>@walletState.Value.faucetBalance</em> LYR</p>
+                </div>
 
-    @*    <div class="section">
-        <ReCAPTCHA @ref="reCAPTCHAComponent" SiteKey="6Lftd8gZAAAAAK5G9aHUFY7wtV1yocfAf2Vj-EmI" OnSuccess="OnSuccess" OnExpired="OnExpired" />
-        </div>*@
+                @*    <div class="section">
+                    <ReCAPTCHA @ref="reCAPTCHAComponent" SiteKey="6Lftd8gZAAAAAK5G9aHUFY7wtV1yocfAf2Vj-EmI" OnSuccess="OnSuccess" OnExpired="OnExpired" />
+                    </div>*@
 
-    <div class="section">
-        <button class="btn btn-success" @onclick="OnClickPost" disabled="@walletState.Value.DisablePostButton">
-            Send me Token!
-        </button>
-        &nbsp;&nbsp;
-        <button class="btn btn-primary" @onclick="Return">Return</button>
-    </div>
-            </TabPanel>
+                <div class="section">
+                    <button class="btn btn-success" @onclick="OnClickPost" disabled="@walletState.Value.DisablePostButton">
+                        Send me Token!
+                    </button>
+                    &nbsp;&nbsp;
+                    <button class="btn btn-primary" @onclick="Return">Return</button>
+                </div>
+            </MudTabPanel>
         }
+    </MudTabs>
 
-    </Content>
-	</Tabs>
 
-	<SnackbarStack @ref="snackbarStack" Location="SnackbarStackLocation.Right" />
+
+
+
 }
 else
 {
-	try
-	{
-		Navigation.NavigateTo("login");
-	}
-    catch(Exception e)
-	{
+    try
+    {
+        Navigation.NavigateTo("login");
+    }
+    catch (Exception e)
+    {
 
-	}
+    }
 }

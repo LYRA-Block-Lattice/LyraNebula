@@ -84,7 +84,8 @@ namespace Nebula.Store.WebWalletUseCase
 				IsOpening = action.IsOpening,
 				wallet = action.wallet,
 				balanceString = bs,
-				VoteFor = action.wallet.VoteFor
+				VoteFor = action.wallet?.VoteFor,
+				error = ""
 			});
 		}			
 

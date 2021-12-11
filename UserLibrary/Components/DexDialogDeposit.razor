@@ -1,0 +1,37 @@
+﻿@using UserLibrary.Data
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1"/>
+            @Args.title
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <h3><b>@Args.view.Symbol</b></h3>
+        <p>Provider: @Args.view.NetworkProvider</p>
+        <p>Contract: @Args.view.Contract</p>
+        <p>Depositon Address: </p>
+        <p style="width:100%">
+            <CopyToClipboard Text="@Args.address" />
+        </p>
+        <p>&nbsp;</p>
+        <p>Minimal Deposit: @Args.view.MinDeposit @Args.view.Symbol</p>
+        <p>Deposition Fee: @Args.view.DepositFee @Args.view.Symbol</p>
+        <p>Confirmation: @Args.view.ConfirmationInfo</p>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public DexDepositArgs Args { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

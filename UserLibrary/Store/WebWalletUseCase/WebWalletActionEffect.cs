@@ -217,12 +217,15 @@ namespace Nebula.Store.WebWalletUseCase
 
 				await wallet.SyncAsync(client);
 				dispatcher.Dispatch(new WebWalletResultAction(wallet, true, UIStage.Main));
-
 			}
 			catch(Exception ex)
             {
 				logger.LogError($"IN HandleOpen: {ex}");
-            }
+				dispatcher.Dispatch(new WalletErrorResultAction
+				{
+					error = "Unable to open wallet."
+				});
+			}
 
 		}
 
