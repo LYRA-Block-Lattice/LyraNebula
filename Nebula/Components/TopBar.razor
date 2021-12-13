@@ -1,0 +1,33 @@
+﻿@namespace Nebula.Components
+
+@using Fluxor
+@using Lyra.Core.API
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<div class="top-row px-4">
+    <div class="tg" style="font-size: larger;">
+        <b>
+            <span class="oi oi-menu" aria-hidden="true" onclick="@toggle"></span>
+            &nbsp;@Configuration["network"].ToUpper()
+        </b>
+    </div>
+    <div>
+        <a href="https://lyra.live/" target="_blank">About</a>
+    </div>
+</div>
+
+@code
+{
+    [Parameter] public EventCallback OnToggle { get; set; }
+
+    RenderFragment? banner;
+
+    private async Task toggle()
+    {
+        if(OnToggle.HasDelegate)
+        {
+            await OnToggle.InvokeAsync();
+        }
+    }
+}

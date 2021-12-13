@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Blazored.LocalStorage;
 using Fluxor;
 using Lyra.Core.API;
 using Microsoft.AspNetCore.Builder;
@@ -20,7 +19,6 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
-using MudBlazor.Services;
 
 namespace Nebula
 {
@@ -37,8 +35,6 @@ namespace Nebula
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddBlazoredLocalStorage();
-
             //services.Configure<reCAPTCHAVerificationOptions>(Configuration.GetSection("reCAPTCHA"));
             //services.Configure<SwapOptions>(Configuration.GetSection("Swap"));
             //services.AddTransient<SampleAPI>();
@@ -84,9 +80,7 @@ namespace Nebula
 
             var currentAssembly = typeof(Startup).Assembly;
             //var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;
-            services.AddFluxor(options => options.ScanAssemblies(currentAssembly));
-
-            services.AddMudServices();
+            services.AddFluxor(options => options.ScanAssemblies(currentAssembly/*, libAssembly*/));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
