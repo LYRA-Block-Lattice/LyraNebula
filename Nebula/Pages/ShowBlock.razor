@@ -5,7 +5,7 @@
 
 <h2 style="text-align: center">Search by Hash or Account ID</h2>
 <p style="text-align: center">
-    <MudTextField T="string" Label="Hash or Account ID" TextChanged="@oninput" />
+    <input size="100" type="text" title="Hash or Account ID" @oninput="@oninput" />
 </p>
 
 @if (searchState.Value.IsLoading)

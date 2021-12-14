@@ -10,6 +10,9 @@ namespace Nebula.Pages
 {
 	public partial class ShowBlock
 	{
+		[Inject]
+		public NavigationManager navigationManager { get; set; }
+
 		[Parameter] 
 		public string hash { get; set; }
 		[Parameter]
@@ -36,11 +39,9 @@ namespace Nebula.Pages
 			await base.OnParametersSetAsync();
         }
 
-        public Task oninput(string value)
+		public void oninput(ChangeEventArgs args)
 		{
-			hash = value;
-			Dispatcher.Dispatch(new BlockSearchAction(hash, height));
-			return Task.CompletedTask;
+			navigationManager.NavigateTo($"/showblock/{args.Value}");
 		}
 	}
 }

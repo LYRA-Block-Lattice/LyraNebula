@@ -25,12 +25,9 @@ namespace Nebula.Pages
 
         string hash;
 
-        public Task oninput(string value)
+        public void oninput(ChangeEventArgs args)
         {
-            hash = value;
-            if(hash != null)
-                navigationManager.NavigateTo($"/showblock/{hash}");
-            return Task.CompletedTask;
+            navigationManager.NavigateTo($"/showblock/{args.Value}");
         }
 
         protected override void OnInitialized()
