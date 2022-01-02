@@ -1,0 +1,23 @@
+﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
+@page "/proc"
+
+<h3>@LyraGlobal.PRODUCTNAME Query Process
+</h3>
+
+<hr />
+
+<RadzenTextBox Placeholder="Hash of Request" @bind-Value=@hash TValue="string" Change=@OnChange />
+<RadzenButton Click=@(args => OnChange(hash)) Text="Search" />
+
+@if(transactions != null)
+{
+    <RadzenDataGrid Data="@transactions" TItem="TransactionBlock" AllowColumnResize="true">
+        <Columns>
+            <RadzenDataGridColumn TItem="TransactionBlock" Property="Hash" Title="Hash" />
+            <RadzenDataGridColumn TItem="TransactionBlock" Property="TimeStamp" Title="Time Stamp" />
+            <RadzenDataGridColumn TItem="TransactionBlock" Property="Height" Title="Height" />
+            <RadzenDataGridColumn TItem="TransactionBlock" Property="BlockType" Title="Type" />
+            <RadzenDataGridColumn TItem="TransactionBlock" Property="AccountID" Title="Account ID" />
+        </Columns>
+    </RadzenDataGrid>
+}
