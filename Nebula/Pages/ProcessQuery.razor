@@ -6,7 +6,7 @@
 
 <hr />
 
-<RadzenTextBox Placeholder="Hash of Request" @bind-Value=@hash TValue="string" Change=@OnChange />
+<RadzenTextBox Style="width:460px;" Placeholder="Hash of Request" @bind-Value=@hash TValue="string" Change=@OnChange />
 <RadzenButton Click=@(args => OnChange(hash)) Text="Search" />
 
 @if(transactions != null)
