@@ -71,7 +71,7 @@ namespace Nebula.Pages
 					StateHasChanged();
 				}
 
-				NodeState.StateChanged += NodeState_StateChanged;
+                NodeState.StateChanged += NodeState_StateChanged; ;
 
 				seedHosts = new Dictionary<string, string>();
 				_ = Task.Run(async () => {
@@ -94,7 +94,7 @@ namespace Nebula.Pages
             catch { }
 		}
 
-		private void Refresh(MouseEventArgs e)
+        private void Refresh(MouseEventArgs e)
 		{
 			IsDisabled = true;
 			StateHasChanged();
@@ -106,8 +106,9 @@ namespace Nebula.Pages
 				Dispatcher.Dispatch(new NodeViewAction { historyState = latest });
 		}
 
-		private void NodeState_StateChanged(object sender, NodeViewState e)
+		private void NodeState_StateChanged(object sender, EventArgs ex)
         {
+			var e = NodeState.Value;
 			if(e.Id == 0 && e.TimeStamp != default(DateTime))
             {
 				try

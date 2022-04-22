@@ -155,7 +155,7 @@
                     {
                         style = "background-color:#e0f4ff; ";
                     }
-                    var imgSrc = $"/images/country/{nodeInfo.Country.ToLower()}.png";
+                    var imgSrc = $"/images/country/{nodeInfo.Country?.ToLower() ?? "ua"}.png";
 
                     <tr style=@style>
                         <td align="center">@nodeInfo.Index</td>

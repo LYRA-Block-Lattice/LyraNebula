@@ -88,7 +88,8 @@ namespace Nebula.Store.NodeViewUseCase
 
 					if(result.pft is TransactionBlock tb)
                     {
-						result.stks = await lcx.FindAllStakingsAsync(tb.AccountID, DateTime.UtcNow);
+						var sjs = await lcx.FindAllStakingsAsync(tb.AccountID, DateTime.UtcNow);
+						result.stks = sjs.Deserialize<List<Staker>>();
 						result.stats = await lcx.GetAccountStatsAsync(tb.AccountID, DateTime.MinValue, DateTime.MaxValue);
 
 						var rwds = new Dictionary<string, decimal>();

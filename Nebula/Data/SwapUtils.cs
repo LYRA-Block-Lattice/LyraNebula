@@ -183,9 +183,7 @@ namespace Nebula.Data
             var syncResult = await wallet.SyncAsync(lyraClient);
             if (syncResult == APIResultCodes.Success)
             {
-                var block = wallet.GetLatestBlock();
-                if(block.Balances?.ContainsKey("LYR") == true)
-                    return block.Balances["LYR"].ToBalanceDecimal();
+                return wallet.BaseBalance;
             }
 
             return 0m;
