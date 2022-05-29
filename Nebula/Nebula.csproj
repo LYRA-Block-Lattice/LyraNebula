@@ -5,7 +5,7 @@
     <UserSecretsId>b6641572-8e3e-498e-bf0f-e899e55aad33</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
-    <Version>1.1.0</Version>
+    <Version>1.1.2.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +19,7 @@
     <PackageReference Include="IP-2-Country.MarkusGo" Version="1.0.6" />
     <PackageReference Include="IP-2-Country.MaxMind" Version="1.2.0" />
     <PackageReference Include="LiteDB" Version="5.0.11" />
-    <PackageReference Include="Lyra.Data" Version="3.3.1" />
+    <PackageReference Include="Lyra.Data" Version="3.3.6.6" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.8" />
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
