@@ -63,7 +63,8 @@ namespace Nebula.Data
             var tasks = bb.NodeAddresses
                 .Select(async node =>
                 {
-                    var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{node.Value}:{port}/api/Node/");
+                    var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
+                    var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
                     try
                     {
                         var syncState = await lcx.GetSyncStateAsync();

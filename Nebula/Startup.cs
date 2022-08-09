@@ -61,10 +61,12 @@ namespace Nebula
 
             services.AddScoped<ILyraAPI>(provider =>
             {
-                var client = new LyraAggregatedClient(networkid, true, null);
-                var t = Task.Run(async () => { await client.InitAsync(); });
-                Task.WaitAll(t);
+                var client = LyraRestClient.Create(networkid, "windows", "nebula", "1.0");
                 return client;
+                //var client = new LyraAggregatedClient(networkid, true, null);
+                //var t = Task.Run(async () => { await client.InitAsync(); });
+                //Task.WaitAll(t);
+                //return client;
             });
 
             // for database
@@ -100,23 +102,23 @@ namespace Nebula
             //app.UseHttpsRedirection();
             app.UseDefaultFiles();
 
-            // Set up custom content types - associating file extension to MIME type
-            var provider = new FileExtensionContentTypeProvider();
-            // Add new mappings
-            provider.Mappings[".appx"] = "application/appx";
-            provider.Mappings[".msix"] = "application/msix";
-            provider.Mappings[".appxbundle"] = "application/appxbundle";
-            provider.Mappings[".msixbundle"] = "application/msixbundle";
-            provider.Mappings[".appinstaller"] = "application/appinstaller";
-            provider.Mappings[".cer"] = "application/pkix-cert";
+            //// Set up custom content types - associating file extension to MIME type
+            //var provider = new FileExtensionContentTypeProvider();
+            //// Add new mappings
+            //provider.Mappings[".appx"] = "application/appx";
+            //provider.Mappings[".msix"] = "application/msix";
+            //provider.Mappings[".appxbundle"] = "application/appxbundle";
+            //provider.Mappings[".msixbundle"] = "application/msixbundle";
+            //provider.Mappings[".appinstaller"] = "application/appinstaller";
+            //provider.Mappings[".cer"] = "application/pkix-cert";
 
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(env.WebRootPath, "apps")),
-                RequestPath = "/apps",
-                ContentTypeProvider = provider
-            });
+            //app.UseStaticFiles(new StaticFileOptions
+            //{
+            //    FileProvider = new PhysicalFileProvider(
+            //        Path.Combine(env.WebRootPath, "apps")),
+            //    RequestPath = "/apps",
+            //    ContentTypeProvider = provider
+            //});
             app.UseStaticFiles();
 
             app.UseRouting();

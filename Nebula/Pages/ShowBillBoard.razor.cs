@@ -75,6 +75,10 @@ namespace Nebula.Pages
 
 				seedHosts = new Dictionary<string, string>();
 				_ = Task.Run(async () => {
+					int port = 4504;
+					if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
+						port = 5504;
+
 					var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
 					pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
 
@@ -85,7 +89,7 @@ namespace Nebula.Pages
 						try
 						{
 							var ip = Dns.GetHostEntry(seed);
-							seedHosts.Add($"{ip.AddressList[0]}", seed);
+							seedHosts.Add($"{ip.AddressList.FirstOrDefault(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)}:{port}", seed);
 						}
 						catch { }
 					}
