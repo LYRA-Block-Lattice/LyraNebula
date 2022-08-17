@@ -75,24 +75,35 @@ namespace Nebula.Pages
 
 				seedHosts = new Dictionary<string, string>();
 				_ = Task.Run(async () => {
-					int port = 4504;
-					if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
-						port = 5504;
+                    int port = 4504;
+                    if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
+                        port = 5504;
 
-					var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-					pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
-
-					var aggClient = new LyraAggregatedClient(Configuration["network"], true, null);
-					var seeds = aggClient.GetSeedNodes();
-					foreach (var seed in seeds)
+                    try
 					{
-						try
-						{
-							var ip = Dns.GetHostEntry(seed);
-							seedHosts.Add($"{ip.AddressList.FirstOrDefault(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)}:{port}", seed);
-						}
-						catch { }
+                        var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+                        pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+                    }
+					catch(Exception ex)
+					{
+
 					}
+
+					try
+					{
+                        var aggClient = new LyraAggregatedClient(Configuration["network"], true, null);
+                        var seeds = aggClient.GetSeedNodes();
+                        foreach (var seed in seeds)
+                        {
+                            try
+                            {
+                                var ip = Dns.GetHostEntry(seed);
+                                seedHosts.Add($"{ip.AddressList.FirstOrDefault(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)}:{port}", seed);
+                            }
+                            catch { }
+                        }
+                    }
+					catch { }
 				});
 			}
             catch { }
