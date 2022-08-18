@@ -27,8 +27,6 @@ namespace Nebula.Pages
 		[Inject]
 		private INodeHistory History { get; set; }
 
-		private Dictionary<string, string> seedHosts;
-
 		private int selId;
 		List<Profiting> pfts;
 
@@ -73,7 +71,6 @@ namespace Nebula.Pages
 
                 NodeState.StateChanged += NodeState_StateChanged; ;
 
-				seedHosts = new Dictionary<string, string>();
 				_ = Task.Run(async () => {
                     int port = 4504;
                     if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
@@ -88,22 +85,6 @@ namespace Nebula.Pages
 					{
 
 					}
-
-					try
-					{
-                        var aggClient = new LyraAggregatedClient(Configuration["network"], true, null);
-                        var seeds = aggClient.GetSeedNodes();
-                        foreach (var seed in seeds)
-                        {
-                            try
-                            {
-                                var ip = Dns.GetHostEntry(seed);
-                                seedHosts.Add($"{ip.AddressList.FirstOrDefault(a => a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)}:{port}", seed);
-                            }
-                            catch { }
-                        }
-                    }
-					catch { }
 				});
 			}
             catch { }

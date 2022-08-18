@@ -139,12 +139,7 @@
             <tbody>
                 @foreach (var nodeInfo in NodeState.Value.GetRankedList())
                 {
-                    string hostName = null;
-                    string ipaddr = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
-                    if (seedHosts.ContainsKey(ipaddr))
-                        hostName = seedHosts[ipaddr];
-                    else
-                        hostName = ipaddr;
+                    string hostName = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
 
                     string pfthost = "app.lyra.live";
                     if (Configuration["network"] == "testnet")
@@ -172,7 +167,7 @@
                         </td>
                         <td>@GetStakingAmount(nodeInfo.ID)</td>
                         <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
-                        <td><span title="@ipaddr">@hostName</span></td>
+                        <td><span title="@hostName">@hostName</span></td>
                         @if (nodeInfo.Status != null && nodeInfo.Status.Status != null)
                         {
                             <td>Connected OK.</td>
