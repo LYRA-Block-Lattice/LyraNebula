@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Humanizer;
 
 namespace Nebula.Pages
 {
@@ -182,13 +183,13 @@ namespace Nebula.Pages
 			return acct.gens.Name;
 		}
 
-		private decimal GetStakingAmount(string posAccount)
+		private string GetStakingAmount(string posAccount)
 		{
 			var target = NodeState.Value.bb.ActiveNodes.FirstOrDefault(a => a.AccountID == posAccount);
 			if (target == null)
-				return 0;
+				return "0";
 			else
-				return target.Votes;
+				return target.Votes.ToString("N0");
 		}
 
 		private void ShowPft(MouseEventArgs e, string owner)

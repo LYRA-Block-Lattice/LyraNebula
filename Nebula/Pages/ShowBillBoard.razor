@@ -123,14 +123,11 @@
                     <th>Profiting ID</th>
                     <th>Staking LYR</th>
                     <th></th>
-                    <th>Endpoint</th>
-                    <th>API Status</th>
-                    <th>UTC Now</th>
-                    <th>Last Cons Block</th>
-                    <th>In Sync</th>
+                    <th>Endpoint</th>                    
                     <th>Version</th>
                     <th>Status</th>
-                    <th>Total Block Count</th>
+                    <th>Height</th>
+                    <th>Last Cons Block</th>
                     <th>Last Float Hash</th>
                     <th>Candidates</th>
                     <th>Connected Peers</th>
@@ -165,13 +162,14 @@
                             @*<a href="" @onclick="@(e => ShowPft(e, nodeInfo.ID))" @onclick:preventDefault>@GetProfitingAccountShort(nodeInfo.ID)...</a>*@
                             <a href="https://@pfthost/profit/@GetProfitingAccount(nodeInfo.ID)?src=ne" >@GetProfitingAccountShort(nodeInfo.ID)...</a>
                         </td>
-                        <td>@GetStakingAmount(nodeInfo.ID)</td>
+                        <td align="right">@GetStakingAmount(nodeInfo.ID)</td>
                         <td align="center"><img src="@imgSrc" alt="@nodeInfo.Country" title="@nodeInfo.Country" /></td>
                         <td><span title="@hostName">@hostName</span></td>
                         @if (nodeInfo.Status != null && nodeInfo.Status.Status != null)
                         {
-                            <td>Connected OK.</td>
-                            <td>@nodeInfo.Status.Status.now</td>
+                            <td>@nodeInfo.Status.Status.version.Replace("LYRA Block Lattice ", "")</td>
+                            <td>@nodeInfo.Status.Status.state</td>
+                            <td>@nodeInfo.Status.Status.totalBlockCount</td>
                             @if (nodeInfo.Status.LastConsolidationHash == null || nodeInfo.Status.LastConsolidationHash.Length < 11)
                             {
                                 <td></td>
@@ -180,10 +178,6 @@
                             {
                                 <td><a href="/showblock/@nodeInfo.Status.LastConsolidationHash">@nodeInfo.Status.LastConsolidationHash.Substring(0, 10)...</a></td>
                             }
-                            <td>@nodeInfo.Status.SyncState</td>
-                            <td>@nodeInfo.Status.Status.version</td>
-                            <td>@nodeInfo.Status.Status.state</td>
-                            <td>@nodeInfo.Status.Status.totalBlockCount</td>
                             @if (nodeInfo.Status.Status.lastUnSolidationHash == null || nodeInfo.Status.Status.lastUnSolidationHash.Length < 11)
                             {
                                 <td></td>
@@ -197,16 +191,7 @@
                         }
                         else
                         {
-                            <td>Failed to connect</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
+                            <td colspan="7">Failed to connect</td>
                         }
                     </tr>
                 }
