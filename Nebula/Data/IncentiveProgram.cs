@@ -80,8 +80,7 @@ namespace Nebula.Data
             var nvs = new NodeViewState(
                 isLoading: false,
                 billBoard: bb,
-                NodeStatus: bag,
-                ipdb: config["ipdb"]);
+                NodeStatus: bag);
 
             nvs.Id = 0;     // create new for liteDB
             nvs.TimeStamp = DateTime.UtcNow;

@@ -4,6 +4,8 @@ using Lyra.Core.Blocks;
 using Lyra.Data.API;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Nebula.Data;
 using Nebula.Store.NodeViewUseCase;
 using System;
@@ -26,6 +28,12 @@ namespace Nebula.Pages
 
 		[Inject]
 		private INodeHistory History { get; set; }
+
+		[Inject]
+		private IConfiguration Config { get; set; }
+
+		[Inject]
+		private ILogger logger { get; set; }
 
 		private int selId;
 		List<Profiting> pfts;
@@ -92,14 +100,28 @@ namespace Nebula.Pages
 
         private void Refresh(MouseEventArgs e)
 		{
-			IsDisabled = true;
-			StateHasChanged();
+			try
+			{
+				logger.LogInformation("Refreshing all nodes...");
+                IsDisabled = true;
+                StateHasChanged();
 
-			var latest = History.FindLatest();
-			if (latest == null)
-				Dispatcher.Dispatch(new NodeViewAction());
-			else
-				Dispatcher.Dispatch(new NodeViewAction { historyState = latest });
+                var latest = History.FindLatest();
+                if (latest == null)
+				{
+                    logger.LogInformation("Dispatch without hist...");
+                    Dispatcher.Dispatch(new NodeViewAction());
+                }                    
+                else
+				{
+                    logger.LogInformation("Dispatch with hist...");
+                    Dispatcher.Dispatch(new NodeViewAction { historyState = latest });
+                }                    
+            }
+			catch(Exception ex)
+			{
+                logger.LogError($"Error refresh all nodes: {ex}");
+            }
 		}
 
 		private void NodeState_StateChanged(object sender, EventArgs ex)

@@ -19,6 +19,8 @@ using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Lyra.Data.API;
 using Nebula.Data.Lyra;
+using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace Nebula
 {
@@ -35,6 +37,12 @@ namespace Nebula
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls| SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+            var serviceProvider = services.BuildServiceProvider();
+            var logger = serviceProvider.GetService<ILogger<ApplicationLogs>>();
+            services.AddSingleton(typeof(ILogger), logger);
+
             //services.Configure<reCAPTCHAVerificationOptions>(Configuration.GetSection("reCAPTCHA"));
             //services.Configure<SwapOptions>(Configuration.GetSection("Swap"));
             //services.AddTransient<SampleAPI>();
@@ -130,5 +138,8 @@ namespace Nebula
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
+    }
+    public class ApplicationLogs
+    {
     }
 }

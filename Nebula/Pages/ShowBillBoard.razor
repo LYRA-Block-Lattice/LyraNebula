@@ -137,7 +137,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var nodeInfo in NodeState.Value.GetRankedList())
+                @foreach (var nodeInfo in NodeState.Value.GetRankedList(Configuration))
                 {
                     string hostName = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
 

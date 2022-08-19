@@ -5,10 +5,13 @@ using Lyra.Core.API;
 using Lyra.Core.Blocks;
 using Lyra.Data.API;
 using Lyra.Data.Blocks;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Nebula.Store.NodeViewUseCase
 {
@@ -26,7 +29,6 @@ namespace Nebula.Store.NodeViewUseCase
         public bool IsLoading { get; set; }
 		public BillBoard bb { get; set; }
 		public ConcurrentDictionary<string, GetSyncStateAPIResult> nodeStatus { get; set; }
-		public string ipDbFn { get; set; }
 
         public int Id { get; set; }         // used by litedb
         public DateTime TimeStamp { get; set; }     // history
@@ -38,15 +40,14 @@ namespace Nebula.Store.NodeViewUseCase
 			IsLoading = false;
         }
 
-		public NodeViewState(bool isLoading, BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatus, string ipdb)
+		public NodeViewState(bool isLoading, BillBoard billBoard, ConcurrentDictionary<string, GetSyncStateAPIResult> NodeStatus)
 		{
 			IsLoading = isLoading;
 			bb = billBoard;
 			nodeStatus = NodeStatus;
-			ipDbFn = ipdb;
 		}
 
-		public List<NodeInfoSet> GetRankedList()
+		public List<NodeInfoSet> GetRankedList(IConfiguration Config)
         {
             var list = new List<NodeInfoSet>();
             foreach (var id in bb.PrimaryAuthorizers)
@@ -93,21 +94,42 @@ namespace Nebula.Store.NodeViewUseCase
             // lookup IP geo location
             try
             {
+                var ipDbFn = Environment.ExpandEnvironmentVariables(Config["ipdb"]);
                 var resolver = new IP2CountryBatchResolver(new IP2CountryResolver(
                     new MarkusGoCSVFileSource(ipDbFn)
                 ));
 
-                var iplist = result.Select(a => bb.NodeAddresses[a.ID]);
-                var geoList = resolver.Resolve(iplist);
+                var hostlist = result.Select(a => bb.NodeAddresses[a.ID]).ToList();
+                Parallel.For(0, hostlist.Count, i => hostlist[i] = Name2IP(hostlist[i]));
+                var geoList = resolver.Resolve(hostlist);
                 for (int i = 0; i < result.Count; i++)
                 {
                     result[i].Country = geoList[i] == null ? "" : geoList[i].Country;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             { }
 
             return result;
+        }
+
+        private string Name2IP(string hostName)
+        {
+            try
+            {
+                var uri = new Uri("http://" + hostName);
+                if (uri.HostNameType == UriHostNameType.IPv4)
+                    return uri.Host;
+                
+                if(uri.HostNameType == UriHostNameType.Dns)
+                    return Dns.GetHostEntry(uri.Host).AddressList[0].ToString();
+
+                return hostName;
+            }
+            catch
+            {
+                return hostName;
+            }
         }
 	}
 

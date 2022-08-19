@@ -13,7 +13,6 @@ namespace Nebula.Store.NodeViewUseCase
 			new NodeViewState(
 				isLoading: false,
 				billBoard: null,
-				NodeStatus: null,
-				ipdb: null);
+				NodeStatus: null);
 	}
 }

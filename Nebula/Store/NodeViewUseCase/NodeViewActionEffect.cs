@@ -13,17 +13,20 @@ using Microsoft.Extensions.Configuration;
 using Lyra.Data.API;
 using Lyra.Data.Blocks;
 using Lyra.Core.Blocks;
+using Microsoft.Extensions.Logging;
 
 namespace Nebula.Store.NodeViewUseCase
 {
 	public class NodeViewActionEffect : Effect<NodeViewAction>
 	{
-		private readonly ILyraAPI client;
+        private readonly ILogger _logger;
+        private readonly ILyraAPI client;
 		private readonly IConfiguration config;
 		private readonly INodeHistory hist;
 
-		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history)
+		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history, ILogger logger)
 		{
+			_logger = logger;
 			client = lyraClient;
 			config = configuration;
 			hist = history;
@@ -31,31 +34,43 @@ namespace Nebula.Store.NodeViewUseCase
 
 		public override async Task HandleAsync(NodeViewAction action, IDispatcher dispatcher)
 		{
-			int port = 4504;
-			if (config["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
-				port = 5504;
-
-			var bb = await client.GetBillBoardAsync();
-
-			var bag = new ConcurrentDictionary<string, GetSyncStateAPIResult>();
-			var tasks = bb.NodeAddresses
-				.Select(async node =>
+			try
 			{
-				var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
-				var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
-				try
-                {
-					var syncState = await lcx.GetSyncStateAsync();
-					bag.TryAdd(node.Key, syncState);
-				}
-				catch(Exception ex)
-                {
-					bag.TryAdd(node.Key, null);
-                }
-			});
-			await Task.WhenAll(tasks);
+                int port = 4504;
+                if (config["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
+                    port = 5504;
 
-			dispatcher.Dispatch(new NodeViewResultAction(bb, bag, config["ipdb"]));
+                _logger.LogInformation($"Getting billboard...");
+                var bb = await client.GetBillBoardAsync();
+                _logger.LogInformation($"Got billboard.");
+
+                var bag = new ConcurrentDictionary<string, GetSyncStateAPIResult>();
+                var tasks = bb.NodeAddresses
+                    .Select(async node =>
+                    {
+                        var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
+                        var lcx = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
+                        try
+                        {
+                            lcx.SetTimeout(TimeSpan.FromSeconds(5));
+                            var syncState = await lcx.GetSyncStateAsync();
+                            bag.TryAdd(node.Key, syncState);
+                        }
+                        catch (Exception ex)
+                        {
+                            bag.TryAdd(node.Key, null);
+                        }
+                    });
+                _logger.LogInformation($"Waiting parallel tasks...");
+                await Task.WhenAll(tasks);
+                _logger.LogInformation($"Parallel tasks finished.");
+
+                dispatcher.Dispatch(new NodeViewResultAction(bb, bag));
+            }
+			catch(Exception ex)
+			{
+                _logger.LogError($"Error Parallel Getting all nodes: {ex}");
+            }
 		}
 	}
 

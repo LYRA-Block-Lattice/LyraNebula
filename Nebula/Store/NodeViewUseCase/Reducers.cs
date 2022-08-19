@@ -14,8 +14,7 @@ namespace Nebula.Store.NodeViewUseCase
 			new NodeViewState(
 				isLoading: true,
 				billBoard: action.historyState?.bb,
-				NodeStatus: action.historyState?.nodeStatus,
-				ipdb: action.historyState?.ipDbFn);
+				NodeStatus: action.historyState?.nodeStatus);
 
 		[ReducerMethod]
 		public static NodeViewState ReduceFetchDataResultAction(NodeViewState state, NodeViewResultAction action)
@@ -23,8 +22,7 @@ namespace Nebula.Store.NodeViewUseCase
 			var nvs = new NodeViewState(
 					isLoading: false,
 					billBoard: action.billBoardResult,
-					NodeStatus: action.nodeStatusResult,
-					ipdb: action.ipDbFn);
+					NodeStatus: action.nodeStatusResult);
 
 			nvs.Id = 0;     // create new for liteDB
 			nvs.TimeStamp = DateTime.UtcNow;
@@ -37,8 +35,7 @@ namespace Nebula.Store.NodeViewUseCase
 			var nvs = new NodeViewState(
 					isLoading: false,
 					billBoard: action.historyState.bb,
-					NodeStatus: action.historyState.nodeStatus,
-					ipdb: action.historyState.ipDbFn);
+					NodeStatus: action.historyState.nodeStatus);
 
 			nvs.Id = action.historyState.Id;
 			nvs.TimeStamp = action.historyState.TimeStamp;
