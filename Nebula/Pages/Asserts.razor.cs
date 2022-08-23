@@ -31,21 +31,17 @@ namespace Nebula.Pages
 
         private void LoadRichData()
         {
-            using (var db = new LiteDatabase(dbCtx.dbfn))
-            {
-
-                if (db.CollectionExists("Meta"))
+                if (dbCtx.Database.CollectionExists("Meta"))
                 {
-                    var coll = db.GetCollection<SnapInfo>("Meta");
+                    var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
                     Snap = coll.FindAll().FirstOrDefault();
                 }
 
-                if (db.CollectionExists("Asserts"))
+                if (dbCtx.Database.CollectionExists("Asserts"))
                 {
-                    var coll = db.GetCollection<Assert>("Asserts");
+                    var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
                     LyraAsserts = coll.FindAll().Skip(1).ToList();  // don't display LYR
                 }
-            }
         }
 
         public void SwapToken(string token)

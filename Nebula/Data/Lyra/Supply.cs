@@ -66,60 +66,57 @@ namespace Nebula.Data.Lyra
                 "LRiVki9Z587UsK2e3qyipERXjBza497xC77NNHmDsuuKD2Ay5mHVfc7EEmvoQEifv1UDVvCY2QNmpKqjCuWpzjzoR3VUVV"
             };
 
-            using (var db = new LiteDatabase(dbCtx.dbfn))
+            if (dbCtx.Database.CollectionExists("Meta"))
             {
-                if (db.CollectionExists("Meta"))
+                var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
+                Snap = coll.FindAll().FirstOrDefault();
+            }
+
+            Current = new SupplyInfo();
+
+            if (dbCtx.Database.CollectionExists("TotalBalance"))
+            {
+                var coll = dbCtx.Database.GetCollection<TotalBalance>("TotalBalance");
+                Total = coll.FindAll().FirstOrDefault();
+
+                if (Total == null)
+                    return;
+
+                RichList = new List<RichItem>();
+                int order = 0;
+                decimal sum = 0;
+                decimal subRito = 0;
+                var burningAccount = Total.AllAccounts
+                    .Where(x => x.Key == LyraGlobal.BURNINGACCOUNTID)
+                    .Select(p => new { Key = p.Key, Value = p.Value })
+                    .FirstOrDefault();
+                if (burningAccount != null)
+                    Current.Burned = burningAccount.Value.UnRecv;
+
+                foreach (var e in Total.AllAccounts.Take(100))
                 {
-                    var coll = db.GetCollection<SnapInfo>("Meta");
-                    Snap = coll.FindAll().FirstOrDefault();
-                }
+                    if (e.Key != LyraGlobal.BURNINGACCOUNTID)
+                        sum += e.Value.Total;
 
-                Current = new SupplyInfo();
+                    subRito = Math.Round(sum / 100000000, 4);
+                    order++;
+                    var tag = "";
+                    if (teamAddresses.Contains(e.Key))
+                        tag = "Lyra Team";
+                    else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
+                        tag = "Burning";
+                    else if (latoken.Contains(e.Key))
+                        tag = "Latoken";
 
-                if (db.CollectionExists("TotalBalance"))
-                {
-                    var coll = db.GetCollection<TotalBalance>("TotalBalance");
-                    Total = coll.FindAll().FirstOrDefault();
-
-                    if (Total == null)
-                        return;
-
-                    RichList = new List<RichItem>();
-                    int order = 0;
-                    decimal sum = 0;
-                    decimal subRito = 0;
-                    var burningAccount = Total.AllAccounts
-                        .Where(x => x.Key == LyraGlobal.BURNINGACCOUNTID)
-                        .Select(p => new { Key = p.Key, Value = p.Value })
-                        .FirstOrDefault();
-                    if (burningAccount != null)
-                        Current.Burned = burningAccount.Value.UnRecv;
-
-                    foreach (var e in Total.AllAccounts.Take(100))
+                    RichList.Add(new RichItem
                     {
-                        if (e.Key != LyraGlobal.BURNINGACCOUNTID)
-                            sum += e.Value.Total;
-
-                        subRito = Math.Round(sum / 100000000, 4);
-                        order++;
-                        var tag = "";
-                        if (teamAddresses.Contains(e.Key))
-                            tag = "Lyra Team";
-                        else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
-                            tag = "Burning";
-                        else if (latoken.Contains(e.Key))
-                            tag = "Latoken";
-
-                        RichList.Add(new RichItem
-                        {
-                            AccountId = e.Key,
-                            Balance = e.Value,
-                            Order = order,
-                            Sum = sum,
-                            SumRito = subRito,
-                            Tag = tag
-                        });
-                    }
+                        AccountId = e.Key,
+                        Balance = e.Value,
+                        Order = order,
+                        Sum = sum,
+                        SumRito = subRito,
+                        Tag = tag
+                    });
                 }
             }
 

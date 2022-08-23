@@ -36,18 +36,15 @@ namespace Nebula.Data.Lyra
 
         private void SaveMetaData()
         {
-            using (var db = new LiteDatabase(dbCtx.dbfn))
+            var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
+            if (coll.FindAll().Any())
+                coll.DeleteAll();
+            coll.Insert(new SnapInfo
             {
-                var coll = db.GetCollection<SnapInfo>("Meta");
-                if (coll.FindAll().Any())
-                    coll.DeleteAll();
-                coll.Insert(new SnapInfo
-                {
-                    Updated = DateTime.UtcNow,
-                    Network = NetworkId
-                });
-                db.Commit();
-            }
+                Updated = DateTime.UtcNow,
+                Network = NetworkId
+            });
+            dbCtx.Database.Commit();
         }
 
         private async Task GetAsserts()
@@ -59,12 +56,12 @@ namespace Nebula.Data.Lyra
             var asserts = allGens.ToList()
                 .Where(x => x.AccountID != "LJcP9ztmYqzjbSRsr2sKZ44pSkhqdtUp5g8YbgPQbxNPNf9FuQ93K1FQUSXYxcofZqgV8qgzWYXArjR9w9VPGBbENcS1Z3") // filter out trash token
                 .Select(x => new Lyra.Assert
-            {
-                Name = x.Ticker,
-                Created = x.TimeStamp,
-                Supply = x.Balances[x.Ticker] / 100000000,
-                OwnerAccountId = x.AccountID
-            }).ToList();
+                {
+                    Name = x.Ticker,
+                    Created = x.TimeStamp,
+                    Supply = x.Balances[x.Ticker] / 100000000,
+                    OwnerAccountId = x.AccountID
+                }).ToList();
 
             // pools
             Console.WriteLine("Find all associated pools...");
@@ -87,16 +84,13 @@ namespace Nebula.Data.Lyra
 
             // save it.
             Console.WriteLine("Saving...");
-            using (var db = new LiteDatabase(dbCtx.dbfn))
-            {
-                var coll = db.GetCollection<Assert>("Asserts");
-                if (coll.FindAll().Any())
-                    coll.DeleteAll();
-                coll.InsertBulk(asserts
-                    .OrderByDescending(x => x.Holders)
-                    .ThenBy(y => y.Name));
-                db.Commit();
-            }
+            var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
+            if (coll.FindAll().Any())
+                coll.DeleteAll();
+            coll.InsertBulk(asserts
+                .OrderByDescending(x => x.Holders)
+                .ThenBy(y => y.Name));
+            dbCtx.Database.Commit();
         }
 
         private async Task SendRecvAsync()
@@ -132,7 +126,7 @@ namespace Nebula.Data.Lyra
 
                     if (chgs.Changes.ContainsKey("LYR"))
                     {
-                        if(chgs.Changes["LYR"] == 0.000001m)
+                        if (chgs.Changes["LYR"] == 0.000001m)
                             Console.WriteLine($"Unrecv: {chgs.Changes["LYR"]}");
                         if (dict.ContainsKey(item.DstAccountId.AsString))
                         {
@@ -172,19 +166,16 @@ namespace Nebula.Data.Lyra
 
             var latest = await FindLatestBlockAsync();
 
-            using (var db = new LiteDatabase(dbCtx.dbfn))
+            var list = new TotalBalance
             {
-                var list = new TotalBalance
-                {
-                    AllAccounts = dict.OrderByDescending(x => x.Value.Total)
-                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-                };
-                var coll = db.GetCollection<TotalBalance>("TotalBalance");
-                if (coll.FindAll().Any())
-                    coll.DeleteAll();
-                coll.Insert(list);
-                db.Commit();
-            }
+                AllAccounts = dict.OrderByDescending(x => x.Value.Total)
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            };
+            var coll = dbCtx.Database.GetCollection<TotalBalance>("TotalBalance");
+            if (coll.FindAll().Any())
+                coll.DeleteAll();
+            coll.Insert(list);
+            dbCtx.Database.Commit();
         }
     }
 

@@ -30,6 +30,9 @@ namespace Nebula.Data
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            await Task.Delay(5000);
+            await rich.Run();
+
             await Task.Delay(5 * 60 * 1000);
 
             if(config["network"] == "mainnet" || config["network"] == "testnet")      // only server do this.

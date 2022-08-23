@@ -96,12 +96,15 @@
                     </div>
                 </td>
                 <td align="right">
-                    <select id="department" @bind="SelectedHistId">
-                        @foreach (var hi in BriefHist)
-                        {
-                            <option value="@hi.id">@hi.TimeStamp</option>
-                        }
-                    </select>
+                    @if(BriefHist != null)
+                    {
+                        <select id="department" @bind="SelectedHistId">
+                            @foreach (var hi in BriefHist)
+                            {
+                                <option value="@hi.id">@hi.TimeStamp</option>
+                            }
+                        </select>
+                    }
                 </td>
             </tr>
             <tr>
