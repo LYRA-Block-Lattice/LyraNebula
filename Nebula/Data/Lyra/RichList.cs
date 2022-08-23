@@ -36,17 +36,18 @@ namespace Nebula.Data.Lyra
 
         private void SaveMetaData()
         {
-            var db = dbCtx.Database;
-
-            var coll = db.GetCollection<SnapInfo>("Meta");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.Insert(new SnapInfo
+            using (var db = new LiteDatabase(dbCtx.dbfn))
             {
-                Updated = DateTime.UtcNow,
-                Network = NetworkId
-            });
-            db.Commit();
+                var coll = db.GetCollection<SnapInfo>("Meta");
+                if (coll.FindAll().Any())
+                    coll.DeleteAll();
+                coll.Insert(new SnapInfo
+                {
+                    Updated = DateTime.UtcNow,
+                    Network = NetworkId
+                });
+                db.Commit();
+            }
         }
 
         private async Task GetAsserts()
@@ -86,15 +87,16 @@ namespace Nebula.Data.Lyra
 
             // save it.
             Console.WriteLine("Saving...");
-            var db = dbCtx.Database;
-
-            var coll = db.GetCollection<Assert>("Asserts");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.InsertBulk(asserts
-                .OrderByDescending(x => x.Holders)
-                .ThenBy(y => y.Name));
-            db.Commit();
+            using (var db = new LiteDatabase(dbCtx.dbfn))
+            {
+                var coll = db.GetCollection<Assert>("Asserts");
+                if (coll.FindAll().Any())
+                    coll.DeleteAll();
+                coll.InsertBulk(asserts
+                    .OrderByDescending(x => x.Holders)
+                    .ThenBy(y => y.Name));
+                db.Commit();
+            }
         }
 
         private async Task SendRecvAsync()
@@ -170,20 +172,20 @@ namespace Nebula.Data.Lyra
 
             var latest = await FindLatestBlockAsync();
 
-            var db = dbCtx.Database;
-            var list = new TotalBalance
+            using (var db = new LiteDatabase(dbCtx.dbfn))
             {
-                AllAccounts = dict.OrderByDescending(x => x.Value.Total)
+                var list = new TotalBalance
+                {
+                    AllAccounts = dict.OrderByDescending(x => x.Value.Total)
                         .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-            };
-            var coll = db.GetCollection<TotalBalance>("TotalBalance");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.Insert(list);
-            db.Commit();
+                };
+                var coll = db.GetCollection<TotalBalance>("TotalBalance");
+                if (coll.FindAll().Any())
+                    coll.DeleteAll();
+                coll.Insert(list);
+                db.Commit();
+            }
         }
-
-
     }
 
     public class SnapInfo

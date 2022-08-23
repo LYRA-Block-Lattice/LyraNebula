@@ -1,4 +1,5 @@
-﻿using Lyra.Core.API;
+﻿using LiteDB;
+using Lyra.Core.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,59 +66,60 @@ namespace Nebula.Data.Lyra
                 "LRiVki9Z587UsK2e3qyipERXjBza497xC77NNHmDsuuKD2Ay5mHVfc7EEmvoQEifv1UDVvCY2QNmpKqjCuWpzjzoR3VUVV"
             };
 
-            var db = dbCtx.Database;
-
-            if (db.CollectionExists("Meta"))
+            using (var db = new LiteDatabase(dbCtx.dbfn))
             {
-                var coll = db.GetCollection<SnapInfo>("Meta");
-                Snap = coll.FindAll().FirstOrDefault();
-            }
-
-            Current = new SupplyInfo();
-
-            if (db.CollectionExists("TotalBalance"))
-            {
-                var coll = db.GetCollection<TotalBalance>("TotalBalance");
-                Total = coll.FindAll().FirstOrDefault();
-
-                if (Total == null)
-                    return;
-
-                RichList = new List<RichItem>();
-                int order = 0;
-                decimal sum = 0;
-                decimal subRito = 0;
-                var burningAccount = Total.AllAccounts
-                    .Where(x => x.Key == LyraGlobal.BURNINGACCOUNTID)
-                    .Select(p => new { Key = p.Key, Value = p.Value })
-                    .FirstOrDefault();
-                if (burningAccount != null)
-                    Current.Burned = burningAccount.Value.UnRecv;
-
-                foreach (var e in Total.AllAccounts.Take(100))
+                if (db.CollectionExists("Meta"))
                 {
-                    if (e.Key != LyraGlobal.BURNINGACCOUNTID)
-                        sum += e.Value.Total;
+                    var coll = db.GetCollection<SnapInfo>("Meta");
+                    Snap = coll.FindAll().FirstOrDefault();
+                }
 
-                    subRito = Math.Round(sum / 100000000, 4);
-                    order++;
-                    var tag = "";
-                    if (teamAddresses.Contains(e.Key))
-                        tag = "Lyra Team";
-                    else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
-                        tag = "Burning";
-                    else if (latoken.Contains(e.Key))
-                        tag = "Latoken";
+                Current = new SupplyInfo();
 
-                    RichList.Add(new RichItem
+                if (db.CollectionExists("TotalBalance"))
+                {
+                    var coll = db.GetCollection<TotalBalance>("TotalBalance");
+                    Total = coll.FindAll().FirstOrDefault();
+
+                    if (Total == null)
+                        return;
+
+                    RichList = new List<RichItem>();
+                    int order = 0;
+                    decimal sum = 0;
+                    decimal subRito = 0;
+                    var burningAccount = Total.AllAccounts
+                        .Where(x => x.Key == LyraGlobal.BURNINGACCOUNTID)
+                        .Select(p => new { Key = p.Key, Value = p.Value })
+                        .FirstOrDefault();
+                    if (burningAccount != null)
+                        Current.Burned = burningAccount.Value.UnRecv;
+
+                    foreach (var e in Total.AllAccounts.Take(100))
                     {
-                        AccountId = e.Key,
-                        Balance = e.Value,
-                        Order = order,
-                        Sum = sum,
-                        SumRito = subRito,
-                        Tag = tag
-                    });
+                        if (e.Key != LyraGlobal.BURNINGACCOUNTID)
+                            sum += e.Value.Total;
+
+                        subRito = Math.Round(sum / 100000000, 4);
+                        order++;
+                        var tag = "";
+                        if (teamAddresses.Contains(e.Key))
+                            tag = "Lyra Team";
+                        else if (e.Key == LyraGlobal.BURNINGACCOUNTID)
+                            tag = "Burning";
+                        else if (latoken.Contains(e.Key))
+                            tag = "Latoken";
+
+                        RichList.Add(new RichItem
+                        {
+                            AccountId = e.Key,
+                            Balance = e.Value,
+                            Order = order,
+                            Sum = sum,
+                            SumRito = subRito,
+                            Tag = tag
+                        });
+                    }
                 }
             }
 

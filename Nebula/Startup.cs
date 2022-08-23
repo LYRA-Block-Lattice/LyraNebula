@@ -38,6 +38,9 @@ namespace Nebula
         public void ConfigureServices(IServiceCollection services)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls| SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var proxycfg = Configuration["proxy"];
+            if (!string.IsNullOrWhiteSpace(proxycfg))
+                HttpClient.DefaultProxy = new WebProxy(proxycfg, true);
 
             var serviceProvider = services.BuildServiceProvider();
             var logger = serviceProvider.GetService<ILogger<ApplicationLogs>>();
@@ -79,7 +82,7 @@ namespace Nebula
 
             // for database
             services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
-            services.AddSingleton<ILiteDbContext, LiteDbContext>();
+            services.AddTransient<ILiteDbContext, LiteDbContext>();
 
             services.Configure<MongoDbOptions>(Configuration.GetSection("Lyra"));
             services.AddSingleton<IMongoDbContext, MongoDbContext>();

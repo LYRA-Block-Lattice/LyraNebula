@@ -10,29 +10,18 @@ namespace Nebula.Data
 {
     public interface ILiteDbContext
     {
-        LiteDatabase Database { get; }
+        //LiteDatabase Database { get; }
+        string dbfn { get; }
     }
 
     public class LiteDbContext : ILiteDbContext
     {
-        public LiteDatabase Database { get; }
+        //public LiteDatabase Database { get; }
+        public string dbfn { get; }
 
         public LiteDbContext(IOptions<LiteDbOptions> options)
         {
-            // iis recycle, file lock.
-            for(var i = 0; i < 60; i++)
-            {
-                try
-                {
-                    Database = new LiteDatabase(options.Value.DatabaseLocation);
-                    break;
-                }
-                catch { }
-                {
-                    Thread.Sleep(2000);
-                }
-            }
-            
+            dbfn = options.Value.DatabaseLocation;
         }
     }
 

@@ -28,10 +28,8 @@
                 <tr>
                     <th>Rank</th>
                     <th>Account ID</th>
-                    <th>Balance</th>
-                    <th>Unreceived Balance</th>
-                    <th>Total Token</th>
-                    <th>Total Rito</th>
+                    <th>Total Balance</th>
+                    <th>Unreceived</th>
                     <th>Tag</th>
                 </tr>
             </thead>
@@ -41,10 +39,8 @@
                     <tr>
                         <td>@rich.Order</td>
                         <td><a href="/showblock/@rich.AccountId">@rich.AccountId</a></td>
-                        <td>@rich.Balance.Total</td>
-                        <td>@rich.Balance.UnRecv</td>
-                        <td>@rich.Sum</td>
-                        <td>@rich.SumRito %</td>
+                        <td align="right">@($"{rich.Balance.Total:n}")</td>
+                        <td align="right">@($"{rich.Balance.UnRecv:n}")</td>
                         <td>@rich.Tag</td>
                     </tr>
                 }

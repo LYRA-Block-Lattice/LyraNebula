@@ -1,4 +1,5 @@
-﻿using LiteDB;
+﻿using DexServer.Ext;
+using LiteDB;
 using Nebula.Data.Lyra;
 using Nebula.Store.NodeViewUseCase;
 using System;
@@ -24,12 +25,10 @@ namespace Nebula.Data
     public class NodeHistory : INodeHistory
     {
         private ILiteDbContext _ctx;
-        private LiteDatabase _liteDb;
 
         public NodeHistory(ILiteDbContext liteDbContext)
         {
             _ctx = liteDbContext;
-            _liteDb = liteDbContext.Database;
         }
 
         public SupplyInfo GetCurrentSupply()
@@ -43,64 +42,86 @@ namespace Nebula.Data
         {
             TimeSpan interval = new TimeSpan(0, 15, 0);
 
-            var result = _liteDb.GetCollection<NodeViewState>("NodeViewState")
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                var result = db.GetCollection<NodeViewState>("NodeViewState")
                 .FindAll()
                 .Where(x => x.TimeStamp > DateTime.UtcNow.AddDays(-2))
                 .GroupBy(x => x.TimeStamp.Ticks / interval.Ticks)
                                    .Select(x => x.First())
                 .OrderBy(x => x.TimeStamp);
 
-            return result;
+                return result;
+            }
         }
 
         public NodeViewState FindOne(int id)
         {
-            return _liteDb.GetCollection<NodeViewState>("NodeViewState")
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                return db.GetCollection<NodeViewState>("NodeViewState")
                 .Find(x => x.Id == id).FirstOrDefault();
+            }
         }
 
         public NodeViewState FindLatest()
         {
-            var data = _liteDb.GetCollection<NodeViewState>("NodeViewState");
-            try
+            using (var db = new LiteDatabase(_ctx.dbfn))
             {
-                var latestId = data
-                    .Max(x => x.Id);
-                return FindOne(latestId);
-            }
-            catch {
-                return null;
+                var data = db.GetCollection<NodeViewState>("NodeViewState");
+                try
+                {
+                    var latestId = data
+                        .Max(x => x.Id);
+                    return FindOne(latestId);
+                }
+                catch
+                {
+                    return null;
+                }
             }
         }
 
         public IEnumerable<HistInfo> FindHistory(int maxCount)
         {
-            var data = _liteDb.GetCollection<NodeViewState>("NodeViewState");
-            var q = data.Query()
-                .OrderByDescending(x => x.TimeStamp)
-                .Limit(maxCount)
-                .ToList()
-                .Select(x => new HistInfo { id = x.Id, TimeStamp = x.TimeStamp });
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                var data = db.GetCollection<NodeViewState>("NodeViewState");
+                var q = data.Query()
+                    .OrderByDescending(x => x.TimeStamp)
+                    .Limit(maxCount)
+                    .ToList()
+                    .Select(x => new HistInfo { id = x.Id, TimeStamp = x.TimeStamp });
 
-            return q;
+                return q;
+            }
         }
 
         public int Insert(NodeViewState record)
         {
-            return _liteDb.GetCollection<NodeViewState>("NodeViewState")
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                return db.GetCollection<NodeViewState>("NodeViewState")
                 .Insert(record);
+            }
         }
 
         public bool Update(NodeViewState record)
         {
-            return _liteDb.GetCollection<NodeViewState>("NodeViewState")
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                return db.GetCollection<NodeViewState>("NodeViewState")
                 .Update(record);
+            }
         }
 
         public bool Delete(int id)
         {
-            return _liteDb.GetCollection<NodeViewState>("NodeViewState")
+            using (var db = new LiteDatabase(_ctx.dbfn))
+            {
+                return db.GetCollection<NodeViewState>("NodeViewState")
                 .Delete(id);
+            }
         }
     }
 
