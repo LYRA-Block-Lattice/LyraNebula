@@ -60,28 +60,31 @@ namespace Nebula.Pages
                 {
                     IsDisabled = true;
 
-                    BriefHist = Enumerable.Empty<HistInfo>();
+					_ = Task.Run(async () => { 
+						BriefHist = Enumerable.Empty<HistInfo>();
 
-                    // load history first
-                    var latest = History.FindLatest();
-                    if (latest == null)
-                        Dispatcher.Dispatch(new NodeViewAction());
-                    else
-                    {
-                        BriefHist = History.FindHistory(100);
-                        if (BriefHist.Any())
-                            selId = BriefHist.First().id;
+						// load history first
+						var latest = History.FindLatest();
+						if (latest == null)
+							Dispatcher.Dispatch(new NodeViewAction());
+						else
+						{
+							BriefHist = History.FindHistory(10);
+							if (BriefHist.Any())
+								selId = BriefHist.First().id;
 
-                        Dispatcher.Dispatch(new LoadHistoryAction { historyState = latest });                        
-                    }
+							Dispatcher.Dispatch(new LoadHistoryAction { historyState = latest });                        
+						}
 
-                    NodeState.StateChanged += NodeState_StateChanged; ;
+						NodeState.StateChanged += NodeState_StateChanged; ;
 
-                    var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-                    pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+						var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+						pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
 
-                    IsDisabled = false;
-                    StateHasChanged();
+						IsDisabled = false;
+
+                        await InvokeAsync(() => StateHasChanged());
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -130,12 +133,11 @@ namespace Nebula.Pages
 					BriefHist = History.FindHistory(100);
 					if (BriefHist.Any())
 						selId = BriefHist.First().id;
-
-					IsDisabled = false;
-					StateHasChanged();
 				}
                 catch { }
-			}				
+			}
+            IsDisabled = false;
+            StateHasChanged();
         }
 
         protected override void OnAfterRender(bool firstRender)
