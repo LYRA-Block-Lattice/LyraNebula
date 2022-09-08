@@ -38,8 +38,9 @@ namespace Nebula
         public void ConfigureServices(IServiceCollection services)
         {
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls| SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var networkid = Configuration["network"];
             var proxycfg = Configuration["proxy"];
-            if (!string.IsNullOrWhiteSpace(proxycfg))
+            if (!string.IsNullOrWhiteSpace(proxycfg) && networkid != "devnet")
                 HttpClient.DefaultProxy = new WebProxy(proxycfg, true);
 
             var serviceProvider = services.BuildServiceProvider();
@@ -66,7 +67,6 @@ namespace Nebula
 
             services.AddHttpClient<FetchDataActionEffect>();
 
-            var networkid = Configuration["network"];
             // use dedicate host to avoid "random" result from api.lyra.live which is dns round-robbined. <-- not fail safe
             //services.AddTransient<LyraRestClient>(a => LyraRestClient.Create(networkid, Environment.OSVersion.ToString(), "Nebula", "1.0"/*, $"http://nebula.{networkid}.lyra.live:{Neo.Settings.Default.P2P.WebAPI}/api/Node/"*/));
 
@@ -133,6 +133,7 @@ namespace Nebula
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseWebSockets();
 
             app.UseEndpoints(endpoints =>
             {

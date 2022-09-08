@@ -1,86 +1,14 @@
-﻿@inherits Fluxor.Blazor.Web.Components.FluxorComponent
-@page "/showbb"
+﻿@page "/showbb"
 @using Lyra.Shared
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-@if (NodeState.Value.IsLoading)
+@if (IsDisabled)
 {
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
 }
-
-
-@if (NodeState.Value.UI == Store.NodeViewUseCase.NodeViewState.UIStage.Profiting)
-{
-    <div>
-        <button class="btn btn-primary" @onclick="Return">Return to node view</button>
-    </div>
-    <hr />
-    @if (NodeState.Value.pft == null)
-    {
-        <p>No profiting account for node.</p>
-    }
-    else
-    {
-        <h1>Profiting Account for Node</h1>
-        <p>
-            Node Owner Account ID: <a href="/showblock/@NodeState.Value.pft?.OwnerAccountId">@NodeState.Value.pft?.OwnerAccountId.Substring(0, 10)...</a>
-        </p>
-        <p>
-            Profiting Account ID:
-            <a href="/showblock/@GetPftID()">@GetPftID()</a>
-        </p>
-        <p>Total Earn: @NodeState.Value.pftStats.Total LYR</p>
-        <p>Profit sharing ratio: @FormatShare() </p>
-        <p>Pay to stakers: @GetToStakers() LYR</p>
-        <p>Pay to owner: @GetToOwner() LYR</p>
-        <p>
-
-        </p>
-        <p>
-            <div><h4>All Stakings</h4></div>
-            <div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Staking Amount</th>
-                            <th>Start Time</th>
-                            <th>Staking Days</th>
-                            <th>Earns</th>
-                            <th>Staking Account</th>
-                            <th>Owner Account</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var stk in NodeState.Value.stks)
-                        {
-                            <tr>
-                                <td>@stk.Amount LYR</td>
-                                <td>@stk.Time</td>
-                                <td>@stk.Days</td>
-                                <td>@NodeState.Value.stkRewards[stk.StkAccount] LYR</td>
-                                <td>
-                                    <a href="/showblock/@stk.StkAccount">@stk.StkAccount.Shorten()</a>
-                                </td>
-                                <td>
-                                    <a href="/showblock/@stk.OwnerAccount">@stk.OwnerAccount.Shorten()</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </p>
-        <p style="font-size:xx-small">Note: Statistics data may not be updated in time. Only for reference.</p>
-    }
-    <hr />
-    <div>
-        <button class="btn btn-primary" @onclick="Return">Return to node view</button>
-    </div>
-}
-
-@if (NodeState.Value.UI == Store.NodeViewUseCase.NodeViewState.UIStage.Main && NodeState.Value.nodeStatus != null)
+else
 {
     <h1>Status of All Authorizer Nodes </h1>
 
@@ -92,7 +20,7 @@
                         <button class="btn btn-primary" @onclick="Refresh" disabled="@IsDisabled">
                             Refresh
                         </button>&nbsp;
-                        <span>Time Updated (UTC): @NodeState.Value.TimeStamp</span>
+                        <span>Time Updated (UTC): @latestState.TimeStamp</span>
                     </div>
                 </td>
                 <td align="right">
@@ -109,7 +37,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <h3>Total Staking: @NodeState?.Value?.TotalStaking LYR</h3>
+                    <h3>Total Staking: @TotalStaking LYR</h3>
                 </td>
             </tr>
         </table>
@@ -137,16 +65,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var nodeInfo in NodeState.Value.GetRankedList(Configuration))
+                @foreach (var nodeInfo in GetRankedList(Configuration))
                 {
-                    string hostName = NodeState.Value.bb.NodeAddresses[nodeInfo.ID];
+                    string hostName = latestState.bb.NodeAddresses[nodeInfo.ID];
 
                     string pfthost = "app.lyra.live";
                     if (Configuration["network"] == "testnet")
                         pfthost = "apptestnet.lyra.live";
 
                     string style = null;
-                    if (nodeInfo.ID == NodeState.Value.bb.CurrentLeader)
+                    if (nodeInfo.ID == latestState.bb.CurrentLeader)
                     {
                         style = "color: gold; background-color:black; font-weight: bold;";
                     }
