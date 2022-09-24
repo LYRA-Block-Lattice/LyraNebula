@@ -62,7 +62,6 @@ namespace Nebula.Data
 
         public NodeViewState FindLatest()
         {
-
             var data = _ctx.Database.GetCollection<NodeViewState>("NodeViewState");
             try
             {

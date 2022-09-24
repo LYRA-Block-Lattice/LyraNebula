@@ -113,6 +113,7 @@ namespace Nebula.Pages
                 {
                     var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
                     var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
+                    lcx.SetTimeout(TimeSpan.FromSeconds(5));
                     try
                     {
                         var syncState = await lcx.GetSyncStateAsync();
