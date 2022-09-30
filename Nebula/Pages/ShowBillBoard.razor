@@ -3,7 +3,7 @@
 @using Microsoft.Extensions.Configuration
 @inject IConfiguration Configuration
 
-@if (IsDisabled)
+@if (IsDisabled || latestState == null)
 {
     <p><em>Checking all nodes... This may take a while.</em></p>
     <div class="spinner"></div>
@@ -20,11 +20,11 @@ else
                         <button class="btn btn-primary" @onclick="Refresh" disabled="@IsDisabled">
                             Refresh
                         </button>&nbsp;
-                        <span>Time Updated (UTC): @latestState.TimeStamp</span>
+                        @*<span>Time Updated (UTC): @latestState.TimeStamp</span>*@
                     </div>
                 </td>
                 <td align="right">
-                    @if(BriefHist != null)
+@*                    @if(BriefHist != null)
                     {
                         <select id="department" @bind="SelectedHistId">
                             @foreach (var hi in BriefHist)
@@ -32,12 +32,12 @@ else
                                 <option value="@hi.id">@hi.TimeStamp</option>
                             }
                         </select>
-                    }
+                    }*@
                 </td>
             </tr>
             <tr>
                 <td colspan="2">
-                    <h3>Total Staking: @TotalStaking LYR</h3>
+                    @*<h3>Total Staking: @TotalStaking LYR</h3>*@
                 </td>
             </tr>
         </table>

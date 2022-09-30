@@ -1,5 +1,4 @@
 ﻿using Fluxor;
-using LiteDB;
 using Lyra.Core.API;
 using Microsoft.AspNetCore.Components;
 using Nebula.Data;
@@ -18,9 +17,6 @@ namespace Nebula.Pages
         [Inject]
         public NavigationManager navigationManager { get; set; }
 
-        [Inject]
-        private ILiteDbContext dbCtx { get; set; }
-
         public Supply CurrentSupply { get; private set; }
 
         string hash;
@@ -34,7 +30,7 @@ namespace Nebula.Pages
         {
             base.OnInitialized();
 
-            CurrentSupply = new Supply(dbCtx);
+            //CurrentSupply = new Supply(dbCtx);
         }
 
 

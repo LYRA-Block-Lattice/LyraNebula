@@ -1,5 +1,4 @@
-﻿using LiteDB;
-using Lyra;
+﻿using Lyra;
 using Lyra.Core.Blocks;
 using Lyra.Shared;
 using Microsoft.Extensions.Configuration;
@@ -21,11 +20,9 @@ namespace Nebula.Data.Lyra
     /// </summary>
     public class RichList : Query
     {
-        private ILiteDbContext dbCtx { get; set; }
-
-        public RichList(ILiteDbContext liteDb, IMongoDbContext dbContext, IConfiguration config) : base(dbContext, config)
+        public RichList(IMongoDbContext dbContext, IConfiguration config) : base(dbContext, config)
         {
-            dbCtx = liteDb;
+
         }
         public override async Task Run()
         {
@@ -36,15 +33,15 @@ namespace Nebula.Data.Lyra
 
         private void SaveMetaData()
         {
-            var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.Insert(new SnapInfo
-            {
-                Updated = DateTime.UtcNow,
-                Network = NetworkId
-            });
-            dbCtx.Database.Commit();
+            //var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
+            //if (coll.FindAll().Any())
+            //    coll.DeleteAll();
+            //coll.Insert(new SnapInfo
+            //{
+            //    Updated = DateTime.UtcNow,
+            //    Network = NetworkId
+            //});
+            //dbCtx.Database.Commit();
         }
 
         private async Task GetAsserts()
@@ -82,15 +79,15 @@ namespace Nebula.Data.Lyra
                 Console.WriteLine($"{x.Name}\t{x.Supply}\t{x.OwnerAccountId.Shorten()}\t{x.Created}\t{x.Holders}");
             }
 
-            // save it.
-            Console.WriteLine("Saving...");
-            var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.InsertBulk(asserts
-                .OrderByDescending(x => x.Holders)
-                .ThenBy(y => y.Name));
-            dbCtx.Database.Commit();
+            //// save it.
+            //Console.WriteLine("Saving...");
+            //var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
+            //if (coll.FindAll().Any())
+            //    coll.DeleteAll();
+            //coll.InsertBulk(asserts
+            //    .OrderByDescending(x => x.Holders)
+            //    .ThenBy(y => y.Name));
+            //dbCtx.Database.Commit();
         }
 
         private async Task SendRecvAsync()
@@ -171,11 +168,11 @@ namespace Nebula.Data.Lyra
                 AllAccounts = dict.OrderByDescending(x => x.Value.Total)
                     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
             };
-            var coll = dbCtx.Database.GetCollection<TotalBalance>("TotalBalance");
-            if (coll.FindAll().Any())
-                coll.DeleteAll();
-            coll.Insert(list);
-            dbCtx.Database.Commit();
+            //var coll = dbCtx.Database.GetCollection<TotalBalance>("TotalBalance");
+            //if (coll.FindAll().Any())
+            //    coll.DeleteAll();
+            //coll.Insert(list);
+            //dbCtx.Database.Commit();
         }
     }
 

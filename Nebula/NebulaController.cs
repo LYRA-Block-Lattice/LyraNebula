@@ -15,25 +15,24 @@ namespace Nebula
     [ApiController]
     public class NebulaController : ControllerBase
     {
-        private INodeHistory History;
-        public NebulaController(INodeHistory nodeHistory)
+        public NebulaController()
         {
-            History = nodeHistory;
-        }
-        // GET: api/<TokenController>
-        [HttpGet]
-        [Route("history")]
-        public IEnumerable<NodeViewState> GetNodesHistory()
-        {
-            return History.FindAll();
-        }
 
-        [HttpGet]
-        [Route("supply")]
-        public SupplyInfo GetCurrentSupplyInfo()
-        {
-            return History.GetCurrentSupply();
         }
+        //// GET: api/<TokenController>
+        //[HttpGet]
+        //[Route("history")]
+        //public IEnumerable<NodeViewState> GetNodesHistory()
+        //{
+        //    return History.FindAll();
+        //}
+
+        //[HttpGet]
+        //[Route("supply")]
+        //public SupplyInfo GetCurrentSupplyInfo()
+        //{
+        //    return History.GetCurrentSupply();
+        //}
 
         //// GET api/<TokenController>/5
         //[HttpGet("{id}")]

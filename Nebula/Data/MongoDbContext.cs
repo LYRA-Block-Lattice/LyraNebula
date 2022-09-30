@@ -1,5 +1,4 @@
-﻿using LiteDB;
-using Lyra.Core.Blocks;
+﻿using Lyra.Core.Blocks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;

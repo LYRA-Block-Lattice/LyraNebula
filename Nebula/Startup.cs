@@ -81,15 +81,15 @@ namespace Nebula
             });
 
             // for database
-            services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
-            services.AddSingleton<ILiteDbContext, LiteDbContext>();
+            //services.Configure<LiteDbOptions>(Configuration.GetSection("LiteDbOptions"));
+            //services.AddSingleton<ILiteDbContext, LiteDbContext>();
 
             services.Configure<MongoDbOptions>(Configuration.GetSection("Lyra"));
             services.AddSingleton<IMongoDbContext, MongoDbContext>();
             services.AddSingleton<RichList>();
 
-            services.AddSingleton<INodeHistory, NodeHistory>();
-            services.AddHostedService<IncentiveProgram>();
+            //services.AddSingleton<INodeHistory, NodeHistory>();
+            //services.AddHostedService<IncentiveProgram>();
 
             var currentAssembly = typeof(Startup).Assembly;
             //var libAssembly = typeof(UserLibrary.Data.WalletView).Assembly;

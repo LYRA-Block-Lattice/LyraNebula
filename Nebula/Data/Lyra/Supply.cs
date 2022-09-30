@@ -1,5 +1,4 @@
-﻿using LiteDB;
-using Lyra.Core.API;
+﻿using Lyra.Core.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +8,14 @@ namespace Nebula.Data.Lyra
 {
     public class Supply
     {
-        private ILiteDbContext dbCtx { get; set; }
-        public SnapInfo Snap { get; set; }
+         public SnapInfo Snap { get; set; }
 
         public TotalBalance Total { get; private set; }
         public List<RichItem> RichList { get; private set; }
         public SupplyInfo Current { get; private set; }
 
-        public Supply(ILiteDbContext ctx)
+        public Supply()
         {
-            dbCtx = ctx;
             LoadRichData();
         }
 
@@ -43,6 +40,7 @@ namespace Nebula.Data.Lyra
 
         private void LoadRichData()
         {
+            return;
             var teamAddresses = new[]{
                 "L5ViiZbSmLJJpXppwBCNPuCzRds2VMkydvfcENp3SxqAfLNuqk5JuuDrshmJNCjTo6oKgXRagCnTrVXseyxn2q74vXmYcG",
                 "LUVD9A8vnS3Ni1WGKAe2gBcY3w2fc2EEmaqNggXm5Fm6t9yqggnUrk7rE9v3xtMj51KM2aM1APUGbXrjuhT9hXsgpkYe2a",
@@ -66,7 +64,7 @@ namespace Nebula.Data.Lyra
                 "LRiVki9Z587UsK2e3qyipERXjBza497xC77NNHmDsuuKD2Ay5mHVfc7EEmvoQEifv1UDVvCY2QNmpKqjCuWpzjzoR3VUVV"
             };
 
-            if (dbCtx.Database.CollectionExists("Meta"))
+/*            if (dbCtx.Database.CollectionExists("Meta"))
             {
                 var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
                 Snap = coll.FindAll().FirstOrDefault();
@@ -130,7 +128,7 @@ namespace Nebula.Data.Lyra
             Current.TeamRito = Math.Round(Current.TeamTotal / 10000000000 * 100, 4);
 
             Current.Circulate = 10000000000 - Current.Burned - Current.TeamTotal;
-            Current.CirculateRito = 100 - Current.TeamRito;
+            Current.CirculateRito = 100 - Current.TeamRito;*/
         }
     }
 }

@@ -25,8 +25,8 @@ namespace Nebula.Pages
 	{
         protected bool IsDisabled { get; set; } = true;
 
-		[Inject]
-		private INodeHistory History { get; set; }
+		//[Inject]
+		//private INodeHistory History { get; set; }
 
 		[Inject]
 		private ILogger logger { get; set; }
@@ -43,7 +43,7 @@ namespace Nebula.Pages
 
         NodeViewState latestState;
 
-        public decimal TotalStaking => latestState.bb == null ? 0 : latestState.bb.ActiveNodes.Sum(a => a.Votes);
+        //public decimal TotalStaking => latestState.bb == null ? 0 : latestState.bb.ActiveNodes.Sum(a => a.Votes);
 
         private int SelectedHistId
         {
@@ -54,12 +54,11 @@ namespace Nebula.Pages
             set
             {
                 selId = value;
-				var recd = History.FindOne(selId);
+				//var recd = History.FindOne(selId);
 				//Dispatcher.Dispatch(new LoadHistoryAction { historyState = recd });
 				StateHasChanged();
 			}
         }
-        private IEnumerable<HistInfo> BriefHist { get; set; }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
@@ -69,20 +68,22 @@ namespace Nebula.Pages
                 {
                     IsDisabled = true;
 
-                    BriefHist = Enumerable.Empty<HistInfo>();
+                    await RefreshNodeStatusAsync();
 
-                    // load history first
-                    latestState = History.FindLatest();
-                    if (latestState == null)
-                    {
-                        await RefreshNodeStatusAsync();
-                    }
+                    //BriefHist = Enumerable.Empty<HistInfo>();
 
-                    BriefHist = History.FindHistory(3);
-                    if (BriefHist.Any())
-                    {                        
-                        selId = BriefHist.First().id;
-                    }                        
+                    //// load history first
+                    //latestState = History.FindLatest();
+                    //if (latestState == null)
+                    //{
+                    //    await RefreshNodeStatusAsync();
+                    //}
+
+                    //BriefHist = History.FindHistory(3);
+                    //if (BriefHist.Any())
+                    //{                        
+                    //    selId = BriefHist.First().id;
+                    //}                        
 
                     //var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
                     //pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
@@ -137,22 +138,27 @@ namespace Nebula.Pages
             var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
             nvs.pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
 
-            History.Insert(nvs);
+            latestState = nvs;
+            //History.Insert(nvs);
         }
 
         private async void Refresh(MouseEventArgs e)
 		{
 			try
 			{
+                var start = DateTime.Now;
 				//logger.LogInformation("Refreshing all nodes...");
 				IsDisabled = true;
 				StateHasChanged();
 
 				await RefreshNodeStatusAsync();
-                latestState = History.FindLatest();
+                //latestState = History.FindLatest();
 
                 IsDisabled = false;
                 StateHasChanged();
+
+                var end = DateTime.Now;
+                logger.LogInformation($"Refresh all nodes uses {(end - start).Humanize()}");
             }
 			catch(Exception ex)
 			{

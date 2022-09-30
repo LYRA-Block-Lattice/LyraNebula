@@ -16,14 +16,12 @@ namespace Nebula.Data
     public class IncentiveProgram : BackgroundService
     {
         private IConfiguration config;
-        private INodeHistory History;
         private LyraRestClient client;
 
         private RichList rich;
-        public IncentiveProgram(IConfiguration configuration, INodeHistory history, RichList richList)
+        public IncentiveProgram(IConfiguration configuration, RichList richList)
         {
             config = configuration;
-            History = history;
             rich = richList;
 
             client = LyraRestClient.Create(config["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
@@ -91,7 +89,7 @@ namespace Nebula.Data
             nvs.Id = 0;     // create new for liteDB
             nvs.TimeStamp = DateTime.UtcNow;
 
-            History.Insert(nvs);
+            //History.Insert(nvs);
         }
     }
 }

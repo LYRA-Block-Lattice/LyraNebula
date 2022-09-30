@@ -22,14 +22,12 @@ namespace Nebula.Store.NodeViewUseCase
         private readonly ILogger _logger;
         private readonly ILyraAPI client;
 		private readonly IConfiguration config;
-		private readonly INodeHistory hist;
 
-		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history, ILogger logger)
+		public NodeViewActionEffect(ILyraAPI lyraClient, IConfiguration configuration, ILogger logger)
 		{
 			_logger = logger;
 			client = lyraClient;
 			config = configuration;
-			hist = history;
 		}
 
 		public override async Task HandleAsync(NodeViewAction action, IDispatcher dispatcher)
@@ -78,13 +76,11 @@ namespace Nebula.Store.NodeViewUseCase
 	{
 		private readonly ILyraAPI client;
 		private readonly IConfiguration config;
-		private readonly INodeHistory hist;
 
-		public PftActionEffect(ILyraAPI lyraClient, IConfiguration configuration, INodeHistory history)
+		public PftActionEffect(ILyraAPI lyraClient, IConfiguration configuration)
 		{
 			client = lyraClient;
 			config = configuration;
-			hist = history;
 		}
 
 		public override async Task HandleAsync(GetProfitAction action, IDispatcher dispatcher)

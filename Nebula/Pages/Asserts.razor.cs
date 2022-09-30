@@ -1,5 +1,4 @@
 ﻿using Fluxor;
-using LiteDB;
 using Lyra.Core.API;
 using Microsoft.AspNetCore.Components;
 using Nebula.Data;
@@ -16,9 +15,6 @@ namespace Nebula.Pages
 		private SnapInfo Snap { get; set; }
 		private List<Assert> LyraAsserts { get; set; }
 
-		[Inject]
-		private ILiteDbContext dbCtx { get; set; }
-
         [Inject]
         public NavigationManager navigationManager { get; set; }
 
@@ -31,17 +27,17 @@ namespace Nebula.Pages
 
         private void LoadRichData()
         {
-                if (dbCtx.Database.CollectionExists("Meta"))
-                {
-                    var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
-                    Snap = coll.FindAll().FirstOrDefault();
-                }
+                //if (dbCtx.Database.CollectionExists("Meta"))
+                //{
+                //    var coll = dbCtx.Database.GetCollection<SnapInfo>("Meta");
+                //    Snap = coll.FindAll().FirstOrDefault();
+                //}
 
-                if (dbCtx.Database.CollectionExists("Asserts"))
-                {
-                    var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
-                    LyraAsserts = coll.FindAll().Skip(1).ToList();  // don't display LYR
-                }
+                //if (dbCtx.Database.CollectionExists("Asserts"))
+                //{
+                //    var coll = dbCtx.Database.GetCollection<Assert>("Asserts");
+                //    LyraAsserts = coll.FindAll().Skip(1).ToList();  // don't display LYR
+                //}
         }
 
         public void SwapToken(string token)

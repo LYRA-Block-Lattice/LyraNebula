@@ -9,7 +9,7 @@
 
 <p><input size="100" type="text" title="Hash or Account ID" @oninput="@oninput" /></p>
 
-@if (CurrentSupply.RichList != null && CurrentSupply.Snap?.Network == Configuration["network"])
+@if (CurrentSupply != null && CurrentSupply.RichList != null && CurrentSupply.Snap?.Network == Configuration["network"])
 {
     <hr />
     <h1>Lyra Token Supply Chart</h1>
