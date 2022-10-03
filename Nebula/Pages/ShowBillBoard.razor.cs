@@ -18,6 +18,9 @@ using Lyra.Data.Blocks;
 using Converto;
 using IP2Country.MarkusGo;
 using IP2Country;
+using Polly.RateLimit;
+using Polly;
+using System.Xml.Linq;
 
 namespace Nebula.Pages
 {
@@ -108,15 +111,23 @@ namespace Nebula.Pages
 
             var bb = await client.GetBillBoardAsync();
 
+            RateLimitPolicy<GetSyncStateAPIResult> rateLimitOfT = Policy
+                    .RateLimit<GetSyncStateAPIResult>(20, TimeSpan.FromSeconds(1));
+
             var bag = new ConcurrentDictionary<string, GetSyncStateAPIResult>();
+            var rand = new Random();
+            var allstart = DateTime.Now;
             var tasks = bb.NodeAddresses
                 .Select(async node =>
                 {
+                    var start = DateTime.Now;
                     var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
                     var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
-                    lcx.SetTimeout(TimeSpan.FromSeconds(5));
+                    lcx.SetTimeout(TimeSpan.FromSeconds(3));
+
                     try
                     {
+                        await Task.Delay(rand.Next(0, 500));
                         var syncState = await lcx.GetSyncStateAsync();
                         bag.TryAdd(node.Key, syncState);
                     }
@@ -124,8 +135,16 @@ namespace Nebula.Pages
                     {
                         bag.TryAdd(node.Key, null);
                     }
+                    var ts = DateTime.Now - start;
+                    Console.WriteLine($"Node {node.Value} uses {ts.Milliseconds} ms.");
                 });
+
+            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
+            var pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+
             await Task.WhenAll(tasks);
+            var allts = DateTime.Now - allstart;
+            Console.WriteLine($"All uses {allts.Milliseconds} ms.");
 
             var nvs = new NodeViewState(
                 isLoading: false,
@@ -135,8 +154,7 @@ namespace Nebula.Pages
             nvs.Id = 0;     // create new for liteDB
             nvs.TimeStamp = DateTime.UtcNow;
 
-            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-            nvs.pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+            nvs.pfts = pfts;
 
             latestState = nvs;
             //History.Insert(nvs);
