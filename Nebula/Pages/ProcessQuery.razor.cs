@@ -22,7 +22,7 @@ namespace Nebula.Pages
 			base.OnInitialized();
 		}
 
-		async void OnChange(string value)
+		async Task OnChange(string value)
 		{
 			if (value!.Length == 44)
             {

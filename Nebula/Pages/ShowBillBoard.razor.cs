@@ -21,6 +21,7 @@ using IP2Country;
 using Polly.RateLimit;
 using Polly;
 using System.Xml.Linq;
+using MongoDB.Driver;
 
 namespace Nebula.Pages
 {
@@ -45,6 +46,13 @@ namespace Nebula.Pages
         //public Dictionary<string, decimal> stkRewards { get; set; }
 
         NodeViewState latestState;
+
+        class UIMsg
+        {
+            public string errmsg { get; set; }
+            public bool busy { get; set; }
+        }
+        ConcurrentDictionary<string, UIMsg> errmsgs = new ConcurrentDictionary<string, UIMsg>();
 
         //public decimal TotalStaking => latestState.bb == null ? 0 : latestState.bb.ActiveNodes.Sum(a => a.Votes);
 
@@ -105,14 +113,19 @@ namespace Nebula.Pages
 
         private async Task RefreshNodeStatusAsync()
         {
+            // TODO: optimize. use a AP seed (after late seeds migration) or even a LAN one to get billboard and pft accounts.
+
             int port = 4504;
             if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
                 port = 5504;
 
-            var bb = await client.GetBillBoardAsync();
+            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");//
+                        //$"https://192.168.222.50:{port}/api/Node/");
 
-            RateLimitPolicy<GetSyncStateAPIResult> rateLimitOfT = Policy
-                    .RateLimit<GetSyncStateAPIResult>(20, TimeSpan.FromSeconds(1));
+            var bb = await lcx.GetBillBoardAsync();
+
+            //RateLimitPolicy<GetSyncStateAPIResult> rateLimitOfT = Policy
+            //        .RateLimit<GetSyncStateAPIResult>(20, TimeSpan.FromSeconds(1));
 
             var bag = new ConcurrentDictionary<string, GetSyncStateAPIResult>();
             var rand = new Random();
@@ -123,26 +136,30 @@ namespace Nebula.Pages
                     var start = DateTime.Now;
                     var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
                     var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
-                    lcx.SetTimeout(TimeSpan.FromSeconds(3));
+                    lcx.SetTimeout(TimeSpan.FromSeconds(15));
 
                     try
                     {
                         await Task.Delay(rand.Next(0, 500));
                         var syncState = await lcx.GetSyncStateAsync();
                         bag.TryAdd(node.Key, syncState);
+                        var umsg = new UIMsg { errmsg = "Success", busy = false };
+                        errmsgs.AddOrUpdate(node.Key, umsg, (key, oldvalue) => umsg);
                     }
                     catch (Exception ex)
                     {
                         bag.TryAdd(node.Key, null);
+                        var umsg = new UIMsg { errmsg = ex.Message, busy = false };
+                        errmsgs.AddOrUpdate(node.Key, umsg, (key, oldvalue) => umsg);
                     }
                     var ts = DateTime.Now - start;
                     Console.WriteLine($"Node {node.Value} uses {ts.Milliseconds} ms.");
                 });
 
-            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4");
-            var pfts = await lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
+            var pftstsk = lcx.FindAllProfitingAccountsAsync(DateTime.MinValue, DateTime.MaxValue);
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks.Concat(new[] { pftstsk }));
+
             var allts = DateTime.Now - allstart;
             Console.WriteLine($"All uses {allts.Milliseconds} ms.");
 
@@ -154,13 +171,47 @@ namespace Nebula.Pages
             nvs.Id = 0;     // create new for liteDB
             nvs.TimeStamp = DateTime.UtcNow;
 
-            nvs.pfts = pfts;
+            nvs.pfts = pftstsk.Result;
 
             latestState = nvs;
             //History.Insert(nvs);
         }
 
-        private async void Refresh(MouseEventArgs e)
+        private async Task RefreshNode(string accountId)
+        {
+            // get the row
+            var ui = errmsgs[accountId];
+            ui.errmsg = "Updating...";
+            ui.busy = true;
+            StateHasChanged();
+
+            var ep = latestState.bb.NodeAddresses.FirstOrDefault(a => a.Key == accountId).Value;
+
+            int port = 4504;
+            if (Configuration["network"].Equals("mainnet", StringComparison.InvariantCultureIgnoreCase))
+                port = 5504;
+            var addr = ep.Contains(':') ? ep : $"{ep}:{port}";
+
+            var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
+            lcx.SetTimeout(TimeSpan.FromSeconds(25));
+
+            try
+            {
+                var syncState = await lcx.GetSyncStateAsync();
+                latestState.nodeStatus.AddOrUpdate(accountId, syncState, (key, oldvalue) => syncState);
+                var umsg = new UIMsg { errmsg = "Success", busy = false };
+                errmsgs.AddOrUpdate(accountId, umsg, (key, oldvalue) => umsg);
+            }
+            catch (Exception ex)
+            {
+                var umsg = new UIMsg { errmsg = ex.Message, busy = false };
+                errmsgs.AddOrUpdate(accountId, umsg, (key, oldvalue) => umsg);
+            }
+
+            StateHasChanged();
+        }
+
+        private async Task Refresh(MouseEventArgs e)
 		{
 			try
 			{
