@@ -62,7 +62,7 @@ else
                     <th>Last Float Hash</th>
                     <th>Candidates</th>
                     <th>Connected Peers</th>
-                    <th>Update</th>
+                    <th><RadzenButton IsBusy="@allbusy" Variant="Variant.Text" Click=@(args => RefreshAll()) Text="Refresh" Icon="refresh" ButtonStyle="ButtonStyle.Light" /></th>
                 </tr>
             </thead>
             <tbody>

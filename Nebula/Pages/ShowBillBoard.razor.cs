@@ -136,7 +136,7 @@ namespace Nebula.Pages
                     var start = DateTime.Now;
                     var addr = node.Value.Contains(':') ? node.Value : $"{node.Value}:{port}";
                     var lcx = LyraRestClient.Create(Configuration["network"], Environment.OSVersion.ToString(), "Nebula", "1.4", $"https://{addr}/api/Node/");
-                    lcx.SetTimeout(TimeSpan.FromSeconds(15));
+                    lcx.SetTimeout(TimeSpan.FromSeconds(25));
 
                     try
                     {
@@ -177,13 +177,38 @@ namespace Nebula.Pages
             //History.Insert(nvs);
         }
 
+        bool allbusy = false;
+        private async Task RefreshAll()
+        {
+            allbusy = true;
+            await InvokeAsync(() => StateHasChanged());
+
+            if (errmsgs.Values.Any(a => a.busy))
+                return;
+
+            ParallelOptions parallelOptions = new()
+            {
+                MaxDegreeOfParallelism = 6
+            };
+
+            var rand = new Random();
+            await Parallel.ForEachAsync(errmsgs.Keys, parallelOptions, async (act, token) =>
+            {
+                await Task.Delay(rand.Next(0, 50));
+                await RefreshNode(act);
+            });
+
+            allbusy = false;
+            await InvokeAsync(() => StateHasChanged());
+        }
+
         private async Task RefreshNode(string accountId)
         {
             // get the row
             var ui = errmsgs[accountId];
             ui.errmsg = "Updating...";
             ui.busy = true;
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
 
             var ep = latestState.bb.NodeAddresses.FirstOrDefault(a => a.Key == accountId).Value;
 
@@ -204,11 +229,13 @@ namespace Nebula.Pages
             }
             catch (Exception ex)
             {
+                latestState.nodeStatus.AddOrUpdate(accountId, (GetSyncStateAPIResult)null, (key, oldvalue) => null);
+
                 var umsg = new UIMsg { errmsg = ex.Message, busy = false };
                 errmsgs.AddOrUpdate(accountId, umsg, (key, oldvalue) => umsg);
             }
 
-            StateHasChanged();
+            await InvokeAsync(() => StateHasChanged());
         }
 
         private async Task Refresh(MouseEventArgs e)
