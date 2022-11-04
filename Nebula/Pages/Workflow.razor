@@ -1,0 +1,49 @@
+﻿@page "/wf"
+@page "/wf/{hash}"
+
+<h2 style="text-align: center">Search by Send Hash</h2>
+<p style="text-align: center">
+    <input size="100" type="text" title="Hash of send block" @oninput="@oninput" />
+</p>
+
+@if (IsLoading)
+{
+    <p><em>Loading...</em></p>
+    <div class="spinner"></div>
+}
+
+@if (block != null)
+{
+
+    <div>
+        @if (MaxHeight > 0)
+        {
+            <div class="pagination">
+                <a href="/showblock/@hash/1">&larrb;</a>
+                <a href="/showblock/@hash/@prevHeight">&laquo;</a>
+                @foreach (var str in @Paging())
+                {
+                    @((MarkupString)@str)
+                }
+                <a href="/showblock/@hash/@nextHeight">&raquo;</a>
+                <a href="/showblock/@hash/@MaxHeight">&rarrb;</a>
+            </div>
+        }
+        <hr />
+        <div>
+            @if (IsBlockValid)
+            {
+                <span style="background-color: greenyellow">Block is valid: Yes</span>
+            }
+            else
+            {
+                <span style="background-color: orangered">Block is valid: No</span>
+            }
+        </div>
+        <div><pre>@((MarkupString)FancyShow())</pre></div>
+    </div>
+}
+else
+{
+    <div>Hash invalid or workflow not found.</div>
+}
