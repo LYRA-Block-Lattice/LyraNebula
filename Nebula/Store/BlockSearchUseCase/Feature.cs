@@ -15,6 +15,7 @@ namespace Nebula.Store.BlockSearchUseCase
 				blockResult: null,
 				previousBlock: null,
 				pageKey: null,
-				maxHeight: 0);
+				maxHeight: 0,
+				errmsg: null);
 	}
 }

@@ -15,7 +15,8 @@ namespace Nebula.Store.BlockSearchUseCase
 				blockResult: null,
 				previousBlock: null,
 				pageKey: null,
-				maxHeight: 0);
+				maxHeight: 0,
+				errmsg: null);
 
 		[ReducerMethod]
 		public static BlockSearchState ReduceFetchDataResultAction(BlockSearchState state, BlockSearchResultAction action) =>
@@ -24,6 +25,8 @@ namespace Nebula.Store.BlockSearchUseCase
 				blockResult: action.block,
 				previousBlock: action.prevBlock,
 				pageKey: action.key,
-				maxHeight: action.maxHeight);
-	}
+				maxHeight: action.maxHeight,
+				errmsg: action.error);
+
+    }
 }

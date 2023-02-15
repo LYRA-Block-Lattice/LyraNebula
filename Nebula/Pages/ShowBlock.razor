@@ -13,7 +13,7 @@
     <p><em>Loading...</em></p>
     <div class="spinner"></div>
 }
-@if (searchState.Value.block != null)
+else if (searchState.Value.block != null)
 {
 
 <div>
@@ -42,7 +42,11 @@
         }
     </div>
     <div><pre>@((MarkupString)searchState.Value.FancyShow())</pre></div>
-</div>
+    </div>
 
+}
+else if (!string.IsNullOrWhiteSpace(searchState.Value.Error))
+{
+    <div>Error is: searchState.Value.Error</div>
 }
 

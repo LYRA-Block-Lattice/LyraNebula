@@ -19,14 +19,16 @@ namespace Nebula.Store.BlockSearchUseCase
 		public long prevHeight => block.Height > 1 ? block.Height - 1 : block.Height;
 		public long nextHeight => block.Height < MaxHeight ? block.Height + 1 : block.Height;
 		public bool IsBlockValid => block.Hash.Equals(block.CalculateHash());
+		public string Error { get; }
 
-		public BlockSearchState(bool isLoading, Block blockResult, Block previousBlock, string pageKey, long maxHeight)
+		public BlockSearchState(bool isLoading, Block blockResult, Block previousBlock, string pageKey, long maxHeight, string errmsg)
 		{
 			IsLoading = isLoading;
 			block = blockResult ?? null;
 			prevBlock = previousBlock;
 			Key = pageKey;
 			MaxHeight = maxHeight;
+			Error = errmsg;
 		}
 
 		public List<string> Paging()

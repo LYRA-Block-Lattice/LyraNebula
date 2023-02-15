@@ -13,13 +13,15 @@ namespace Nebula.Store.BlockSearchUseCase
 		public Block prevBlock { get; }
 		public string key { get; }
 		public long maxHeight { get; }
+		public string error { get; }
 
-		public BlockSearchResultAction(Block resultBlock, Block previousBlock, string resultKey, long resultHeight)
+		public BlockSearchResultAction(Block resultBlock, Block previousBlock, string resultKey, long resultHeight, string errorMessage)
 		{
 			block = resultBlock;
 			prevBlock = previousBlock;
 			key = resultKey;
 			maxHeight = resultHeight;
+			error = errorMessage;
 		}
 	}
 }
