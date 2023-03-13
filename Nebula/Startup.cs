@@ -72,6 +72,11 @@ namespace Nebula
 
             services.AddScoped<ILyraAPI>(provider =>
             {
+                if(networkid == "devnet")
+                {
+                    return LyraRestClient.Create(networkid, Environment.OSVersion.ToString(), "Nebula", "1.0", $"https://localhost:4504/api/Node/");
+                }
+                
                 var client = LyraRestClient.Create(networkid, "windows", "nebula", "1.0");
                 return client;
                 //var client = new LyraAggregatedClient(networkid, true, null);

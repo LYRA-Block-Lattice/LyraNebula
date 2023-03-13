@@ -66,7 +66,7 @@ namespace Nebula.Store.BlockSearchUseCase
 				
 				if (ret != null && ret.ResultCode == APIResultCodes.Success)
 				{
-					blockResult = ret.GetBlock();
+					blockResult = ret.GetBlock(false);
 				}
 			}
 
